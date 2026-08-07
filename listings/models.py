@@ -21,7 +21,7 @@ class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tek
     #     Null --> Veritabanı katmanında çalışır
 
     olusturulma_tarihi = models.DateTimeField(auto_now_add = True)
-    guncellenme_tarihi = models.DateTimeField(auton_now_add = True)
+    guncellenme_tarihi = models.DateTimeField(auto_now_add = True)
 
     class Meta: # modelin veritabanında nasıl çalıştığını kontrol eder formatlama ile alakalı
         ordering = ["-olusturulma_tarihi"] # enyenilerden göstercek - sayesinde
@@ -38,7 +38,7 @@ class CarListing(Listing):
         ]
 
 
-    marka = models.CharField(max_lenth = 100)
+    marka = models.CharField(max_length = 100)
     seri = models.CharField(max_length = 100, blank = True)
     model = models.CharField(max_length = 100)
     yil = models.PositiveIntegerField(null = True, blank = True) # 2022
