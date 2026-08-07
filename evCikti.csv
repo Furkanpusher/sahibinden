@@ -1,0 +1,211 @@
+konum,fiyat,ilan_tarihi,metrekare,bina_yasi,toplam_kat_sayisi,oda_sayisi,bulundugu_kat,kredi_uygunlugu
+adalar,3100000,24 Şubat 2022,160.0,21,3,3+1,Çatı Katı,Krediye Uygun
+arnavutkoy,650000,27 Şubat 2022,140.0,0,4,3+1,Düz Giriş,Krediye Uygun
+arnavutkoy,805000,10 Şubat 2022,180.0,0,4,4+2,4. Kat,Krediye Uygun
+atasehir,2450000,03 Mart 2022,127.0,21,7,3+1,2. Kat,Krediye Uygun
+atasehir,1950000,24 Aralık 2021,190.0,2,4,4+1,4. Kat,Krediye Uygun
+atasehir,3450000,03 Mart 2022,120.0,1,10,3+1,2. Kat,Krediye Uygun
+avcilar,325000,23 Şubat 2022,100.0,5,6,2+1,3. Kat,Krediye Uygun
+avcilar,1450000,01 Mart 2022,140.0,0,2,2+1,Yüksek Giriş,Krediye Uygun
+avcilar,1380000,25 Şubat 2022,140.0,4,4,3+1,4. Kat,Krediye Uygun Değil
+avcilar,700000,25 Ocak 2022,100.0,21,5,2+1,3. Kat,Krediye Uygun
+avcilar,315000,27 Aralık 2021,90.0,0,5,1+1,2. Kat,Krediye Uygun
+avcilar,2000000,05 Aralık 2021,159.0,3,24,3+1,20. Kat,Bilinmiyor
+avcilar,1635000,06 Ekim 2021,200.0,5,12,4+1,2. Kat,Krediye Uygun
+avcilar,380000,12 Ekim 2021,130.0,11,6,3+1,Kot 2 (-2). Kat,Krediye Uygun
+bagcilar,1150000,14 Şubat 2022,55.0,2,19,Stüdyo,16. Kat,Krediye Uygun
+bagcilar,650000,13 Ocak 2022,95.0,5,3,2+1,Yüksek Giriş,Krediye Uygun
+bagcilar,495000,02 Ocak 2022,150.0,11,4,3+1,Bahçe Katı,Krediye Uygun
+bagcilar,1200000,07 Aralık 2021,210.0,5,4,5+2,4. Kat,Krediye Uygun
+bahcelievler,1500000,24 Şubat 2022,160.0,0,5,4+1,5. Kat,Krediye Uygun
+bahcelievler,2050000,03 Mart 2022,300.0,4,4,6+1,Çatı Dubleks,Krediye Uygun
+bahcelievler,1550000,23 Şubat 2022,165.0,0,4,3+2,4. Kat,Krediye Uygun
+bahcelievler,1050000,01 Mart 2022,90.0,0,4,2+1,1. Kat,Krediye Uygun
+bahcelievler,1450000,03 Mart 2022,175.0,0,5,5+1,5. Kat,Krediye Uygun
+bahcelievler,1100000,25 Şubat 2022,120.0,21,4,3+1,Düz Giriş,Krediye Uygun
+bahcelievler,615000,03 Mart 2022,90.0,21,5,2+1,5. Kat,Krediye Uygun
+bahcelievler,1850000,21 Ocak 2022,225.0,0,4,5+2,4. Kat,Krediye Uygun
+bahcelievler,1750000,01 Mart 2022,115.0,0,5,3+1,3. Kat,Krediye Uygun
+bahcelievler,595000,03 Mart 2022,80.0,0,4,2+1,Düz Giriş,Krediye Uygun
+bahcelievler,770000,19 Şubat 2022,90.0,5,4,2+1,1. Kat,Krediye Uygun
+bahcelievler,1300000,02 Mart 2022,95.0,0,4,2+1,3. Kat,Krediye Uygun Değil
+bakirkoy,8750000,03 Mart 2022,220.0,5,5,4+1,4. Kat,Krediye Uygun
+bakirkoy,5900000,03 Mart 2022,170.0,0,4,3+1,Düz Giriş,Krediye Uygun
+bakirkoy,6150000,03 Ocak 2022,135.0,0,3,3+1,Bahçe Katı,Krediye Uygun
+bakirkoy,2150000,15 Aralık 2021,52.0,0,17,1+1,10. Kat,Krediye Uygun
+bakirkoy,1550000,01 Aralık 2021,130.0,21,4,3+1,2. Kat,Krediye Uygun
+bakirkoy,5000000,23 Şubat 2022,360.0,21,3,6+1,Düz Giriş,Krediye Uygun
+basaksehir,390000,02 Mart 2022,110.0,0,6,2+1,2. Kat,Krediye Uygun
+basaksehir,3540000,22 Şubat 2022,202.0,5,26,4+1,5. Kat,Krediye Uygun
+basaksehir,900000,09 Şubat 2022,110.0,1,6,2+1,6. Kat,Krediye Uygun
+basaksehir,1050000,01 Şubat 2022,210.0,21,1,3+1,Düz Giriş,Krediye Uygun Değil
+basaksehir,825000,23 Şubat 2022,110.0,0,3,2+1,1. Kat,Krediye Uygun
+bayrampasa,815000,25 Şubat 2022,120.0,21,4,2+1,3. Kat,Krediye Uygun
+bayrampasa,1350000,01 Mart 2022,95.0,0,5,2+1,1. Kat,Krediye Uygun
+besiktas,800000,10 Şubat 2022,78.0,21,5,1.5+1,Düz Giriş,Krediye Uygun
+besiktas,30000000,18 Ocak 2022,340.0,21,4,6+1,4. Kat,Krediye Uygun
+besiktas,22000000,23 Aralık 2021,270.0,4,7,3+1,4. Kat,Krediye Uygun
+besiktas,32000000,02 Mart 2022,350.0,21,7,3+1,Yüksek Giriş,Krediye Uygun
+besiktas,14000000,14 Ocak 2022,300.0,21,5,5+1,5. Kat,Krediye Uygun
+beykoz,11000000,10 Ocak 2022,175.0,21,4,3+1,Bahçe Katı,Krediye Uygun
+beylikduzu,475000,27 Şubat 2022,105.0,0,5,2+1,1. Kat,Krediye Uygun
+beylikduzu,1225000,02 Mart 2022,95.0,0,5,2+1,2. Kat,Krediye Uygun
+beylikduzu,710000,24 Şubat 2022,135.0,3,13,2+1,3. Kat,Krediye Uygun
+beylikduzu,410000,04 Mart 2022,85.0,4,6,2+1,Bahçe Katı,Krediye Uygun
+beylikduzu,390000,19 Şubat 2022,110.0,0,4,2+1,3. Kat,Krediye Uygun
+beylikduzu,399999,08 Mart 2022,110.0,0,4,2+1,Yüksek Giriş,Krediye Uygun
+beylikduzu,510000,12 Şubat 2022,130.0,0,5,3+1,4. Kat,Krediye Uygun
+beylikduzu,875000,09 Mart 2022,100.0,0,4,2+1,1. Kat,Krediye Uygun
+beyoglu,500000,19 Şubat 2022,100.0,21,5,2+1,Yüksek Giriş,Krediye Uygun
+beyoglu,2250000,03 Mart 2022,110.0,21,5,2+1,2. Kat,Krediye Uygun
+buyukcekmece,2100000,18 Şubat 2022,175.0,21,6,4+1,2. Kat,Krediye Uygun
+buyukcekmece,11700000,27 Ocak 2022,2.0,11,3,8+ Oda,Düz Giriş,Krediye Uygun
+buyukcekmece,1600000,26 Aralık 2021,162.0,0,4,2+1,Düz Giriş,Krediye Uygun
+buyukcekmece,23000000,15 Şubat 2022,873.0,1,1,3+1,Bahçe Katı,Krediye Uygun
+buyukcekmece,2000000,04 Mart 2022,265.0,5,4,5+2,4. Kat,Krediye Uygun
+buyukcekmece,1500000,07 Ocak 2022,351.0,11,3,8+ Oda,Kot 3 (-3). Kat,Krediye Uygun
+catalca,42000000,22 Şubat 2022,740.0,11,2,5+1,Villa Tipi,Bilinmiyor
+cekmekoy,2500000,02 Mart 2022,137.0,11,7,3+1,2. Kat,Krediye Uygun
+cekmekoy,690000,22 Şubat 2022,90.0,0,5,2+1,2. Kat,Krediye Uygun
+cekmekoy,1350000,28 Şubat 2022,130.0,5,5,3+1,Çatı Katı,Krediye Uygun
+cekmekoy,1299000,27 Ocak 2022,185.0,5,3,4+1,3. Kat,Krediye Uygun
+cekmekoy,2350000,31 Aralık 2021,200.0,0,5,4+2,5. Kat,Krediye Uygun
+cekmekoy,2000000,26 Şubat 2022,195.0,0,4,3+2,Çatı Katı,Krediye Uygun
+cekmekoy,445000,22 Kasım 2021,100.0,0,5,2+1,2. Kat,Krediye Uygun
+esenler,610000,27 Şubat 2022,98.0,0,4,3+1,Bahçe Katı,Krediye Uygun
+esenler,850000,26 Şubat 2022,85.0,0,4,2+1,2. Kat,Krediye Uygun
+esenler,475000,26 Şubat 2022,80.0,0,4,2+1,Bahçe Dublex,Krediye Uygun
+esenyurt,355000,28 Şubat 2022,110.0,0,4,2+1,3. Kat,Krediye Uygun
+esenyurt,385000,04 Mart 2022,100.0,3,5,2+1,Bahçe Katı,Krediye Uygun
+esenyurt,469000,26 Şubat 2022,110.0,4,4,2+1,Bahçe Katı,Krediye Uygun
+esenyurt,860000,03 Mart 2022,75.0,4,12,1+1,4. Kat,Krediye Uygun
+esenyurt,570000,21 Şubat 2022,100.0,5,5,2+1,Yüksek Giriş,Krediye Uygun
+esenyurt,350000,19 Şubat 2022,100.0,0,5,2+1,3. Kat,Krediye Uygun
+esenyurt,560000,27 Şubat 2022,80.0,4,15,1+1,13. Kat,Krediye Uygun Değil
+esenyurt,579999,04 Mart 2022,120.0,4,4,2+1,1. Kat,Krediye Uygun
+esenyurt,699000,04 Mart 2022,155.0,0,5,3+1,2. Kat,Krediye Uygun
+esenyurt,708500,12 Şubat 2022,135.0,5,5,3+1,2. Kat,Krediye Uygun
+esenyurt,419000,04 Mart 2022,160.0,0,5,4+1,Bahçe Katı,Krediye Uygun
+eyupsultan,1650000,26 Şubat 2022,180.0,0,4,3+2,Çatı Dubleks,Krediye Uygun
+eyupsultan,2250000,08 Şubat 2022,70.0,0,4,1+1,2. Kat,Krediye Uygun
+eyupsultan,1629000,04 Mart 2022,105.0,0,13,2+1,3. Kat,Krediye Uygun
+eyupsultan,2150000,30 Ocak 2022,120.0,0,4,2+1,Bahçe Katı,Krediye Uygun
+eyupsultan,419000,26 Ocak 2022,100.0,4,4,2+1,Kot 1 (-1). Kat,Krediye Uygun
+eyupsultan,800000,04 Şubat 2022,180.0,3,6,5+2,Çatı Dubleks,Krediye Uygun
+fatih,850000,26 Şubat 2022,45.0,21,3,1 Oda,1. Kat,Krediye Uygun
+fatih,900000,27 Aralık 2021,70.0,21,6,2+1,2. Kat,Krediye Uygun
+fatih,12500000,17 Kasım 2021,105.0,0,6,1 Oda,1. Kat,Krediye Uygun
+fatih,1250000,30 Eylül 2021,170.0,21,5,Stüdyo,Düz Giriş,Krediye Uygun
+gaziosmanpasa,1500000,17 Şubat 2022,180.0,5,4,3+2,Çatı Dubleks,Krediye Uygun
+gaziosmanpasa,600000,01 Şubat 2022,90.0,2,5,2+1,3. Kat,Krediye Uygun
+gaziosmanpasa,1150000,05 Ocak 2022,240.0,5,5,3+2,4. Kat,Krediye Uygun
+gaziosmanpasa,650000,04 Mart 2022,95.0,5,5,2+1,2. Kat,Krediye Uygun
+gaziosmanpasa,850000,08 Şubat 2022,100.0,5,5,2+1,Bahçe Katı,Krediye Uygun
+gaziosmanpasa,450000,19 Şubat 2022,100.0,21,5,2+1,Düz Giriş,Krediye Uygun
+gungoren,1500000,21 Şubat 2022,100.0,21,9,2.5+1,9. Kat,Krediye Uygun
+kadikoy,7000000,16 Şubat 2022,170.0,3,9,4+1,3. Kat,Krediye Uygun
+kadikoy,30500000,25 Şubat 2022,350.0,0,12,5+2,12. Kat,Krediye Uygun Değil
+kadikoy,3885000,04 Mart 2022,160.0,21,6,3+1,2. Kat,Krediye Uygun
+kadikoy,5900000,17 Şubat 2022,220.0,1,12,4+2,12. Kat,Krediye Uygun
+kadikoy,1825000,10 Şubat 2022,100.0,21,3,2+1,3. Kat,Krediye Uygun
+kadikoy,5295000,07 Şubat 2022,130.0,11,8,3+1,5. Kat,Krediye Uygun
+kadikoy,3495000,03 Mart 2022,160.0,21,8,3+1,4. Kat,Krediye Uygun
+kadikoy,5150000,25 Ocak 2022,160.0,4,4,3+1,4. Kat,Krediye Uygun Değil
+kadikoy,4400000,20 Ocak 2022,150.0,21,8,3+1,8. Kat,Krediye Uygun
+kadikoy,6050000,11 Ocak 2022,210.0,3,13,4+2,Çatı Dubleks,Krediye Uygun
+kadikoy,7595000,24 Şubat 2022,135.0,0,11,3+1,9. Kat,Krediye Uygun
+kadikoy,5250000,29 Aralık 2021,150.0,4,9,3+1,7. Kat,Krediye Uygun
+kagithane,1200000,16 Şubat 2022,110.0,0,5,2+1,2. Kat,Krediye Uygun
+kagithane,820000,04 Mart 2022,77.0,4,5,2+1,1. Kat,Krediye Uygun
+kagithane,3000000,18 Şubat 2022,85.0,4,14,2+1,12. Kat,Krediye Uygun
+kagithane,625000,03 Mart 2022,60.0,0,5,1+1,3. Kat,Krediye Uygun
+kagithane,15500000,02 Şubat 2022,90.0,11,5,2+1,1. Kat,Krediye Uygun
+kagithane,1600000,29 Ekim 2021,128.0,0,14,2+1,11. Kat,Krediye Uygun
+kagithane,790000,02 Mart 2022,140.0,21,3,3+1,Çatı Katı,Krediye Uygun Değil
+kartal,1000000,25 Şubat 2022,90.0,2,24,2+1,5. Kat,Krediye Uygun
+kartal,850000,15 Şubat 2022,125.0,16,12,3+1,6. Kat,Krediye Uygun
+kartal,985000,22 Ocak 2022,160.0,5,4,3+1,Çatı Dubleks,Krediye Uygun
+kartal,2500000,24 Ocak 2022,120.0,0,7,3.5+1,5. Kat,Krediye Uygun
+kartal,850000,24 Kasım 2021,40.0,3,30,Stüdyo,25. Kat,Krediye Uygun
+kucukcekmece,1900000,26 Şubat 2022,180.0,0,3,5+2,3. Kat,Krediye Uygun
+kucukcekmece,570000,20 Şubat 2022,90.0,5,4,2+1,Yüksek Giriş,Krediye Uygun
+kucukcekmece,4350000,11 Şubat 2022,220.0,21,3,4+1,Villa Tipi,Krediye Uygun
+kucukcekmece,10000000,07 Şubat 2022,200.0,2,4,1 Oda,Düz Giriş,Krediye Uygun
+kucukcekmece,2458000,24 Ocak 2022,152.0,11,15,3+1,14. Kat,Krediye Uygun
+kucukcekmece,450000,22 Şubat 2022,75.0,3,3,2+1,Bahçe Katı,Krediye Uygun
+kucukcekmece,835000,16 Şubat 2022,88.0,1,3,2+1,1. Kat,Krediye Uygun
+kucukcekmece,2750000,12 Ocak 2022,109.0,21,6,1 Oda,Düz Giriş,Krediye Uygun
+kucukcekmece,678000,28 Şubat 2022,80.0,5,4,2+1,3. Kat,Krediye Uygun
+kucukcekmece,850000,03 Mart 2022,80.0,0,4,2+1,Yüksek Giriş,Krediye Uygun
+kucukcekmece,900000,04 Mart 2022,85.0,0,3,2+1,1. Kat,Krediye Uygun
+maltepe,835000,27 Şubat 2022,95.0,11,5,2+1,2. Kat,Krediye Uygun
+maltepe,3050000,23 Şubat 2022,130.0,3,16,3+1,4. Kat,Krediye Uygun
+maltepe,2850000,25 Şubat 2022,215.0,11,4,4+2,4. Kat,Krediye Uygun
+maltepe,1345000,03 Mart 2022,90.0,5,4,2+1,Düz Giriş,Krediye Uygun
+maltepe,1870000,08 Şubat 2022,110.0,4,4,2+1,3. Kat,Krediye Uygun
+maltepe,1875000,22 Şubat 2022,100.0,0,4,2+1,2. Kat,Krediye Uygun
+maltepe,2935000,09 Ocak 2022,150.0,11,17,3+1,17. Kat,Krediye Uygun
+maltepe,900000,27 Aralık 2021,130.0,11,10,3+1,2. Kat,Krediye Uygun Değil
+maltepe,490000,15 Şubat 2022,75.0,11,4,1+1,Bahçe Katı,Krediye Uygun
+maltepe,2665000,17 Eylül 2021,154.0,5,11,3+1,3. Kat,Krediye Uygun
+maltepe,450000,24 Ekim 2021,110.0,2,3,2+1,3. Kat,Krediye Uygun
+pendik,1100000,03 Mart 2022,160.0,21,11,3+1,4. Kat,Krediye Uygun
+pendik,1500000,05 Şubat 2022,125.0,3,10,3+1,1. Kat,Krediye Uygun
+pendik,1470000,17 Ocak 2022,61.0,4,9,1+1,8. Kat,Krediye Uygun
+pendik,625000,20 Aralık 2021,110.0,16,5,2+1,Yüksek Giriş,Krediye Uygun
+pendik,950000,19 Aralık 2021,155.0,5,4,3+1,2. Kat,Krediye Uygun
+sancaktepe,380000,25 Şubat 2022,192.0,21,3,3+1,1. Kat,Krediye Uygun Değil
+sancaktepe,3895000,25 Şubat 2022,216.0,5,11,4+1,10. Kat,Krediye Uygun
+sancaktepe,1260000,13 Şubat 2022,150.0,5,3,3+2,3. Kat,Krediye Uygun
+sancaktepe,770000,26 Şubat 2022,125.0,11,8,3+1,7. Kat,Krediye Uygun
+sancaktepe,1300000,04 Mart 2022,105.0,4,4,2+1,2. Kat,Krediye Uygun
+sancaktepe,775000,10 Ocak 2022,90.0,0,4,2+1,2. Kat,Krediye Uygun
+sancaktepe,1280000,19 Aralık 2021,100.0,3,7,2+1,3. Kat,Krediye Uygun
+sancaktepe,1000000,08 Şubat 2022,90.0,5,6,2+1,3. Kat,Krediye Uygun
+sariyer,3700000,25 Şubat 2022,117.0,5,30,3+1,2. Kat,Krediye Uygun
+sariyer,7200000,19 Şubat 2022,170.0,5,30,3+1,18. Kat,Krediye Uygun
+sariyer,4500000,06 Mart 2022,110.0,5,20,2+1,9. Kat,Krediye Uygun
+sariyer,3250000,06 Mart 2022,240.0,21,4,4+2,3. Kat,Krediye Uygun Değil
+sariyer,3000000,02 Şubat 2022,72.0,5,30,1+1,10. Kat,Krediye Uygun
+sariyer,19000000,30 Ocak 2022,225.0,0,3,3+1,Düz Giriş,Krediye Uygun
+sariyer,3300000,19 Ocak 2022,100.0,5,30,1+1,10. Kat,Krediye Uygun
+sariyer,2600000,22 Aralık 2021,65.0,5,30,Stüdyo,10. Kat,Krediye Uygun
+sariyer,700000000,09 Aralık 2021,1.2,21,2,8+ Oda,Düz Giriş,Krediye Uygun
+sariyer,4500000,24 Kasım 2021,128.0,5,24,3+1,19. Kat,Krediye Uygun
+sariyer,7535000,13 Aralık 2021,170.0,3,40,2+1,21. Kat,Krediye Uygun
+sariyer,4250000,20 Ekim 2021,280.0,5,2,4+1,Düz Giriş,Krediye Uygun
+sile,4300000,28 Şubat 2022,300.0,0,2,4+2,Villa Tipi,Krediye Uygun
+silivri,625000,06 Şubat 2022,75.0,11,10,2+1,3. Kat,Krediye Uygun
+silivri,850000,18 Aralık 2021,300.0,11,3,5+2,Bahçe Dublex,Krediye Uygun
+silivri,42000000,22 Şubat 2022,350.0,5,2,3+2,Villa Tipi,Krediye Uygun
+sisli,450000,02 Mart 2022,70.0,21,5,2+1,Düz Giriş,Krediye Uygun Değil
+sisli,27000000,02 Mart 2022,241.0,0,30,4.5+1,30-40. Kat,Krediye Uygun
+sisli,4500000,07 Aralık 2021,125.0,5,30,1+1,7. Kat,Krediye Uygun
+sisli,20000000,09 Şubat 2022,250.0,11,6,3+1,Çatı Katı,Krediye Uygun
+sultanbeyli,940000,04 Mart 2022,115.0,3,8,3+1,1. Kat,Krediye Uygun
+sultanbeyli,750000,28 Şubat 2022,105.0,1,7,2+1,1. Kat,Krediye Uygun
+sultanbeyli,620000,22 Ocak 2022,250.0,11,5,3+1,5. Kat,Bilinmiyor
+sultangazi,1595000,23 Şubat 2022,240.0,5,6,4+2,5. Kat,Krediye Uygun
+sultangazi,659000,12 Şubat 2022,130.0,21,5,2+1,1. Kat,Krediye Uygun Değil
+sultangazi,1249000,01 Şubat 2022,125.0,3,11,3+1,2. Kat,Krediye Uygun
+sultangazi,799000,17 Ocak 2022,110.0,5,5,3+1,Yüksek Giriş,Krediye Uygun
+sultangazi,770000,01 Mart 2022,90.0,4,5,2+1,1. Kat,Krediye Uygun
+sultangazi,415000,29 Aralık 2021,85.0,11,4,2+1,Yüksek Giriş,Krediye Uygun
+sultangazi,645000,04 Şubat 2022,120.0,11,5,2+1,1. Kat,Krediye Uygun
+sultangazi,580000,25 Eylül 2021,100.0,0,4,2+1,1. Kat,Krediye Uygun
+tuzla,2190000,02 Mart 2022,125.0,0,7,3+1,6. Kat,Krediye Uygun
+tuzla,1900000,14 Şubat 2022,164.0,0,5,3+1,5. Kat,Krediye Uygun
+tuzla,1500000,16 Ocak 2022,114.0,3,11,2+1,9. Kat,Krediye Uygun
+tuzla,1350000,12 Şubat 2022,545.0,3,1,3+1,Müstakil,Krediye Uygun
+umraniye,1504000,21 Şubat 2022,140.0,11,7,3+1,2. Kat,Krediye Uygun
+umraniye,1300000,07 Şubat 2022,140.0,16,11,3+1,4. Kat,Krediye Uygun
+umraniye,1350000,24 Ocak 2022,90.0,4,7,2+1,3. Kat,Krediye Uygun
+umraniye,725000,05 Ocak 2022,120.0,5,5,2+1,Yüksek Giriş,Krediye Uygun
+umraniye,900000,09 Kasım 2021,100.0,0,5,3+1,4. Kat,Krediye Uygun
+uskudar,2500000,27 Şubat 2022,80.0,4,4,2+1,1. Kat,Krediye Uygun Değil
+uskudar,600000,22 Şubat 2022,55.0,21,4,2+1,Yüksek Giriş,Krediye Uygun
+uskudar,6200000,25 Ocak 2022,215.0,0,4,4+1,2. Kat,Krediye Uygun
+uskudar,2225000,02 Ocak 2022,160.0,5,9,3+1,3. Kat,Krediye Uygun Değil
+uskudar,2700000,21 Şubat 2022,100.0,21,3,2+1,2. Kat,Krediye Uygun
+uskudar,775000,07 Mart 2022,100.0,11,4,2+1,Yüksek Giriş,Krediye Uygun Değil
+zeytinburnu,3000000,29 Aralık 2021,120.0,0,14,2+1,3. Kat,Krediye Uygun
