@@ -21,7 +21,7 @@ class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tek
     #     Null --> Veritabanı katmanında çalışır
 
     olusturulma_tarihi = models.DateTimeField(auto_now_add = True)
-    guncellenme_tarihi = models.DateTimeField(auto_now_add = True)
+    guncellenme_tarihi = models.DateTimeField(auto_now = True)
 
     class Meta: # modelin veritabanında nasıl çalıştığını kontrol eder formatlama ile alakalı
         ordering = ["-olusturulma_tarihi"] # enyenilerden göstercek - sayesinde
