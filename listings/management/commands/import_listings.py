@@ -1,4 +1,4 @@
-# csv dosyalrını veritabanına yazar 
+# csv dosyalarını veritabanına yazar
 
 import csv
 import re
@@ -14,14 +14,11 @@ TURKCE_AYLAR = {
     "temmuz": 7, "ağustos": 8, "eylül": 9, "ekim": 10, "kasım": 11, "aralık": 12,
 }
 
-BATCH_SIZE = 200
-
 
 def temizle_sayi(deger):
     """'1.169.000 TL' / '124.000 km' -> 1169000 (int). Boşsa None döner."""
     if not deger or not str(deger).strip():
         return None
-    # Sadece rakamları bırak (nokta, TL, km, boşluk vs. hepsini at)
     rakamlar = re.sub(r"[^\d]", "", str(deger))
     return int(rakamlar) if rakamlar else None
 
@@ -61,44 +58,46 @@ def temizle_bool(deger, pozitif_kelime):
 
 
 def araba_satirini_isle(satir):
+    """CSV kolonları Türkçe kaldı (baslik, konum, fiyat...) - model alanları
+    İngilizce (title, location, price...). Burada eşleştirme yapılıyor."""
     return CarListing(
-        baslik=satir.get("baslik", "") or "",
-        konum=satir.get("konum", "") or "",
-        fiyat=temizle_sayi(satir.get("fiyat")) or 0,
-        ilan_tarihi=temizle_tarih(satir.get("ilan_tarihi")),
-        marka=satir.get("marka", "") or "",
-        seri=satir.get("seri", "") or "",
+        title=satir.get("baslik", "") or "",
+        location=satir.get("konum", "") or "",
+        price=temizle_sayi(satir.get("fiyat")) or 0,
+        listing_date=temizle_tarih(satir.get("ilan_tarihi")),
+        brand=satir.get("marka", "") or "",
+        series=satir.get("seri", "") or "",
         model=satir.get("model", "") or "",
-        yil=temizle_sayi(satir.get("yil")),
-        kilometre=temizle_sayi(satir.get("kilometre")),
-        vites_tipi=satir.get("vites_tipi", "") or "",
-        yakit_tipi=satir.get("yakit_tipi", "") or "",
-        kasa_tipi=satir.get("kasa_tipi", "") or "",
-        renk=satir.get("renk", "") or "",
-        motor_hacmi=satir.get("motor_hacmi", "") or "",
-        motor_gucu=satir.get("motor_gucu", "") or "",
-        cekis=satir.get("cekis", "") or "",
-        arac_durumu=satir.get("arac_durumu", "") or "",
-        ortalama_yakit_tuketimi=satir.get("ortalama_yakit_tuketimi", "") or "",
-        yakit_deposu=satir.get("yakit_deposu", "") or "",
-        boya_degisen=satir.get("boya_degisen", "") or "",
-        takasa_uygun=temizle_bool(satir.get("takasa_uygun"), "uygun"),
-        kimden=satir.get("kimden", "") or "",
+        year=temizle_sayi(satir.get("yil")),
+        km=temizle_sayi(satir.get("kilometre")),
+        transmission_type=satir.get("vites_tipi", "") or "",
+        fuel_type=satir.get("yakit_tipi", "") or "",
+        body_type=satir.get("kasa_tipi", "") or "",
+        color=satir.get("renk", "") or "",
+        engine_size=satir.get("motor_hacmi", "") or "",
+        engine_power=satir.get("motor_gucu", "") or "",
+        traction=satir.get("cekis", "") or "",
+        status=satir.get("arac_durumu", "") or "",
+        avg_fuel_consumption=satir.get("ortalama_yakit_tuketimi", "") or "",
+        fuel_tank=satir.get("yakit_deposu", "") or "",
+        changed_parts=satir.get("boya_degisen", "") or "",
+        for_trade=temizle_bool(satir.get("takasa_uygun"), "uygun"),
+        from_whom=satir.get("kimden", "") or "",
         tramer=temizle_ondalik(satir.get("tramer")),
     )
 
 
 def ev_satirini_isle(satir):
     return HouseListing(
-        konum=satir.get("konum", "") or "",
-        fiyat=temizle_sayi(satir.get("fiyat")) or 0,
-        ilan_tarihi=temizle_tarih(satir.get("ilan_tarihi")),
-        metrekare=temizle_sayi(satir.get("metrekare")),
-        bina_yasi=satir.get("bina_yasi", "") or "",
-        toplam_kat_sayisi=temizle_sayi(satir.get("toplam_kat_sayisi")),
-        oda_sayisi=satir.get("oda_sayisi", "") or "",
-        bulundugu_kat=satir.get("bulundugu_kat", "") or "",
-        kredi_uygunlugu=temizle_bool(satir.get("kredi_uygunlugu"), "uygun"),
+        location=satir.get("konum", "") or "",
+        price=temizle_sayi(satir.get("fiyat")) or 0,
+        listing_date=temizle_tarih(satir.get("ilan_tarihi")),
+        meter_squared=temizle_sayi(satir.get("metrekare")),
+        building_aged=satir.get("bina_yasi", "") or "",
+        number_of_floors=temizle_sayi(satir.get("toplam_kat_sayisi")),
+        number_of_rooms=satir.get("oda_sayisi", "") or "",
+        floor=satir.get("bulundugu_kat", "") or "",
+        credit_eligibility=temizle_bool(satir.get("kredi_uygunlugu"), "uygun"),
     )
 
 
@@ -114,7 +113,6 @@ class Command(BaseCommand):
         csv_yolu = options["csv_yolu"]
 
         satir_isleyici = araba_satirini_isle if tur == "araba" else ev_satirini_isle
-        model_sinifi = CarListing if tur == "araba" else HouseListing
 
         try:
             with open(csv_yolu, encoding="utf-8") as f:

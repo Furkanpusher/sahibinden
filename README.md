@@ -51,7 +51,7 @@ View'ların şişmesini önlemek için ilanlarla ilgili iş mantığı `ListingS
 - **Şikayet işlemi** — ilan detayında "şikayet et" aksiyonu, `report_listing()`'i tetikler
 - **Admin paneli / moderasyon** — `is_staff=True` kullanıcılar için şikayet edilen ilanları görüp `remove_reported_listing()` ile kaldırabildiği görünüm
 
-## Mimari Kararlar (özet)
+## Genel Mimari Kararlar
 
 - **Class-based view + custom logic**: kendi get postlarımız yazılcak.
 - **Service layer**: asıl logic viewlardan ayrılarak services.py da yazılcak bu sayede viewların içi gereksiz şişmicek
