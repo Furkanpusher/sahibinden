@@ -15,7 +15,7 @@ Tüm ilan türlerinin ortak taşıdığı alanları içerir. `CarListing` ve `Ho
 
 - `title`, `location`, `price`, `listing_date`, `update_date`
 - `listing_owner` — ilanı veren kullanıcı (`User`'a foreign key)
-- `is_reported` — ilan şikayet edilmiş mi(eğer öyleyse de bunu tek kaldırabilcek yetkili superuser olcak)
+- `is_reported` — ilan şikayet edilmiş mi(eğer öyleyse de bunu tek kaldırabilcek yetkili staff olcak)
 
 ### `CarListing(Listing)`
 Araç ilanlarına özel alanlar: `brand`, `series`, `model`, `year`, `km`, `transmission_type`, `engine_size` vb.
@@ -27,10 +27,10 @@ Ev ilanlarına özel alanlar: `meter_square`, `room_number`, `house_age`, `total
 Ev ve araç ilanlarının ortak alanları (fiyat, konum, tarih vb.) tek yerde tutulup kod tekrari önlendi, hem de genel ilan sorgulamaları yapılırken sadece Listing sınıfından yapılabilcek mesela title bazlı vb.
 
 ### `User`
-Django'nun `AUTH_USER_MODEL`'i kullanılıyor, ayrı bir custom model yok. `is_staff` / `is_superuser` alanları admin yetkisi için Django'nun kendi mekanizmasıyla yönetiliyor — ayrı bir `Admin` modeli yok.
+Django'nun `AUTH_USER_MODEL`'i kullanılıyor, ayrı bir custom model yok. `is_staff` / `is_staff` alanları admin yetkisi için Django'nun kendi mekanizmasıyla yönetiliyor — ayrı bir `Admin` modeli yok.
 
-### "Yetkilendirme" pratiği için superuser
-`is_reported` bir boolean, eğer bir ilan reported edilirse onu kaldırma yetkisi sadece super_user'da olucak(normalde de superuser'da aslında)
+### "Yetkilendirme" pratiği için staff
+`is_reported` bir boolean, eğer bir ilan reported edilirse onu kaldırma yetkisi sadece super_user'da olucak(normalde de staff'da aslında)
 
 ## Asıl işin yapıldığı yer(services.py): `ListingService`
 
@@ -39,7 +39,7 @@ View'ların şişmesini önlemek için ilanlarla ilgili iş mantığı `ListingS
 - `add_listing()`, `update_listing()`, `delete_listing()` — CRUD işlemleri
 - `search_listing()`, `filter_listing()` — arama/filtreleme
 - `report_listing()` — kullanıcı bir ilanı şikayet eder
-- `remove_reported_listing()` — **admin-only**, şikayet edilen ilanı sadece yetkililer(superuser) kaldırabilir.s
+- `remove_reported_listing()` — **admin-only**, şikayet edilen ilanı sadece yetkililer(staff) kaldırabilir.s
 
 ## App
 
@@ -56,7 +56,7 @@ Genel listing fonksiyonları(filter, search, add, update) için `listings` app'i
 - **Kullanıcı profili** — kullanıcının kendi verdiği ilanları listelediği sayfa
 - **Auth sayfaları** — `register()`, `login()`, `logout()`
 - **Şikayet işlemi** — ilan detayında "şikayet et" aksiyonu, `report_listing()`'i tetikler
-- **İlan Kaldırma işlemi** - `report_listing()` tetiklendikten sonra, o listing için is_reported = True olur ve super user artık o postu kaldırabilir hale gelir.
+- **İlan Kaldırma işlemi** - `report_listing()` tetiklendikten sonra, o listing için is_reported = True olur ve staff artık o postu kaldırabilir hale gelir.
 - **Admin paneli / moderasyon** — `is_staff=True` kullanıcılar için şikayet edilen ilanları görüp `remove_reported_listing()` ile kaldırabildiği görünüm
 
 
