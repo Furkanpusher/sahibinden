@@ -39,11 +39,11 @@ View'ların şişmesini önlemek için ilanlarla ilgili iş mantığı `ListingS
 - `add_listing()`, `update_listing()`, `delete_listing()` — CRUD işlemleri
 - `search_listing()`, `filter_listing()` — arama/filtreleme
 - `report_listing()` — kullanıcı bir ilanı şikayet eder
-- `remove_reported_listing()` — **admin-only**, şikayet edilen ilanı sadece yetkililer(superuser) kaldırabilir.
+- `remove_reported_listing()` — **admin-only**, şikayet edilen ilanı sadece yetkililer(superuser) kaldırabilir.s
 
 ## App
 
-Register, login, auth, profil sayfası vb gibi işlemler için bir tane `users` app'i kullanılacak.
+Register, login, auth, profil sayfası vb gibi işlemler için bir tane `accounts` app'i kullanılacak.
 
 Genel listing fonksiyonları(filter, search, add, update) için `listings` app'i kullanılacak.
 
