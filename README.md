@@ -39,17 +39,31 @@ View'ların şişmesini önlemek için ilanlarla ilgili iş mantığı `ListingS
 - `add_listing()`, `update_listing()`, `delete_listing()` — CRUD işlemleri
 - `search_listing()`, `filter_listing()` — arama/filtreleme
 - `report_listing()` — kullanıcı bir ilanı şikayet eder
-- `remove_reported_listing()` — **admin-only**, şikayet edilen ilanı yetkililer kaldırabilir.
+- `remove_reported_listing()` — **admin-only**, şikayet edilen ilanı sadece yetkililer(superuser) kaldırabilir.
+
+## App
+
+Register, login, auth, profil sayfası vb gibi işlemler için bir tane `users` app'i kullanılacak.
+
+Genel listing fonksiyonları(filter, search, add, update) için `listings` app'i kullanılacak.
+
 
 ## View Planı
 
-- **Listing listesi / arama sayfası** — tüm ilanları (ev + araç birlikte veya filtrelenmiş) listeler, `search_listing()` / `filter_listing()` kullanır
+- **Listing listesi / arama sayfası** — `pagination` ile birlikte tüm ilanları (ev + araç birlikte veya filtrelenmiş) listeler, `search_listing()` / `filter_listing()` kullanır
 - **Listing detay sayfası** — tek bir ilanın tüm bilgilerini gösterir(bir ilana tıklayınca gelcek bu sayfa)
 - **Listing oluşturma / düzenleme / silme** — giriş yapmış kullanıcı kendi ilanları üzerinde CRUD yapar, `ListingService`'teki ilgili fonksiyonları çağırır
 - **Kullanıcı profili** — kullanıcının kendi verdiği ilanları listelediği sayfa
 - **Auth sayfaları** — `register()`, `login()`, `logout()`
 - **Şikayet işlemi** — ilan detayında "şikayet et" aksiyonu, `report_listing()`'i tetikler
+- **İlan Kaldırma işlemi** - `report_listing()` tetiklendikten sonra, o listing için is_reported = True olur ve super user artık o postu kaldırabilir hale gelir.
 - **Admin paneli / moderasyon** — `is_staff=True` kullanıcılar için şikayet edilen ilanları görüp `remove_reported_listing()` ile kaldırabildiği görünüm
+
+
+## Kullanılcak Veriler
+
+- Ev ve Araba ilanları `kaggle.com`'daki 2 ayrı verisetinden çekildi. Sütun isimleri ingilizce olarak yeniden adlandırıldı ve modellere uygun şekilde migrate edildi.
+- Pagination uygulamasını gösterebilmek için her 2 kategoriden yaklaşık **200** veri çekildi.
 
 ## Genel Mimari Kararlar
 
