@@ -10,7 +10,7 @@ class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tek
     listing_date = models.DateField(null = True, blank = True)
 
     listing_owner = models.ForeignKey( # bi user olmalı
-        settings.AUTH_USER_MODEL, # sonra değiştirmek istersek diye en iyi practice bu
+        settings.AUTH_USER_MODEL, # bu sayede user modeli sonradan değiştirebildik çünk üsettingsdeki bir veri bu
         on_delete = models.CASCADE,
         related_name = 'ilanlar', # user modelinden listinge kolay erişim
         null = True,
@@ -84,3 +84,11 @@ class HouseListing(Listing): # Ev listelemeleri
  
     def __str__(self):
         return self.title or f"{self.number_of_rooms} - {self.location}"
+
+
+
+
+
+# user(login, signup ...)
+# viewlar deneyerek
+# frontend de hafiften(react)
