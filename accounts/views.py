@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import RegisterSerializer
+from .serializers.serializers import RegisterSerializer
  
 
 # Create your views here.
@@ -25,7 +25,7 @@ class LoginView(APIView):
         if user is None: # kullancı veritabanında yok ise
             return Response(
                 {"hata": "Kullanıcı adı veya şifre hatalı."},
-                {status.HTTP_401_UNAUTHORIZED},
+                status=status.HTTP_401_UNAUTHORIZED
             )
             
         refresh = RefreshToken.for_user(user) # var ise refresh token üret çünkü yeni giriş yapıyor

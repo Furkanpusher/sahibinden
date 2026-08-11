@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'listings', # bizim app
     'accounts', # login, register falan için
     "rest_framework", # drf
+    'corsheaders',
     
 ]
 
@@ -54,6 +55,7 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -143,3 +145,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 AUTH_USER_MODEL = "accounts.CustomUser"  # djangoya kendi user modelimi kullanacağımı söylüyorum. bunu yazmazsam django kendi user modelini kullanır ve bizim eklediğimiz alanları görmez
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
