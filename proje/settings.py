@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'listings', # bizim app
     'accounts', # login, register falan için
+    "rest_framework", # drf
     
 ]
 
