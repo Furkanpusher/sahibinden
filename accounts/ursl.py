@@ -1,7 +1,7 @@
-from django.contrib import admin
 from django.urls import path
+from . import views # accounts/views.py
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('login/', views.LoginView.as_view(), name='login'),
+     path("register/", RegisterView.as_view(), name="register"),
 ]
