@@ -13,14 +13,12 @@ Class-based views
 Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
+"""  
+
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView  
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # simplejwt tarafından hazır gelen endpointler
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"), # LOGİN ENDPOİNTİMİZ   username + password alır, access ve refresh token döndürür  
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),#refresh token ile access token üsreitr
+    path('accounts/', include('accounts.urls')), # accountsdaki urls.py 
 ]

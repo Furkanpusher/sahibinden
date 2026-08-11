@@ -13,3 +13,4 @@ class RegisterSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         # .create_user() otomatik hasliyor
         return CustomUser.objects.create_user(**validated_data)
+
