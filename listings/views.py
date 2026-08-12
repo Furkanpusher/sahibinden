@@ -1,5 +1,5 @@
 from rest_framework.response import Response
-from .services import get_all_listings, get_all_cars, filter_cars, get_all_houses, filter_houses
+from .services import get_all_listings, get_all_cars, filter_cars, get_all_houses, filter_houses, get_car_by_id, get_house_by_id
 from .serializers import ListingSerializer, CarListingSerializer, HouseListingSerializer
 from rest_framework.views import APIView
 
@@ -33,3 +33,18 @@ class HouseListView(APIView):
             houses = get_all_houses()
         serializer = HouseListingSerializer(houses, many = True)
         return Response(serializer.data, status = 200)
+
+
+class CarDetailView(APIView):
+    def get(self, request, pk):
+        # pk sı ile bulucak yani id
+        car = get_car_by_id(pk)
+        serializer = CarListingSerializer(car)
+        return Response(serializer.data, status=200)
+
+
+class HouseDetailView(APIView):
+    def get(self, request, pk):
+        house = get_house_by_id(pk)
+        serializer = HouseListingSerializer(house)
+        return Response(serializer.data, status=200)

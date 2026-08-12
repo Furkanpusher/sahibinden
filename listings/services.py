@@ -1,5 +1,5 @@
 from listings.models import Listing, CarListing, HouseListing
-
+from django.shortcuts import get_object_or_404
 
 
 # genel listing fonksiyonellikleri burada yazılacak
@@ -81,3 +81,9 @@ def filter_houses(**filtreler):
 
     return qs
 
+
+def get_car_by_id(pk):
+    return get_object_or_404(CarListing, pk=pk)
+
+def get_house_by_id(pk):
+    return get_object_or_404(HouseListing, pk=pk)
