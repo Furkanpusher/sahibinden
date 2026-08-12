@@ -20,13 +20,13 @@ def get_all_houses():
 
 
 # Arabaları filtreleme mantığı
-def filter_cars(**filtreler):  # ** --> gelen query parametrelerini sözlük haline getiriyor
+def filter_cars(**filtreler):  # ** --> gelen query parametrelerini sözlük haline getiriyor 
 
     print("filter_cars fonksiyonu çalıştı")
 
-    qs = CarListing.objects.all() # query set
+    qs = CarListing.objects.all() # query set { sayı büyüyünce verimsiz}
 
-    if filtreler.get("brand"): # o keyin value'sini çekiyor
+    if filtreler.get("brand"): # o keyin value'sini çekiyor  {brand: "Renault"}
         # marka
         qs = qs.filter(brand__exact=filtreler["brand"])
 
@@ -82,6 +82,11 @@ def filter_houses(**filtreler):
         qs = qs.filter(location__icontains=filtreler["location"])
 
     return qs
+
+
+
+# şehir vb json var public, bide dropdowno lcak!
+
 
 
 def get_car_by_id(pk):

@@ -37,9 +37,11 @@ Django'nun `AUTH_USER_MODEL`'i kullanılıyor, ayrı bir custom model yok. `is_s
 View'ların şişmesini önlemek için ilanlarla ilgili iş mantığı `ListingService` katmanında toplanıyor (view'lar bu fonksiyonları çağırıyor, logic'i kendi içinde barındırmıyor):
 
 - `add_listing()`, `update_listing()`, `delete_listing()` — CRUD işlemleri
-- `search_listing()`, `filter_listing()` — arama/filtreleme
+- `filter_listing()` — arama/filtreleme
 - `report_listing()` — kullanıcı bir ilanı şikayet eder
-- `remove_reported_listing()` — **admin-only**, şikayet edilen ilanı sadece yetkililer(staff) kaldırabilir.s
+- `remove_reported_listing()` — **admin-only**, şikayet edilen ilanı sadece yetkililer(staff) kaldırabilir.
+- `favorites`
+
 
 ## App
 

@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers.serializers import RegisterSerializer
+from .serializers import RegisterSerializer
  
 
 # Create your views here.
@@ -20,7 +20,13 @@ class LoginView(APIView):
 
         print("Loginview post metodu çalıştı")
         print("Gelen veri:", request.data)
-        
+
+        # print("remote_Addr: ", request.META.get('REMOTE_ADDR'))
+        # bu tarz request.META ile falan çok fazla metadataya ulaşabiliyorum
+        print(request.headers.get('Content-Type')) # mesela buraya application/json olarak geldiğini görüyorum
+
+
+        # requst.data dediğimiz an DRF'in JSONParser çalışır
         username = request.data.get('username')
         password = request.data.get('password')
 
@@ -70,3 +76,4 @@ class RegisterView(APIView):
 
         else: # serializerden gelen veri okey değilse
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    

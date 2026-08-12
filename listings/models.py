@@ -8,16 +8,16 @@ class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tek
 
     # arabalarda şehir olarak evlerde semt olarak geçiyor verisetinde
     location = models.CharField(max_length = 250, default = "")
-    
+        
     price = models.DecimalField(max_digits = 12, decimal_places = 2, default = 0) # 100 milyar ...
     listing_date = models.DateField(null = True, blank = True)
 
     listing_owner = models.ForeignKey( # bi user olmalı
         settings.AUTH_USER_MODEL, # bu sayede user modeli sonradan değiştirebildik çünk üsettingsdeki bir veri bu
-        on_delete = models.CASCADE,
+        on_delete = models.CASCADE, # user silinince ilanları silinmeli 
         related_name = 'ilanlar', # user modelinden listinge kolay erişim
-        null = True,
-        blank = True,
+         null = False,  #her ilanın 1 ownerı olmalı!
+        blank = False, 
     )
 
     #NOT: Blank --> doğrulama / form katmanında çalışıyor
@@ -89,9 +89,8 @@ class HouseListing(Listing): # Ev listelemeleri
         return self.title or f"{self.number_of_rooms} - {self.location}"
 
 
+# favorites --> list_id user_id (user favori görüp silebilmeli) (ilanı silince favoriden de silinmeli)
+# reported --> listing base class eklenebilir
 
 
 
-# user(login, signup ...)
-# viewlar deneyerek
-# frontend de hafiften(react)

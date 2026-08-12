@@ -9,5 +9,3 @@ from django.contrib.auth.models import AbstractUser
 class CustomUser(AbstractUser):  # AbstractBaseUser tanımlarsam username, ğpassword gibi alanları da kendim tanımlamam gerekir
     phone_number = models.CharField(max_length=15, blank=True) 
     profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True,  null = True)
-
-
