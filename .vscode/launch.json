@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Django",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",
+            "args": [ // manage.py runserver 8001 yapsın
+                "runserver",
+                "8001",
+                "--noreload"
+            ],
+            "django": true,
+            "justMyCode": true
+            
+        }
+    ]
+}

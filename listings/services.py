@@ -1,7 +1,6 @@
 from listings.models import Listing, CarListing, HouseListing
 from django.shortcuts import get_object_or_404
 
-
 # genel listing fonksiyonellikleri burada yazılacak
 # add_listing, update_listing, delete_listing vb
 
@@ -21,12 +20,15 @@ def get_all_houses():
 
 
 # Arabaları filtreleme mantığı
-def filter_cars(**filtreler): 
-    qs = CarListing.objects.all()
+def filter_cars(**filtreler):  # ** --> gelen query parametrelerini sözlük haline getiriyor
 
-    if filtreler.get("brand"):
+    print("filter_cars fonksiyonu çalıştı")
+
+    qs = CarListing.objects.all() # query set
+
+    if filtreler.get("brand"): # o keyin value'sini çekiyor
         # marka
-        qs = qs.filter(brand__iexact=filtreler["brand"])
+        qs = qs.filter(brand__exact=filtreler["brand"])
 
     if filtreler.get("transmission_type"): 
         # vites tipi

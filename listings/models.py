@@ -5,7 +5,10 @@ from django.conf import settings # kendi settingsim ile django conf ikisinide al
 
 class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tekrar etmemesi çin iyi
     title = models.CharField(max_length = 250, default = "")
+
+    # arabalarda şehir olarak evlerde semt olarak geçiyor verisetinde
     location = models.CharField(max_length = 250, default = "")
+    
     price = models.DecimalField(max_digits = 12, decimal_places = 2, default = 0) # 100 milyar ...
     listing_date = models.DateField(null = True, blank = True)
 

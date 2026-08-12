@@ -37,6 +37,7 @@ class HouseListView(APIView):
 
 class CarDetailView(APIView):
     def get(self, request, pk):
+        print("CarDetailView get metodu çalıştı")
         # pk sı ile bulucak yani id
         car = get_car_by_id(pk)
         serializer = CarListingSerializer(car)

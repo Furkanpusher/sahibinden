@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+from datetime import timedelta
+
 
 load_dotenv()
 
@@ -146,6 +148,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "accounts.CustomUser"  # djangoya kendi user modelimi kullanacağımı söylüyorum. bunu yazmazsam django kendi user modelini kullanır ve bizim eklediğimiz alanları görmez
 
-CORS_ALLOWED_ORIGINS = [
+CORS_ALLOWED_ORIGINS = [ # react iletişimi için
     "http://localhost:5173",
 ]
+
+SIMPLE_JWT = { # jwt token timeout ları
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),      
+}
