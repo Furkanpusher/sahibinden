@@ -160,3 +160,10 @@ def get_house_filter_options(selected_city=None):
         options["districts"] = [{"name": item["district"], "count": item["count"]} for item in districts_qs if item["district"]]
   
     return options
+
+
+def create_car_listing(user,data):
+    # user --> listing_owner
+    # data --> fronteendden gelecek json {brand: polo falan}
+    car = CarListing.objects.create(listing_owner = user, **data)
+    return car

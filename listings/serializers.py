@@ -8,6 +8,8 @@ class ListingSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner', 'listing_date', 'listing_update']
 
 class CarListingSerializer(serializers.ModelSerializer):
+    listing_owner = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = CarListing
         fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner', 'listing_date',
