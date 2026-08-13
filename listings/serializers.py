@@ -13,9 +13,9 @@ class CarListingSerializer(serializers.ModelSerializer):
     class Meta:
         model = CarListing
         fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner', 'listing_date',
-                'brand', 'model', 'year', 'transmission_type', 'km', 'fuel_type', 'body_type',
-                  'color', 'engine_size', 'engine_power', 'traction', 'status', 'avg_fuel_consumption',
-                'fuel_tank', 'changed_parts', 'from_whom', 'tramer']
+                'brand', 'series', 'model', 'year', 'transmission_type', 'km', 'fuel_type', 'body_type',
+                'color', 'engine_size', 'engine_power', 'traction', 'status', 'avg_fuel_consumption',
+                'fuel_tank', 'changed_parts', 'for_trade', 'from_whom', 'tramer']
 
 
 class HouseListingSerializer(serializers.ModelSerializer):

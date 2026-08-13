@@ -167,3 +167,5 @@ def create_car_listing(user,data):
     # data --> fronteendden gelecek json {brand: polo falan}
     car = CarListing.objects.create(listing_owner = user, **data)
     return car
+
+    

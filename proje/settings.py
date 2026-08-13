@@ -17,6 +17,8 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 from datetime import timedelta
+from corsheaders.defaults import default_headers
+
 
 
 load_dotenv()
@@ -54,8 +56,10 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ),
 }
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -152,6 +156,9 @@ AUTH_USER_MODEL = "accounts.CustomUser"  # djangoya kendi user modelimi kullanac
 CORS_ALLOWED_ORIGINS = [ # react iletişimi için
     "http://localhost:5173",
 ]
+
+CORS_ALLOW_HEADERS = list(default_headers) + ["authorization"]
+
 
 SIMPLE_JWT = { # jwt token timeout ları
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   

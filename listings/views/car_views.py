@@ -23,11 +23,18 @@ class CarListingView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        print("--- CarListingView POST isteği geldi ---")
+        print("Authorization Header:", request.headers.get("Authorization"))
+        print("Request User:", request.user)
+        print("Request Auth:", request.auth)
+        print("Gelen Data:", request.data)
+
         # sadece giriş yaptıysan liste oluşturabiliyorsun
         serializer = CarListingSerializer(data=request.data)
         if serializer.is_valid():
             car = create_car_listing(user=request.user, data=serializer.validated_data)
             return Response(CarListingSerializer(car).data, status=status.HTTP_201_CREATED)
+        print("Serializer Hataları:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CarDetailView(APIView):

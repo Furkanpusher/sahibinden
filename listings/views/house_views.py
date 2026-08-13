@@ -31,8 +31,7 @@ class HouseFilterOptionsView(APIView):
 class MainListingView(APIView):
     # Tüm ilanları göster
     def get(self, request):
-        from listings.serializers import ListingSerializer
-        from ..services import get_all_listings
         listings = get_all_listings()
         serializer = ListingSerializer(listings, many=True)
-        return Response(serializer.data, status=200)
+        return Response(serializer.data, status=200)
+

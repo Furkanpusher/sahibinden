@@ -41,15 +41,18 @@ class LoginView(APIView):
                 {"hata": "Kullanıcı adı veya şifre hatalı."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-            
+        login(request, user) # Tarayıcı oturumu (session cookie) başlatır
+
         refresh = RefreshToken.for_user(user) # var ise refresh token üret çünkü yeni giriş yapıyor
 
         print("Refresh token üretildi:", refresh)
 
         return Response(
             {
-                "access": str(refresh.access_token),    # tokenlara yaz
+                "access": str(refresh.access_token),
+                "access_token": str(refresh.access_token),  # frontend access_token key'ini rahatça okuyabilsin
                 "refresh": str(refresh),
+                "refresh_token": str(refresh),
             },
             status = status.HTTP_200_OK
         )
@@ -67,12 +70,20 @@ class RegisterView(APIView):
 
         if serializer.is_valid(): # serializerden gelen veri okeyse
             print("validasyon çağırıldı")
-            serializer.save() # veriyi kaydet
+            user = serializer.save() # veriyi kaydet
+
+            refresh = RefreshToken.for_user(user) # kayıt sonrası otomatik token üret
 
             return Response(
-                {"mesaj": "Kayıt başarılı"},
+                {
+                    "mesaj": "Kayıt başarılı",
+                    "access": str(refresh.access_token),
+                    "access_token": str(refresh.access_token),
+                    "refresh": str(refresh),
+                    "refresh_token": str(refresh),
+                },
                 status=status.HTTP_201_CREATED
-                )
+            )
 
         else: # serializerden gelen veri okey değilse
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

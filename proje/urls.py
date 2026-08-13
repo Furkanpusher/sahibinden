@@ -22,6 +22,7 @@ print("proje/urls.py çalıştı")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api-auth/', include('rest_framework.urls')), # DRF tarayıcı içi Log in / Log out için
     path('accounts/', include('accounts.urls')), # accountsdaki urls.py 
     path('api/listings/', include('listings.urls')), # listingsdeki urls.py
 ]
