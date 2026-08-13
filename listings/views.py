@@ -1,5 +1,8 @@
 from rest_framework.response import Response
-from .services import get_all_listings, get_all_cars, filter_cars, get_all_houses, filter_houses, get_car_by_id, get_house_by_id
+from .services import (
+    get_all_listings, get_all_cars, filter_cars, get_all_houses, filter_houses, 
+    get_car_by_id, get_house_by_id, get_car_filter_options, get_house_filter_options
+)
 from .serializers import ListingSerializer, CarListingSerializer, HouseListingSerializer
 from rest_framework.views import APIView
 
@@ -49,3 +52,33 @@ class HouseDetailView(APIView):
         house = get_house_by_id(pk)
         serializer = HouseListingSerializer(house)
         return Response(serializer.data, status=200)
+
+
+
+""" TAMAMEN DROPDOWNLARI DOLDURMAK İÇİN VİEWLAR """
+
+
+class CarFilterOptionsView(APIView):
+    def get(self, request):
+        # URL'den seçilen şehri parametre olarak alıyorum (Örn: ?city=Ankara)
+        selected_city = request.query_params.get("city")
+        
+        options = get_car_filter_options(selected_city=selected_city)
+
+        # buraya retrun olan option şu tipte 
+        # { 
+        #   "cities": ["İstanbul", "Ankara", "İzmir"],
+        #   "brands": ["Renault", "Ford", "Volkswagen"],
+        #   "transmissions": ["Manuel", "Otomatik"],
+        #   "districts": ["Kadıköy", "Beşiktaş", "Şişli"]
+        # }
+        
+        # Hazırlanan seçenekler sözlüğünü JSON olarak frontend'e dönüyoruz
+        return Response(options, status=200)
+
+class HouseFilterOptionsView(APIView):
+    def get(self, request):
+        selected_city = request.query_params.get("city")
+        # sözlükten city yi çekiyoruz
+        options = get_house_filter_options(selected_city=selected_city)
+        return Response(options, status=200)

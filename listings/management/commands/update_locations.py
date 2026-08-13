@@ -6,6 +6,9 @@ from django.db import transaction
 from django.conf import settings
 from listings.models import Listing, CarListing, HouseListing
 
+# Json verilerinden migrate verilerine map edicek
+
+
 def turkce_kucuk(metin):
     """Türkçe karakterleri düzgün şekilde küçük harfe çevirir."""
     if not metin:

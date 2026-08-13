@@ -1,13 +1,17 @@
 from listings.models import Listing, CarListing, HouseListing
 from django.shortcuts import get_object_or_404
+from django.db import models   
 
 # genel listing fonksiyonellikleri burada yazılacak
 # add_listing, update_listing, delete_listing vb
 
+
+
+""" BASİT GET METODLARI """
+
 # Ana sayfa için her şeyi döndürür
 def get_all_listings():
     return Listing.objects.all()
-
 
 # Tüm arabaları alır
 def get_all_cars():
@@ -18,6 +22,16 @@ def get_all_cars():
 def get_all_houses(): 
     return HouseListing.objects.all()
 
+
+def get_car_by_id(pk):
+    return get_object_or_404(CarListing, pk=pk)
+
+def get_house_by_id(pk):
+    return get_object_or_404(HouseListing, pk=pk)
+
+
+
+""" FİLTRELEME VE DROPDOWN FONKSİYONLARI """
 
 # Arabaları filtreleme mantığı
 def filter_cars(**filtreler):  # ** --> gelen query parametrelerini sözlük haline getiriyor 
@@ -98,13 +112,58 @@ def filter_houses(**filtreler):
     return qs
 
 
+# ARABA DROPDOWN
+def get_car_filter_options(selected_city=None):
+    # Şehirler
+    cities_qs = CarListing.objects.values("city").annotate(count=models.Count("id")).order_by("city")
+    cities = [{"name": item["city"], "count": item["count"]} for item in cities_qs if item["city"]]
+    
+    # Markalar
+    brands_qs = CarListing.objects.values("brand").annotate(count=models.Count("id")).order_by("brand")
+    brands = [{"name": item["brand"], "count": item["count"]} for item in brands_qs if item["brand"]]
+    
+    # Vites Tipleri
+    transmissions_qs = CarListing.objects.values("transmission_type").annotate(count=models.Count("id")).order_by("transmission_type")
+    transmissions = [{"name": item["transmission_type"], "count": item["count"]} for item in transmissions_qs if item["transmission_type"]]
+    
+    options = {
+        "cities": cities,
+        "brands": brands,
+        "transmissions": transmissions,
+        "districts": [] 
+    }
+    
+    if selected_city:
+        districts_qs = CarListing.objects.filter(city__iexact=selected_city).values("district").annotate(count=models.Count("id")).order_by("district")
+        options["districts"] = [{"name": item["district"], "count": item["count"]} for item in districts_qs if item["district"]]
+    return options
 
-# şehir vb json var public, bide dropdowno lcak!
 
 
-
-def get_car_by_id(pk):
-    return get_object_or_404(CarListing, pk=pk)
-
-def get_house_by_id(pk):
-    return get_object_or_404(HouseListing, pk=pk)
+# house dropdown
+def get_house_filter_options(selected_city=None):
+    # Şehirler
+    cities_qs = HouseListing.objects.values("city").annotate(count=models.Count("id")).order_by("city")
+    cities = [{"name": item["city"], "count": item["count"]} for item in cities_qs if item["city"]]
+    
+    # Oda Sayıları (Veritabanından gerçek "1+1", "2+1" değerleri)
+    rooms_qs = HouseListing.objects.values("number_of_rooms").annotate(count=models.Count("id")).order_by("number_of_rooms")
+    number_of_rooms = [{"name": item["number_of_rooms"], "count": item["count"]} for item in rooms_qs if item["number_of_rooms"]]
+    
+    # Katlar (Veritabanından gerçek "1. Kat", "Düz Giriş" değerleri)
+    floors_qs = HouseListing.objects.values("floor").annotate(count=models.Count("id")).order_by("floor")
+    floors = [{"name": item["floor"], "count": item["count"]} for item in floors_qs if item["floor"]]
+    
+    options = {
+        "cities": cities,
+        "number_of_rooms": number_of_rooms,
+        "floors": floors,
+        "districts": [],
+    }
+    
+    # Şehir seçildiyse ilçeleri getir
+    if selected_city:
+        districts_qs = HouseListing.objects.filter(city__iexact=selected_city).values("district").annotate(count=models.Count("id")).order_by("district")
+        options["districts"] = [{"name": item["district"], "count": item["count"]} for item in districts_qs if item["district"]]
+  
+    return options
