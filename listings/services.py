@@ -42,6 +42,14 @@ def filter_cars(**filtreler):  # ** --> gelen query parametrelerini sözlük hal
         # maximum fiyat
         qs = qs.filter(price__lte=filtreler["price_max"])
 
+    if filtreler.get("city"):
+        # eşleşen şehir
+        qs = qs.filter(city__iexact=filtreler["city"])
+
+    if filtreler.get("district"):
+        # semt
+        qs = qs.filter(district__iexact=filtreler["district"])
+
     if filtreler.get("location"):
         # konum
         qs = qs.filter(location__icontains=filtreler["location"])
@@ -76,6 +84,12 @@ def filter_houses(**filtreler):
     if filtreler.get("price_max"):
         # maximum fiyat
         qs = qs.filter(price__lte=filtreler["price_max"])
+
+    if filtreler.get("city"):
+        qs = qs.filter(city__iexact=filtreler["city"])
+
+    if filtreler.get("district"):
+        qs = qs.filter(district__iexact=filtreler["district"])
 
     if filtreler.get("location"):
         # konum
