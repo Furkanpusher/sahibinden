@@ -42,7 +42,7 @@ class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tek
 
 class CarListing(Listing):
     TRANSMISSION_OPTIONS = [ # 3seçenek
-        ("manueş", "Manuel"),
+        ("manuel", "Manuel"),
         ("otomatik", "Otomatik"),
         ("yarı otomatik", "Yarı Otomatik"),
         ]

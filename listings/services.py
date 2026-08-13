@@ -64,9 +64,6 @@ def filter_cars(**filtreler):  # ** --> gelen query parametrelerini sözlük hal
         # semt
         qs = qs.filter(district__iexact=filtreler["district"])
 
-    if filtreler.get("location"):
-        # konum
-        qs = qs.filter(location__icontains=filtreler["location"])
 
     return qs
 
@@ -104,10 +101,6 @@ def filter_houses(**filtreler):
 
     if filtreler.get("district"):
         qs = qs.filter(district__iexact=filtreler["district"])
-
-    if filtreler.get("location"):
-        # konum
-        qs = qs.filter(location__icontains=filtreler["location"])
 
     return qs
 
