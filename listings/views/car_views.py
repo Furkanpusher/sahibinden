@@ -3,18 +3,20 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from listings.serializers import CarListingSerializer
-from ..services import get_all_cars, filter_cars, get_car_by_id, get_car_filter_options, create_car_listing
+from ..services import (get_all_cars, filter_cars, get_car_by_id, get_car_filter_options,
+                        create_car_listing, delete_car_listing)
 
 
 class CarListingView(APIView):
 
     def get_permissions(self):
+        # Sadece POST işlemi yaparken (ilan eklerken) JWT Token isteyecek
         if self.request.method == "POST":
-            return [IsAuthenticated()]  # ilan oluşturmak için login şart
-        return [AllowAny()]    # genel listeleri herkes görebilir sadece post da yani list oluşturuken falan izin lazım
+            return [IsAuthenticated()]  
+        # Diğer durumlarda (GET - listeleme) herkes görebilir
+        return [AllowAny()]    
 
     def get(self, request):
-        # tüm arabaları listele (filtre varsa filtreleyerek)
         if request.query_params:
             cars = filter_cars(**request.query_params.dict())
         else:
@@ -22,20 +24,20 @@ class CarListingView(APIView):
         serializer = CarListingSerializer(cars, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        print("--- CarListingView POST isteği geldi ---")
-        print("Authorization Header:", request.headers.get("Authorization"))
-        print("Request User:", request.user)
-        print("Request Auth:", request.auth)
-        print("Gelen Data:", request.data)
-
-        # sadece giriş yaptıysan liste oluşturabiliyorsun
+    def post(self, request): # İlan ekleme ana sayfadan yapılabilir
         serializer = CarListingSerializer(data=request.data)
+        
         if serializer.is_valid():
+            # Artık token doğru okunduğu için request.user 'Anonim' DEĞİL, senin giriş yaptığın hesap olacak!
             car = create_car_listing(user=request.user, data=serializer.validated_data)
             return Response(CarListingSerializer(car).data, status=status.HTTP_201_CREATED)
-        print("Serializer Hataları:", serializer.errors)
+            
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+   
+
+
+
 
 class CarDetailView(APIView):
 
@@ -47,18 +49,21 @@ class CarDetailView(APIView):
     def get(self, request, pk):
         car = get_car_by_id(pk)
         serializer = CarListingSerializer(car)
-        return Response(serializer.data, status=200)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
         # ilan güncelleme — sadece ilan sahibi yapabilmeli
         pass
 
-    def delete(self, request, pk):
-        # ilan silme — sadece ilan sahibi yapabilmeli
-        pass
+    def delete(self, request, pk):  # İlan silme
+        delete_car_listing(user = request.user, pk = pk)
 
 
 class CarFilterOptionsView(APIView):
+    # ÇÖZÜM BURASI: Filtre seçeneklerini (markalar, şehirler vb.) herkesin 
+    # token olmadan çekebilmesi için AllowAny ekledik.
+    permission_classes = [AllowAny]
+
     def get(self, request):
         # URL'den seçilen şehri parametre olarak alıyorum (Örn: ?city=Ankara)
         selected_city = request.query_params.get("city")
@@ -74,4 +79,4 @@ class CarFilterOptionsView(APIView):
         # }
         
         # Hazırlanan seçenekler sözlüğünü JSON olarak frontend'e dönüyoruz
-        return Response(options, status=200)
+        return Response(options, status=status.HTTP_200_OK)

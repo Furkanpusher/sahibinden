@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from django.views import View # view base classı üzerinden gidicez
+from django.views import View
 from django.contrib.auth import authenticate, login
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import RegisterSerializer
- 
+
 
 # Create your views here.
 
@@ -15,64 +15,62 @@ from .serializers import RegisterSerializer
 
 class LoginView(APIView):
     permission_classes = [AllowAny]  # herkes giriş yapabilsin
+    authentication_classes = []  # bu endpoint'te token hiç kontrol edilmesin
+    # (localStorage'da eski/geçersiz bir token varsa bile login isteği bundan etkilenmemeli)
 
     def post(self, request):
 
         print("Loginview post metodu çalıştı")
         print("Gelen veri:", request.data)
 
-        # print("remote_Addr: ", request.META.get('REMOTE_ADDR'))
-        # bu tarz request.META ile falan çok fazla metadataya ulaşabiliyorum
-        print(request.headers.get('Content-Type')) # mesela buraya application/json olarak geldiğini görüyorum
+        print(request.headers.get('Content-Type'))
 
-
-        # requst.data dediğimiz an DRF'in JSONParser çalışır
         username = request.data.get('username')
         password = request.data.get('password')
 
         print("username:", username, "password:", password)
 
-        user = authenticate(request, username=username, password=password) # doğrula
+        user = authenticate(request, username=username, password=password)
         print("authenticate sonucu:", user)
 
-        if user is None: # kullancı veritabanında yok ise
+        if user is None:
             print("Kullancı bulunamadı, 401 döncek")
             return Response(
                 {"hata": "Kullanıcı adı veya şifre hatalı."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        login(request, user) # Tarayıcı oturumu (session cookie) başlatır
+        login(request, user)  # Tarayıcı oturumu (session cookie) başlatır
 
-        refresh = RefreshToken.for_user(user) # var ise refresh token üret çünkü yeni giriş yapıyor
+        refresh = RefreshToken.for_user(user)
 
         print("Refresh token üretildi:", refresh)
 
         return Response(
             {
                 "access": str(refresh.access_token),
-                "access_token": str(refresh.access_token),  # frontend access_token key'ini rahatça okuyabilsin
+                "access_token": str(refresh.access_token),
                 "refresh": str(refresh),
                 "refresh_token": str(refresh),
             },
-            status = status.HTTP_200_OK
+            status=status.HTTP_200_OK
         )
 
 
 class RegisterView(APIView):
-    permission_classes = [AllowAny] # herkes kayıt olabilsin
+    permission_classes = [AllowAny]  # herkes kayıt olabilsin
+    authentication_classes = []  # burada da aynı sebeple token kontrolü kapalı
 
     def post(self, request):
         print("RegisterView post metodu çalıştı")
         print("Gelen ham veri:", request.data)
 
+        serializer = RegisterSerializer(data=request.data)
 
-        serializer = RegisterSerializer(data=request.data) # serializer ile veriyi doğrula
-
-        if serializer.is_valid(): # serializerden gelen veri okeyse
+        if serializer.is_valid():
             print("validasyon çağırıldı")
-            user = serializer.save() # veriyi kaydet
+            user = serializer.save()
 
-            refresh = RefreshToken.for_user(user) # kayıt sonrası otomatik token üret
+            refresh = RefreshToken.for_user(user)
 
             return Response(
                 {
@@ -85,6 +83,5 @@ class RegisterView(APIView):
                 status=status.HTTP_201_CREATED
             )
 
-        else: # serializerden gelen veri okey değilse
+        else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    

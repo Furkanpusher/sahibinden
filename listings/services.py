@@ -1,6 +1,7 @@
 from listings.models import Listing, CarListing, HouseListing
 from django.shortcuts import get_object_or_404
 from django.db import models   
+from django.core.exceptions import PermissionDenied
 
 # genel listing fonksiyonellikleri burada yazılacak
 # add_listing, update_listing, delete_listing vb
@@ -165,7 +166,11 @@ def get_house_filter_options(selected_city=None):
 def create_car_listing(user,data):
     # user --> listing_owner
     # data --> fronteendden gelecek json {brand: polo falan}
-    car = CarListing.objects.create(listing_owner = user, **data)
+    car = CarListing.objects.create(listing_owner = user, **data) # create hem oluşturuyo hem save ediyo zaten
     return car
 
-    
+def delete_car_listing(user, pk): # bu kullanıcın kendi sildiği araba olcak yetkili olan değil
+    car = get_car_by_id(pk)
+    if car.listing_owner != user: # eğer silmeye çalışan kişi user değil ise
+        raise PermissionDenied("Sadece kendi ilanınızı silebilirsiniz") # 403 döncek
+    car.delete() 
