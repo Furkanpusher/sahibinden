@@ -1,20 +1,16 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework import status
+from listings.models import CarListing
 from listings.serializers import CarListingSerializer
+from listings.permissions import IsOwnerOrReadOnly
 from ..services import (get_all_cars, filter_cars, get_car_by_id, get_car_filter_options,
-                        create_car_listing, delete_car_listing)
+                        create_listing, delete_listing, update_listing)
 
 
 class CarListingView(APIView):
-
-    def get_permissions(self):
-        # Sadece POST işlemi yaparken (ilan eklerken) JWT Token isteyecek
-        if self.request.method == "POST":
-            return [IsAuthenticated()]  
-        # Diğer durumlarda (GET - listeleme) herkes görebilir
-        return [AllowAny()]    
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
         if request.query_params:
@@ -24,27 +20,23 @@ class CarListingView(APIView):
         serializer = CarListingSerializer(cars, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request): # İlan ekleme ana sayfadan yapılabilir
+    def post(self, request): # İlan ekleme
         serializer = CarListingSerializer(data=request.data)
         
         if serializer.is_valid():
-            # Artık token doğru okunduğu için request.user 'Anonim' DEĞİL, senin giriş yaptığın hesap olacak!
-            car = create_car_listing(user=request.user, data=serializer.validated_data)
+            car = create_listing(CarListing, user=request.user, data=serializer.validated_data)
             return Response(CarListingSerializer(car).data, status=status.HTTP_201_CREATED)
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
    
-
-
+# request  istedği atan kullanıcının bilgilerini taşır(token, request.user falan)
 
 
 class CarDetailView(APIView):
 
-    def get_permissions(self):
-        if self.request.method == "GET":
-            return [AllowAny()]         # detay sayfasını herkes görebilir
-        return [IsAuthenticated()]      # PUT, DELETE için login şart
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def get(self, request, pk):
         car = get_car_by_id(pk)
@@ -52,16 +44,28 @@ class CarDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
-        # ilan güncelleme — sadece ilan sahibi yapabilmeli
-        pass
+        car = get_car_by_id(pk)
+        self.check_object_permissions(request, car)  # Yetki kontrolü (IsOwnerOrReadOnly)
 
-    def delete(self, request, pk):  # İlan silme
-        delete_car_listing(user = request.user, pk = pk)
+        updated_car, errors = update_listing(car, CarListingSerializer, request.data, partial=True)
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(CarListingSerializer(updated_car).data, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk):  # İlan silme 
+        print("\n=== GET_PERMISSIONS LİSTESİ ===")
+        print(self.get_permissions()) # Listenin içindekileri basar
+        print("===============================\n")
+        
+        car = get_car_by_id(pk)
+        self.check_object_permissions(request, car)  # Permission kontrolü
+        delete_listing(user=request.user, pk=pk)
+        return Response({"detail": "İlan başarıyla silindi."}, status=status.HTTP_200_OK)
+
 
 
 class CarFilterOptionsView(APIView):
-    # ÇÖZÜM BURASI: Filtre seçeneklerini (markalar, şehirler vb.) herkesin 
-    # token olmadan çekebilmesi için AllowAny ekledik.
+
     permission_classes = [AllowAny]
 
     def get(self, request):

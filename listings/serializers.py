@@ -3,6 +3,8 @@ from .models import Listing, CarListing, HouseListing
 from rest_framework import serializers
 
 class ListingSerializer(serializers.ModelSerializer):
+    listing_owner = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = Listing
         fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner', 'listing_date', 'listing_update']
@@ -19,6 +21,8 @@ class CarListingSerializer(serializers.ModelSerializer):
 
 
 class HouseListingSerializer(serializers.ModelSerializer):
+    listing_owner = serializers.PrimaryKeyRelatedField(read_only=True)
+
     class Meta:
         model = HouseListing
         fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner', 'listing_date',

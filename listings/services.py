@@ -163,14 +163,24 @@ def get_house_filter_options(selected_city=None):
     return options
 
 
-def create_car_listing(user,data):
-    # user --> listing_owner
-    # data --> fronteendden gelecek json {brand: polo falan}
-    car = CarListing.objects.create(listing_owner = user, **data) # create hem oluşturuyo hem save ediyo zaten
-    return car
+def create_listing(model_class, user, data):
+    """Hem ev hem araba (tüm modeller) için ortak ilan oluşturma servisi"""
+    listing = model_class.objects.create(listing_owner=user, **data)
+    return listing
 
-def delete_car_listing(user, pk): # bu kullanıcın kendi sildiği araba olcak yetkili olan değil
-    car = get_car_by_id(pk)
-    if car.listing_owner != user: # eğer silmeye çalışan kişi user değil ise
-        raise PermissionDenied("Sadece kendi ilanınızı silebilirsiniz") # 403 döncek
-    car.delete() 
+
+def delete_listing(user, pk):
+    # silme ortak olabilir basitçe çünkü listing_owner kısımları ortak.
+    listing = get_object_or_404(Listing, pk=pk)
+    if listing.listing_owner != user:
+        raise PermissionDenied("Sadece kendi ilanınızı silebilirsiniz.")
+    listing.delete()
+
+
+def update_listing(instance, serializer_class, data, partial=True):
+    """Hem ev hem araba için ortak güncelleme servisi"""
+    serializer = serializer_class(instance, data=data, partial=partial) # instance mevcut obje, data yeni obje
+    if serializer.is_valid():
+        updated_instance = serializer.save()
+        return updated_instance, None
+    return None, serializer.errors
