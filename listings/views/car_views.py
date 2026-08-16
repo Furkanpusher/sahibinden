@@ -35,30 +35,30 @@ class CarListingView(APIView):
 
 
 class CarDetailView(APIView):
-
+    
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
+    def dispatch(self, request, *args, **kwargs):
+        pk = kwargs.get("pk")
+        self.car = get_car_by_id(pk)
+        return super().dispatch(request, *args, **kwargs) # asıl dispatch devam ediyor
+
+
     def get(self, request, pk):
-        car = get_car_by_id(pk)
-        serializer = CarListingSerializer(car)
+        serializer = CarListingSerializer(self.car)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def put(self, request, pk):
-        car = get_car_by_id(pk)
-        self.check_object_permissions(request, car)  # Yetki kontrolü (IsOwnerOrReadOnly)
 
-        updated_car, errors = update_listing(car, CarListingSerializer, request.data, partial=True)
+    def put(self, request, pk):
+        self.check_object_permissions(request, self.car)  # Yetki kontrolü (IsOwnerOrReadOnly)
+        updated_car, errors = update_listing(self.car, CarListingSerializer, request.data, partial=True)
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(CarListingSerializer(updated_car).data, status=status.HTTP_200_OK)
 
+
     def delete(self, request, pk):  # İlan silme 
-        print("\n=== GET_PERMISSIONS LİSTESİ ===")
-        print(self.get_permissions()) # Listenin içindekileri basar
-        print("===============================\n")
-        
-        car = get_car_by_id(pk)
-        self.check_object_permissions(request, car)  # Permission kontrolü
+        self.check_object_permissions(request, self.car)  # Permission kontrolü
         delete_listing(user=request.user, pk=pk)
         return Response({"detail": "İlan başarıyla silindi."}, status=status.HTTP_200_OK)
 

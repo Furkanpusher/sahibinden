@@ -33,25 +33,28 @@ class HouseDetailView(APIView):
      # başta initial --> self.get_permissions() fakat bizim get_permissions() olmadığı için ata sınıf yani APIViewdaki get_permissions çalışır
      # ve onda da  return [permission() for permission in self.permission_classes] bu satır olduğu için permission classes böyle kullanılır
 
+    def dispatch(self, request, *args, **kwargs):
+        pk = kwargs.get("pk") # sürekli çekmemek için
+        self.house = get_house_by_id(pk)
+        return super().dispath(request, *args, **kwargs) # root dispatch devam
+
+
+
     def get(self, request, pk):
 
-        house = get_house_by_id(pk)
-        serializer = HouseListingSerializer(house)
+        serializer = HouseListingSerializer(self.house)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def put(self, request, pk):
-        house = get_house_by_id(pk)
-        self.check_object_permissions(request, house)
-
-        updated_house, errors = update_listing(house, HouseListingSerializer, request.data, partial=True)
+        self.check_object_permissions(request, self.house)
+        updated_house, errors = update_listing(self.house, HouseListingSerializer, request.data, partial=True)
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(HouseListingSerializer(updated_house).data, status=status.HTTP_200_OK)
 
-    def delete(self, request, pk):
 
-        house = get_house_by_id(pk)
-        self.check_object_permissions(request, house) # üstteki permission_classes dan alır
+    def delete(self, request, pk):
+        self.check_object_permissions(request, self.house) # üstteki permission_classes dan alır
         delete_listing(user=request.user, pk=pk)
         return Response({"detail": "Ev ilanı başarıyla silindi."}, status=status.HTTP_200_OK)
 
