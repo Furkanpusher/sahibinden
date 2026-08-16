@@ -12,16 +12,16 @@ from django.core.exceptions import PermissionDenied
 
 # Ana sayfa için her şeyi döndürür
 def get_all_listings():
-    return Listing.objects.all()
+    return Listing.objects.select_related("listing_owner").all()
 
 # Tüm arabaları alır
 def get_all_cars():
-    return CarListing.objects.all()
+    return CarListing.objects.select_related("listing_owner").all()
 
 
 # Tüm evleri alır
 def get_all_houses(): 
-    return HouseListing.objects.all()
+    return HouseListing.objects.select_related("listing_owner").all()
 
 
 def get_car_by_id(pk):

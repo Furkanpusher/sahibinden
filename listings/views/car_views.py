@@ -29,11 +29,6 @@ class CarListingView(APIView):
             
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-   
-# request  istedği atan kullanıcının bilgilerini taşır(token, request.user falan)
-
-
 class CarDetailView(APIView):
     
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]

@@ -36,7 +36,7 @@ class HouseDetailView(APIView):
     def dispatch(self, request, *args, **kwargs):
         pk = kwargs.get("pk") # sürekli çekmemek için
         self.house = get_house_by_id(pk)
-        return super().dispath(request, *args, **kwargs) # root dispatch devam
+        return super().dispatch(request, *args, **kwargs) # root dispatch devam
 
 
 

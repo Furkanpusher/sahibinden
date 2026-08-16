@@ -9,8 +9,8 @@ class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tek
     # arabalarda şehir olarak evlerde semt olarak geçiyor verisetinde
     # location = models.CharField(max_length = 250, default = "") gerek kalmadı artık city, distrcite geçtik
 
-    city = models.CharField(max_length = 250, default = "", blank = True)
-    district = models.CharField(max_length = 250, default = "", blank= True) # migrationda hata vermemesi için ""
+    city = models.CharField(max_length = 250, default = "", blank = True, db_index = True)
+    district = models.CharField(max_length = 250, default = "", blank= True, db_index = True) # migrationda hata vermemesi için ""
 
 
     price = models.DecimalField(max_digits = 12, decimal_places = 2, default = 0) # 100 milyar ...
@@ -26,7 +26,7 @@ class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tek
     )
 
 
-    
+
 
     #NOT: Blank --> doğrulama / form katmanında çalışıyor
     #     Null --> Veritabanı katmanında çalışır
