@@ -5,7 +5,7 @@ from rest_framework import status
 from listings.models import HouseListing
 from listings.serializers import ListingSerializer, HouseListingSerializer
 from listings.permissions import IsOwnerOrReadOnly
-from ..services import (get_all_listings, get_all_houses, filter_houses, get_house_by_id, 
+from ..services import (get_all_houses, filter_houses, get_house_by_id, 
                         get_house_filter_options, create_listing, delete_listing, update_listing)
 
 class HouseListView(APIView):
@@ -66,11 +66,4 @@ class HouseFilterOptionsView(APIView):
         options = get_house_filter_options(selected_city=selected_city)
         return Response(options, status=200)
 
-
-class MainListingView(APIView):
-    # Tüm ilanları göster
-    def get(self, request):
-        listings = get_all_listings()
-        serializer = ListingSerializer(listings, many=True)
-        return Response(serializer.data, status=200)
 

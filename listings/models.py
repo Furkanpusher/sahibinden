@@ -112,4 +112,19 @@ class HouseListing(Listing): # Ev listelemeleri
 # reported --> listing base class eklenebilir
 
 
+class Favorite(models.Model):
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name = "favorited_by") # ilan kaldırılırsa favorilerden de silincek
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name = "favorites") # user kaldırılırsa favorilerden silincek
+    created_at = models.DateTimeField(auto_now_add = True)
+    
+    class Meta: # modelimiz için bir config dosyası gibi, metadaatayı güncellemek için 
+        unique_together = ("listing", "user") # aynı kullanıcı ilanı 2 kez favorileyemesin 
+        ordering = ["-created_at"] # en son favoriler başa düşcek
+    
+    def __str__(self):
+        return f"{self.user} - {self.listing.title}"
+       
+
+  
+     
 

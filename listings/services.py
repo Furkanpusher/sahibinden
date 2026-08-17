@@ -1,4 +1,5 @@
-from listings.models import Listing, CarListing, HouseListing
+from django.conf import global_settings
+from listings.models import Listing, CarListing, HouseListing, Favorite
 from django.shortcuts import get_object_or_404
 from django.db import models   
 from django.core.exceptions import PermissionDenied
@@ -163,14 +164,18 @@ def get_house_filter_options(selected_city=None):
     return options
 
 
+
+# İLAN CRUD İŞLEMLERİ
+
+
 def create_listing(model_class, user, data):
-    """Hem ev hem araba (tüm modeller) için ortak ilan oluşturma servisi"""
+    # İlan oluşturma
     listing = model_class.objects.create(listing_owner=user, **data)
     return listing
 
 
 def delete_listing(user, pk):
-    # silme ortak olabilir basitçe çünkü listing_owner kısımları ortak.
+    # ilan silme
     listing = get_object_or_404(Listing, pk=pk)
     if listing.listing_owner != user:
         raise PermissionDenied("Sadece kendi ilanınızı silebilirsiniz.")
@@ -178,9 +183,30 @@ def delete_listing(user, pk):
 
 
 def update_listing(instance, serializer_class, data, partial=True):
-    """Hem ev hem araba için ortak güncelleme servisi"""
+    # ilan güncelleme
     serializer = serializer_class(instance, data=data, partial=partial) # instance mevcut obje, data yeni obje
     if serializer.is_valid():
         updated_instance = serializer.save()
         return updated_instance, None
     return None, serializer.errors
+
+
+
+# Favoriler
+
+def toggle_favorite(user, pk):
+    listing = get_object_or_404(Listing, pk=pk)
+    
+    
+    favorite, created = Favorite.objects.get_or_create(user = user, listing = listing) 
+    # aynı parametreler ile aynı obje db de oluşturulmasın diye bu fonksiyon kullanılıyor, obje ve created bool returnlüyor ordan anlıyoruz
+
+    if not created: # oluşturulmadıysa zaten ekliydi yani favoriden çıkarıyoruz
+        favorite.delete()
+        return False
+    return True
+
+
+def get_user_favorites(user):
+    # usera ait favoriler döner
+    return Favorite.objects.filter(user=user).select_related("listing")

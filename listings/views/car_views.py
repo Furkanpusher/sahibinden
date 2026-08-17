@@ -22,6 +22,8 @@ class CarListingView(APIView):
 
     def post(self, request): # İlan ekleme
         serializer = CarListingSerializer(data=request.data) 
+        # list sahibi post ile gönderilmiyor o yüzden serializer json üzerinden alıyoruz
+        
         
         if serializer.is_valid():
             car = create_listing(CarListing, user=request.user, data=serializer.validated_data)
@@ -43,7 +45,7 @@ class CarDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    def put(self, request, pk):
+    def put(self, request, pk): # ilan güncelleme
         self.check_object_permissions(request, self.car)  # Yetki kontrolü (IsOwnerOrReadOnly)
         updated_car, errors = update_listing(self.car, CarListingSerializer, request.data, partial=True)
         if errors:
@@ -55,6 +57,7 @@ class CarDetailView(APIView):
         self.check_object_permissions(request, self.car)  # Permission kontrolü
         delete_listing(user=request.user, pk=pk)
         return Response({"detail": "İlan başarıyla silindi."}, status=status.HTTP_200_OK)
+
 
 
 

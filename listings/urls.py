@@ -2,7 +2,8 @@ from django.urls import path
 from .views import (
     MainListingView, CarListingView, HouseListView, 
     CarDetailView, HouseDetailView,
-    CarFilterOptionsView, HouseFilterOptionsView  # <--- Eklendi
+    CarFilterOptionsView, HouseFilterOptionsView, 
+    FavoriteToggleView, UserFavoritesListView
 )
 
 print("listings/urls.py çalıştı")
@@ -19,6 +20,10 @@ urlpatterns = [
     path("car-options/", CarFilterOptionsView.as_view(), name="car-options"), # dropdownlar
     path("house-options/", HouseFilterOptionsView.as_view(), name="house-options"),
     
+
+    path("listing/<int:pk>/favorite/", FavoriteToggleView.as_view(), name = "toggle-favorite"),
+    path("my-favorites/", UserFavoritesListView.as_view(), name = "user-favorites"),
+
     # addListing
     # updateListing
     # deleteListing

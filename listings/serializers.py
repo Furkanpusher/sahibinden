@@ -1,5 +1,5 @@
 # Listing serializers halleder
-from .models import Listing, CarListing, HouseListing
+from .models import Listing, CarListing, HouseListing, Favorite
 from rest_framework import serializers
 
 class ListingSerializer(serializers.ModelSerializer):
@@ -28,3 +28,12 @@ class HouseListingSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner', 'listing_date',
                   'meter_squared', 'building_aged', 'number_of_floors', 'number_of_rooms',
                   'floor', 'credit_eligibility']
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    listing = ListingSerializer(read_only = True)
+
+    class Meta:
+        model = Favorite
+        fields = ['id', 'listing', 'created_at']
+
