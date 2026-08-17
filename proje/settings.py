@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'accounts', # login, register falan için
     "rest_framework", # drf
     'corsheaders',
+     'drf_spectacular',
     
 ]
 
@@ -58,6 +59,7 @@ REST_FRAMEWORK = {
         "rest_framework_simplejwt.authentication.JWTAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 
@@ -165,3 +167,7 @@ SIMPLE_JWT = { # jwt token timeout ları
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),      
     "AUTH_HEADER_TYPES": ("Bearer", "JWT"), # headerdehem bearer hem hwt kabul et
 }
+
+
+MEDIA_ROOT = BASE_DIR / 'media'
+MEDIA_URL = '/media/'

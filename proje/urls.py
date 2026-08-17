@@ -17,6 +17,9 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+# pyrefly: ignore [missing-import]
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+
 
 print("proje/urls.py çalıştı")
 
@@ -25,4 +28,24 @@ urlpatterns = [
     path('api-auth/', include('rest_framework.urls')), # DRF tarayıcı içi Log in / Log out için
     path('accounts/', include('accounts.urls')), # accountsdaki urls.py 
     path('api/listings/', include('listings.urls')), # listingsdeki urls.py
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
+
+
+# admin/ 
+# api-auth/
+# accounts/
+# api/listings/ all-cars/ [name='all-cars']
+# api/listings/ all-houses/ [name='all-houses']
+# api/listings/ car/<int:pk>/ [name='car-detail']
+# api/listings/ house/<int:pk>/ [name='house-detail']
+# api/listings/ car-options/ [name='car-options']
+# api/listings/ house-options/ [name='house-options']
+# api/listings/ listing/<int:pk>/favorite/ [name='toggle-favorite']
+# api/listings/ my-favorites/ [name='user-favorites']
+# api/listings/ listing/<int:pk>/report/ [name='report-listing']
+# api/listings/ my-reports/ [name='user-reports']
+# api/listings/ staff/reports/ [name='staff-reports']
+# api/listings/ staff/reports/<int:pk>/delete/ [name='staff-delete-report']
+# api/listings/ staff/listings/<int:pk>/delete/ [name='staff-delete-listing']
