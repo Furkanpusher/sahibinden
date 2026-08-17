@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import (
-    MainListingView, CarListingView, HouseListView, 
+    CarListingView, HouseListView, 
     CarDetailView, HouseDetailView,
     CarFilterOptionsView, HouseFilterOptionsView, 
     FavoriteToggleView, UserFavoritesListView,
@@ -11,7 +11,6 @@ from .views import (
 print("listings/urls.py çalıştı")
 
 urlpatterns = [
-    path("", MainListingView.as_view(), name="main-listings"),
 
     path("all-cars/", CarListingView.as_view(), name="all-cars"), # product page
     path("all-houses/", HouseListView.as_view(), name="all-houses"),

@@ -3,15 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from listings.serializers import ListingSerializer, FavoriteSerializer, ReportSerializer
-from ..services import get_all_listings, toggle_favorite, get_user_favorites, report_listing, get_user_reports
-
-class MainListingView(APIView):
-    permission_classes = [AllowAny]
-    # Tüm ilanları göster
-    def get(self, request):
-        listings = get_all_listings()
-        serializer = ListingSerializer(listings, many=True)
-        return Response(serializer.data, status=200)
+from ..services import toggle_favorite, get_user_favorites, report_listing, get_user_reports
 
 
 # FAVORİTE VİEWS

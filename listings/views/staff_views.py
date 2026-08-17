@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser # staff kontrolü yapar
+from listings.permissions import IsStaffUser # staff kontrolü yapar
 from rest_framework import status
 from listings.models import Report, Listing
 from listings.serializers import ReportSerializer
@@ -10,7 +10,7 @@ from django.shortcuts import get_object_or_404
 
 
 class StaffReportListView(APIView): # reportlanan ilanları görür
-    permission_classes = [IsAdminUser] # staff = true ise erişir
+    permission_classes = [IsStaffUser] # staff = true ise erişir
     
     def get(self, request):
         reports = get_all_reports()
@@ -19,7 +19,7 @@ class StaffReportListView(APIView): # reportlanan ilanları görür
 
 
 class StaffDeleteReportView(APIView):  # reportlanan ilanların reportunu kaldırabilir
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsStaffUser]
     
     def delete(self, request, pk):
         report = get_object_or_404(Report, pk = pk)
@@ -27,7 +27,7 @@ class StaffDeleteReportView(APIView):  # reportlanan ilanların reportunu kaldı
         return Response(status = status.HTTP_204_NO_CONTENT)
 
 class StaffDeleteListingView(APIView): # reportlanan ilanı siler 
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsStaffUser]
     
     def delete(self, request, pk):
         listing = get_object_or_404(Listing, pk = pk)

@@ -12,13 +12,9 @@ from django.core.exceptions import PermissionDenied
 
 """ BASİT GET METODLARI """
 
-# Ana sayfa için her şeyi döndürür
-def get_all_listings():
-    return Listing.objects.select_related("listing_owner").all()
-
 # Tüm arabaları alır
 def get_all_cars():
-    return CarListing.objects.select_related("listing_owner").all()
+    return CarListing.objects.select_related("listing_owner").all().order_by("-id")
 
 
 # Tüm evleri alır
@@ -227,7 +223,7 @@ def report_listing(user, pk, description=""):
     if Report.objects.filter(user = user, listing = listing).exists(): # zten bu unique report varsa bir daha edemez
         raise ValidationError("Bu ilanı zaten şikayet ettin")
 
-    report = Report.objects.create(
+    report = Report.objects.create( # report oluştur
         user = user,
         listing = listing,
         description = description # blank olabilir
