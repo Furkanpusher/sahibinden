@@ -2,8 +2,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
-from listings.serializers import ListingSerializer, FavoriteSerializer
-from ..services import get_all_listings, toggle_favorite, get_user_favorites
+from listings.serializers import ListingSerializer, FavoriteSerializer, ReportSerializer
+from ..services import get_all_listings, toggle_favorite, get_user_favorites, report_listing, get_user_reports
 
 class MainListingView(APIView):
     permission_classes = [AllowAny]
@@ -12,6 +12,9 @@ class MainListingView(APIView):
         listings = get_all_listings()
         serializer = ListingSerializer(listings, many=True)
         return Response(serializer.data, status=200)
+
+
+# FAVORİTE VİEWS
 
 class FavoriteToggleView(APIView):
     permission_classes = [IsAuthenticated] # logged in olmalı
@@ -51,3 +54,29 @@ class UserFavoritesListView(APIView):
 #         "created_at": "2026-08-17T08:30:51.056901Z",
 #         "user": 10 user id
 #     },
+
+# REPORT VİEWSLARI
+
+class ReportListingView(APIView):
+    # kullanıcının kendi reportlarını görebilmesi için
+    permission_classes = [IsAuthenticated] # logged in olmalı
+
+    def post(self, request, pk):
+
+        description = request.data.get("description", "") # "" default value
+
+        report = report_listing(user=request.user, pk=pk, description=description)
+        serializer = ReportSerializer(report) #
+        return Response({
+            "detail": "İlan rapor edildi.",
+            "report": serializer.data
+        }, status=status.HTTP_200_OK)
+
+
+class UserReportsListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        reports = get_user_reports(user=request.user)
+        serializer = ReportSerializer(reports, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

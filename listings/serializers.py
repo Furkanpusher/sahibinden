@@ -1,13 +1,21 @@
 # Listing serializers halleder
-from .models import Listing, CarListing, HouseListing, Favorite
+from .models import Listing, CarListing, HouseListing, Favorite, Report
 from rest_framework import serializers
 
 class ListingSerializer(serializers.ModelSerializer):
     listing_owner = serializers.PrimaryKeyRelatedField(read_only=True)
+    listing_type = serializers.SerializerMethodField()  # veri tabanında yok ama serializer çıktısında yani jsonda olsun.
 
     class Meta:
         model = Listing
-        fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner', 'listing_date', 'listing_update']
+        fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner', 'listing_date', 'listing_update', 'listing_type']
+
+    def get_listing_type(self, obj):
+        if hasattr(obj, 'carlisting'):
+            return 'car'
+        elif hasattr(obj, 'houselisting'):
+            return 'house'
+        return 'unknown'
 
 class CarListingSerializer(serializers.ModelSerializer):
     listing_owner = serializers.PrimaryKeyRelatedField(read_only=True) # post ile gönderemezsin
@@ -37,3 +45,10 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = ['id', 'listing', 'created_at', 'user']
 
+
+class ReportSerializer(serializers.ModelSerializer):
+    listing = ListingSerializer(read_only=True)
+
+    class Meta:
+        model = Report
+        fields = ['id', 'listing', 'description', 'report_date', 'user']

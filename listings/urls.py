@@ -3,7 +3,9 @@ from .views import (
     MainListingView, CarListingView, HouseListView, 
     CarDetailView, HouseDetailView,
     CarFilterOptionsView, HouseFilterOptionsView, 
-    FavoriteToggleView, UserFavoritesListView
+    FavoriteToggleView, UserFavoritesListView,
+    ReportListingView, UserReportsListView,
+    StaffReportListView, StaffDeleteReportView, StaffDeleteListingView
 )
 
 print("listings/urls.py çalıştı")
@@ -23,6 +25,16 @@ urlpatterns = [
 
     path("listing/<int:pk>/favorite/", FavoriteToggleView.as_view(), name = "toggle-favorite"),
     path("my-favorites/", UserFavoritesListView.as_view(), name = "user-favorites"),
+
+
+    path("listing/<int:pk>/report/", ReportListingView.as_view(), name = "report-listing"),
+    path("my-reports/", UserReportsListView.as_view(), name = "user-reports"),
+
+    # staff urls
+    path("staff/reports/", StaffReportListView.as_view(), name = "staff-reports"),
+    path("staff/reports/<int:pk>/delete/", StaffDeleteReportView.as_view(), name = "staff-delete-report"),
+    path("staff/listings/<int:pk>/delete/", StaffDeleteListingView.as_view(), name = "staff-delete-listing"),
+
 
     # addListing
     # updateListing

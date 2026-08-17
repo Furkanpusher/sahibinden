@@ -4,3 +4,9 @@ Yapacaklarım(öncelik listesine göre)
 3. profil sayfası kendi ilanlarını görebilme.
 
 # viewsdaki reportdan devam.
+
+
+staff
+
+staffuser
+password123

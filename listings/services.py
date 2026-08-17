@@ -234,4 +234,8 @@ def report_listing(user, pk, description=""):
     )
     return report
     
-   
+def get_user_reports(user):
+    return Report.objects.filter(user=user).select_related("listing")
+
+def get_all_reports():
+    return Report.objects.all().order_by("-report_date").select_related("listing")

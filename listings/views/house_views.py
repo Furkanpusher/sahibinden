@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
 from rest_framework import status
 from listings.models import HouseListing
-from listings.serializers import ListingSerializer, HouseListingSerializer
+from listings.serializers import HouseListingSerializer
 from listings.permissions import IsOwnerOrReadOnly
 from ..services import (get_all_houses, filter_houses, get_house_by_id, 
                         get_house_filter_options, create_listing, delete_listing, update_listing)
