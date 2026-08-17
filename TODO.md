@@ -10,3 +10,8 @@ staff
 
 staffuser
 password123
+
+
+# resim eklenebilir ya  4
+# yorum satırları türkçeyap
+# facvori, listeleri, reportları 3 

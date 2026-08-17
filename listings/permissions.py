@@ -27,6 +27,6 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 
 
 class IsStaffUser(permissions.BasePermission): 
-    def has_permission(self, request, view): # roothas_permission override ediyoruz
+    def has_permission(self, request, view): # root has_permission override ediyoruz
         return bool(request.user and request.user.is_authenticated and request.user.is_staff)
         # hem giriş yapmış olmalı hem staff olmalı
