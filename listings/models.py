@@ -13,13 +13,17 @@ class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tek
     district = models.CharField(max_length = 250, default = "", blank= True, db_index = True) # migrationda hata vermemesi için ""
 
 
+    # WHERE, JOIN veya ORDER BY gibi sorgu işlemlerinde kullanılacaksa db_index=True yapmak lazım
     price = models.DecimalField(max_digits = 12, decimal_places = 2, default = 0) # 100 milyar ...
     listing_date = models.DateField(null = True, blank = True)
 
     listing_owner = models.ForeignKey( # bi user olmalı
-        settings.AUTH_USER_MODEL, # bu sayede user modeli sonradan değiştirebildik çünk üsettingsdeki bir veri bu
+    
+        settings.AUTH_USER_MODEL, # CustomUser
         on_delete = models.CASCADE, # user silinince ilanları silinmeli 
-        related_name = 'ilanlar', # user modelinden listinge kolay erişim
+        related_name = 'ilanlar', # reverse ilişki için mesela user.ilanlar() diyebilirim
+        # select * from listings where user_id = 1 yerine user.ilanlar() derim.
+
          null = False,  #her ilanın 1 ownerı olmalı!
         blank = False, 
 
@@ -41,6 +45,13 @@ class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tek
 
 
 class CarListing(Listing):
+
+    # listing_ptr adlı bir tablo oluşuyor bu inheritten sonra
+    # carlisting gösterirken hep önce listing sorgusundan sonra join yapıyor
+    # yani önce ortak bilgileri listing'den sonra da ek bilgileri alcak
+
+    # listing_ptr_id sütunu oluştu artık ve 2 tablo idleri 1-1 ilişki var.
+
     TRANSMISSION_OPTIONS = [ # 3seçenek
         ("manuel", "Manuel"),
         ("otomatik", "Otomatik"),
@@ -94,7 +105,7 @@ class HouseListing(Listing): # Ev listelemeleri
         verbose_name_plural = "Ev İlanları"
  
     def __str__(self):
-        return self.title or f"{self.number_of_rooms} - {self.location}"
+        return self.title or f"{self.number_of_rooms} - {self.city}"
 
 
 # favorites --> list_id user_id (user favori görüp silebilmeli) (ilanı silince favoriden de silinmeli)

@@ -21,12 +21,11 @@ class CarListingView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request): # İlan ekleme
-        serializer = CarListingSerializer(data=request.data)
+        serializer = CarListingSerializer(data=request.data) 
         
         if serializer.is_valid():
             car = create_listing(CarListing, user=request.user, data=serializer.validated_data)
             return Response(CarListingSerializer(car).data, status=status.HTTP_201_CREATED)
-            
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CarDetailView(APIView):

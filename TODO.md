@@ -1,5 +1,4 @@
 Yapacaklarım(öncelik listesine göre)
 
-2. kullanıcılar ilan oluşturup, silip, güncelleyebilsin, report edebilsin
-3. mixin | permission
-4. reporting |favoriler
+2. report etme, favoriler, admin tarafından kaldırabilme
+3. profil sayfası kendi ilanlarını görebilme.

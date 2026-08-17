@@ -10,7 +10,9 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['username', 'email', 'password', 'phone_number', 'profile_picture']
 
-    def create(self, validated_data):
+    def create(self, validated_data): # root create override ettim.
         # .create_user() otomatik hasliyor
         return CustomUser.objects.create_user(**validated_data)
+        # Customuser.objects.create(user_name = "ali") gibi olurdu
+        # yani hashlenmezdi
 
