@@ -1,5 +1,6 @@
+from django.core.exceptions import ValidationError
 from django.conf import global_settings
-from listings.models import Listing, CarListing, HouseListing, Favorite
+from listings.models import Listing, CarListing, HouseListing, Favorite, Report
 from django.shortcuts import get_object_or_404
 from django.db import models   
 from django.core.exceptions import PermissionDenied
@@ -201,7 +202,7 @@ def toggle_favorite(user, pk):
     favorite, created = Favorite.objects.get_or_create(user = user, listing = listing) 
     # aynı parametreler ile aynı obje db de oluşturulmasın diye bu fonksiyon kullanılıyor, obje ve created bool returnlüyor ordan anlıyoruz
 
-    if not created: # oluşturulmadıysa zaten ekliydi yani favoriden çıkarıyoruz
+    if not created: # zaten eklenmiş bir daha basarsa silinir
         favorite.delete()
         return False
     return True
@@ -210,3 +211,27 @@ def toggle_favorite(user, pk):
 def get_user_favorites(user):
     # usera ait favoriler döner
     return Favorite.objects.filter(user=user).select_related("listing")
+
+
+
+
+
+# Reports
+
+def report_listing(user, pk, description=""):
+    listing = get_object_or_404(Listing, pk = pk)
+
+    if listing.listing_owner == user: # kendi ilanını reportlayamaz
+        raise PermissionDenied("Kendi ilanını şikayet edemezsin")
+
+    if Report.objects.filter(user = user, listing = listing).exists(): # zten bu unique report varsa bir daha edemez
+        raise ValidationError("Bu ilanı zaten şikayet ettin")
+
+    report = Report.objects.create(
+        user = user,
+        listing = listing,
+        description = description # blank olabilir
+    )
+    return report
+    
+   

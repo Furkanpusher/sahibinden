@@ -1,6 +1,7 @@
 from django.db.models.expressions import result
 from rest_framework import permissions
 
+
 class IsOwnerOrReadOnly(permissions.BasePermission):
     """
     Özel İzin Sınıfı:
@@ -23,3 +24,9 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         
         # put delete ise listing owner ile user aynı olmalı
         return result
+
+
+class IsStaffUser(permissions.BasePermission): 
+    def has_permission(self, request, view): # roothas_permission override ediyoruz
+        return bool(request.user and request.user.is_authenticated and request.user.is_staff)
+        # hem giriş yapmış olmalı hem staff olmalı

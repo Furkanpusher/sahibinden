@@ -127,4 +127,15 @@ class Favorite(models.Model):
 
   
      
+class Report(models.Model):
+    listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="reports")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name = "reports")
+    report_date = models.DateTimeField(auto_now_add = True) 
+    description = models.TextField()
 
+    class Meta: 
+        unique_together = ("listing", "user") # 1 liste 1 kere reportlanabilir aynı kullanıcı tarafından
+        ordering = ["-report_date"] # en son reportlanan başa düşcek
+
+
+    

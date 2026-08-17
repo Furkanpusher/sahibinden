@@ -32,3 +32,22 @@ class UserFavoritesListView(APIView):
         favorites = get_user_favorites(user=request.user)
         serializer = FavoriteSerializer(favorites, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+# DÖNÜŞ TİPİ
+#   {
+#         "id": 2, favori lsit id
+#         "listing": {
+#             "id": 112,  list id
+#             "title": "AĞIRLAR ANIL OTOMOTİV'DEN VOLKSWAGEN POLO 2014 TDI.",
+#             "city": "Konya",
+#             "district": "Ereğli",
+#             "price": "675000.00",
+#             "listing_owner": 1, owner ıd
+#             "listing_date": "2025-08-21",
+#             "listing_update": "2026-08-13T07:55:44.937705Z"
+#         },
+#         "created_at": "2026-08-17T08:30:51.056901Z",
+#         "user": 10 user id
+#     },
