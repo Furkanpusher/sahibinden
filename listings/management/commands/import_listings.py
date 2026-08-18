@@ -9,7 +9,7 @@ from django.db import transaction
 
 from listings.models import CarListing, HouseListing
 
-TURKCE_AYLAR = {
+TURKISH_MONTHS = {
     "ocak": 1, "şubat": 2, "mart": 3, "nisan": 4, "mayıs": 5, "haziran": 6,
     "temmuz": 7, "ağustos": 8, "eylül": 9, "ekim": 10, "kasım": 11, "aralık": 12,
 }
@@ -41,7 +41,7 @@ def temizle_tarih(deger):
     if len(parcalar) != 3:
         return None
     gun_str, ay_str, yil_str = parcalar
-    ay = TURKCE_AYLAR.get(ay_str.lower())
+    ay = TURKISH_MONTHS.get(ay_str.lower())
     if not ay:
         return None
     try:

@@ -8,7 +8,6 @@ from .views import (
     StaffReportListView, StaffDeleteReportView, StaffDeleteListingView
 )
 
-print("listings/urls.py çalıştı")
 
 urlpatterns = [
 

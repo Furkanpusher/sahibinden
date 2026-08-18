@@ -15,36 +15,30 @@ from .serializers import RegisterSerializer
 # LoginView
 
 class LoginView(APIView):
-    permission_classes = [AllowAny]  # herkes giriş yapabilsin
-    authentication_classes = []  # bu endpoint'te token hiç kontrol edilmesin
-    # (localStorage'da eski/geçersiz bir token varsa bile login isteği bundan etkilenmemeli)
+    permission_classes = [AllowAny]  # everyone can log in
+
+    authentication_classes = []  # Never check tokens on this endpoint
+    # (Even if there is an old/invalid token in localStorage, the login request should not be affected)
+
 
     def post(self, request):
 
-        print("Loginview post metodu çalıştı")
-        print("Gelen veri:", request.data)
-
-        print(request.headers.get('Content-Type'))
 
         username = request.data.get('username')
         password = request.data.get('password')
 
-        print("username:", username, "password:", password)
-
         user = authenticate(request, username=username, password=password)
-        print("authenticate sonucu:", user)
 
         if user is None:
-            print("Kullancı bulunamadı, 401 döncek")
             return Response(
-                {"hata": "Kullanıcı adı veya şifre hatalı."},
+                {"hata": "The username or password is incorrect."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        login(request, user)  # Tarayıcı oturumu (session cookie) başlatır
+        login(request, user)  # Starts a browser session (session cookie)
+
 
         refresh = RefreshToken.for_user(user)
 
-        print("Refresh token üretildi:", refresh)
 
         return Response(
             {
@@ -66,29 +60,29 @@ class LoginView(APIView):
 
 
 class RegisterView(APIView):
-    permission_classes = [AllowAny]  # herkes kayıt olabilsin
-    authentication_classes = []  # burada da aynı sebeple token kontrolü kapalı
+    permission_classes = [AllowAny]  # everyone can register
+
+    authentication_classes = []  # Token control is disabled here for the same reason.
+
 
     def post(self, request):
-        print("RegisterView post metodu çalıştı")
-        print("Gelen ham veri:", request.data)
+     
 
         serializer = RegisterSerializer(data=request.data)
 
         if serializer.is_valid():
-            print("validasyon çağırıldı")
             user = serializer.save()
 
             refresh = RefreshToken.for_user(user)
 
             return Response(
                 {
-                    "mesaj": "Kayıt başarılı",
+                    "mesaj": "Register Successful",
                     "access": str(refresh.access_token),
                     "access_token": str(refresh.access_token),
                     "refresh": str(refresh),
                     "refresh_token": str(refresh),
-                    "user_id": user.id, # kişiye özel gösterebilmek için lazım
+                    "user_id": user.id, # Needed for personel authorizations
                     "username": user.username,
                     "user": {
                         "id": user.id,

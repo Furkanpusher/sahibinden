@@ -1,24 +1,24 @@
 from listings.models import HouseListing
  
-bos_olanlar = HouseListing.objects.filter(title="")
-print(f"Güncellenecek kayıt sayısı: {bos_olanlar.count()}")
+empty_ones = HouseListing.objects.filter(title="")
+print(f"Number of records to be updated: {empty_ones.count()}")
  
-guncellenen = 0
-for house in bos_olanlar:
-    parcalar = []
+updated = 0
+for house in empty_ones:
+    parts = []
  
     if house.number_of_rooms:
-        parcalar.append(house.number_of_rooms)
+        parts.append(house.number_of_rooms)
     if house.meter_squared:
-        parcalar.append(f"{house.meter_squared} m²")
+        parts.append(f"{house.meter_squared} m²")
     if house.location:
-        parcalar.append(house.location)
+        parts.append(house.location)
  
-    yeni_baslik = " ".join(parcalar).strip() or f"İlan #{house.id}"
+    new_title = " ".join(parts).strip() or f"Listing #{house.id}"
  
-    house.title = yeni_baslik
+    house.title = new_title
     house.save(update_fields=["title"])
-    guncellenen += 1
+    updated += 1
  
-print(f"Güncellenen kayıt sayısı: {guncellenen}")
+print(f"Number of updated records: {updated}")
  
