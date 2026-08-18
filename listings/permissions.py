@@ -3,18 +3,36 @@ from rest_framework import permissions
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission): 
-    def has_object_permission(self, request, view, obj): 
+
+    def has_object_permission(self, request, view, obj): # overrided the has_object_permission() from Base.permission class
 
         result = (obj.listing_owner == request.user)
 
-        if request.method in permissions.SAFE_METHODS: # SAFE_METHODS = ('GET', 'HEAD', 'OPTIONS') ana permission da böyle tanımlanış
+    # if it's a safe method (GET, HEAD, OPTIONS) return true without checking anything else
+        if request.method in permissions.SAFE_METHODS:
             return True
-        
-        # put delete ise listing owner ile user aynı olmalı
+    
+        # if it's put or delete only allow if the user == owner
         return result
 
 
 class IsStaffUser(permissions.BasePermission): 
-    def has_permission(self, request, view): # root has_permission override ediyoruz
+    # user must be authenticated and user must be a staff
+
+    def has_permission(self, request, view):
+        # overriding the root has_permission() function with exact args
         return bool(request.user and request.user.is_authenticated and request.user.is_staff)
-        # hem giriş yapmış olmalı hem staff olmalı
+
+
+# class IsAuthenticatedOrReadOnly(BasePermission):
+#     """
+#     THIS IS BUILT IN FUNCTION JUST FOR DOCUMENTATİON
+#     The request is authenticated as a user, or is a read-only request.
+#     """
+
+#     def has_permission(self, request, view):
+#         return bool(
+#             request.method in SAFE_METHODS or
+#             request.user and
+#             request.user.is_authenticated
+#         )

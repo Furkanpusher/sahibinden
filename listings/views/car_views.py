@@ -12,6 +12,12 @@ from ..services import (get_all_cars, filter_cars, get_car_by_id, get_car_filter
 class CarListingView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
+
+    # because get_permissions() in view return [permission() for permission in self.permission_classes]
+    
+    # for each item in permission_classes, get_permissions() creates an object instance of it.
+    
+
     def get(self, request):
         if request.query_params:
             cars = filter_cars(**request.query_params.dict())
@@ -34,7 +40,10 @@ class CarDetailView(APIView):
     
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
-    # The request is authenticated as a user, or is a read-only request.
+
+    # permission_classes work as 
+
+    # user is authenticated, or is a read-only request.
 
     def dispatch(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
@@ -48,7 +57,11 @@ class CarDetailView(APIView):
 
 
     def put(self, request, pk): # ilan güncelleme
-        self.check_object_permissions(request, self.car)  # Yetki kontrolü (IsOwnerOrReadOnly)
+        self.check_object_permissions(request, self.car) # is he the owner?
+        
+        # does for permission in self.get_permissions():
+        #   permission.has_object_permission(request, self, self.car)
+
         updated_car, errors = update_listing(self.car, CarListingSerializer, request.data, partial=True)
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
@@ -57,6 +70,7 @@ class CarDetailView(APIView):
 
     def delete(self, request, pk):  # İlan silme 
         self.check_object_permissions(request, self.car)  # Permission kontrolü
+        
         delete_listing(user=request.user, pk=pk)
         return Response({"detail": "İlan başarıyla silindi."}, status=status.HTTP_200_OK)
 
@@ -68,18 +82,13 @@ class CarFilterOptionsView(APIView):
     permission_classes = [AllowAny]
 
     def get(self, request):
-        # URL'den seçilen şehri parametre olarak alıyorum (Örn: ?city=Ankara)
         selected_city = request.query_params.get("city")
+        selected_brand = request.query_params.get("brand")
+        selected_transmission = request.query_params.get("transmission_type")
         
-        options = get_car_filter_options(selected_city=selected_city)
-
-        # buraya retrun olan option şu tipte 
-        # { 
-        #   "cities": ["İstanbul", "Ankara", "İzmir"],
-        #   "brands": ["Renault", "Ford", "Volkswagen"],
-        #   "transmissions": ["Manuel", "Otomatik"],
-        #   "districts": ["Kadıköy", "Beşiktaş", "Şişli"]
-        # }
-        
-        # Hazırlanan seçenekler sözlüğünü JSON olarak frontend'e dönüyoruz
+        options = get_car_filter_options(
+            selected_city=selected_city,
+            selected_brand=selected_brand,
+            selected_transmission=selected_transmission
+        )
         return Response(options, status=status.HTTP_200_OK)

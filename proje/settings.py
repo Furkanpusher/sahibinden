@@ -17,6 +17,7 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 from datetime import timedelta
+# pyrefly: ignore [missing-import]
 from corsheaders.defaults import default_headers
 
 
@@ -32,7 +33,7 @@ SECRET_KEY = 'django-insecure-xxli!e0t%$1*u9g)7tsdz5)42d5%(pl=w%_i5q&v9x(f#l@xm4
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 ROOT_URLCONF = 'proje.urls'
 
@@ -153,10 +154,10 @@ MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-AUTH_USER_MODEL = "accounts.CustomUser"  # djangoya kendi user modelimi kullanacağımı söylüyorum. bunu yazmazsam django kendi user modelini kullanır ve bizim eklediğimiz alanları görmez
-
+AUTH_USER_MODEL = "accounts.CustomUser"  # we use our own custom user model
 CORS_ALLOWED_ORIGINS = [ # react iletişimi için
     "http://localhost:5173",
+    "http://127.0.0.1:5173", # for container communication
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + ["authorization"]

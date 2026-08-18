@@ -60,10 +60,18 @@ class HouseDetailView(APIView):
 
 
 class HouseFilterOptionsView(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request):
         selected_city = request.query_params.get("city")
-        # sözlükten city yi çekiyoruz
-        options = get_house_filter_options(selected_city=selected_city)
-        return Response(options, status=200)
+        selected_rooms = request.query_params.get("number_of_rooms")
+        selected_floor = request.query_params.get("floor")
+
+        options = get_house_filter_options(
+            selected_city=selected_city,
+            selected_number_of_rooms=selected_rooms,
+            selected_floor=selected_floor
+        )
+        return Response(options, status=status.HTTP_200_OK)
 
 

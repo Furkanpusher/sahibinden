@@ -4,13 +4,48 @@ services:
     container_name: sahibinden_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME:-sahibinden}
+      POSTGRES_USER: ${DB_USER:-furkan}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-147890}
     ports:
-      - "5432:5432" # postgres 5432 portunda
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  backend:
+    build: # image build ediyoruz
+      context: .
+      dockerfile: Dockerfile
+    container_name: sahibinden_backend
+    restart: unless-stopped
+    command: python manage.py runserver 0.0.0.0:8001
+    volumes:
+      - .:/app
+      - ./media:/app/media
+    ports:
+      - "8001:8001"
+    environment:
+      - DB_NAME=${DB_NAME:-sahibinden}
+      - DB_USER=${DB_USER:-furkan}
+      - DB_PASSWORD=${DB_PASSWORD:-147890}
+      - DB_HOST=db
+      - DB_PORT=5432
+    depends_on:
+      - db
+
+  frontend:
+    build:
+      context: ./frontend/ilan-frontend
+      dockerfile: Dockerfile
+    container_name: sahibinden_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend/ilan-frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
 
 volumes:
   postgres_data:
