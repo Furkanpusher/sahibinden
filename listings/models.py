@@ -3,11 +3,9 @@ from django.conf import settings # kendi settingsim ile django conf ikisinide al
 
 # Create your models here.
 
-class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tekrar etmemesi çin iyi
+class Listing(models.Model):# Common information for cars and house
     title = models.CharField(max_length = 250, default = "")
 
-    # arabalarda şehir olarak evlerde semt olarak geçiyor verisetinde
-    # location = models.CharField(max_length = 250, default = "") gerek kalmadı artık city, distrcite geçtik
 
     city = models.CharField(max_length = 250, default = "", blank = True, db_index = True)
     district = models.CharField(max_length = 250, default = "", blank= True, db_index = True) # migrationda hata vermemesi için ""
@@ -28,6 +26,9 @@ class Listing(models.Model): # Tüm ilan türlerindeki ortak bilgiler burda, tek
         blank = False, 
 
     )
+    
+    image = models.ImageField(upload_to = "listings/images/%Y/%m/%d/", null = True, blank = True)
+
 
 
 
@@ -139,3 +140,12 @@ class Report(models.Model):
 
 
     
+
+class ListingImage(models.Model):
+    listing = models.ForeignKey(Listing, on_delete = models.CASCADE, related_name = "images")
+    image = models.ImageField(upload_to = "listings/images/%Y/%m/%d/", null = True, blank = True)
+    is_cover = models.BooleanField(default = False) #is it cover picture
+    created_at = models.DateTimeField(auto_now_add = True)
+
+
+

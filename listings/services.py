@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError
 from django.conf import global_settings
-from listings.models import Listing, CarListing, HouseListing, Favorite, Report
+from listings.models import Listing, CarListing, HouseListing, Favorite, Report, ListingImage
 from django.shortcuts import get_object_or_404
 from django.db import models   
 from django.core.exceptions import PermissionDenied
@@ -35,7 +35,6 @@ def get_house_by_id(pk):
 # Arabaları filtreleme mantığı
 def filter_cars(**filtreler):  # ** --> gelen query parametrelerini sözlük haline getiriyor 
 
-    print("filter_cars fonksiyonu çalıştı")
 
     qs = CarListing.objects.all() # query set { sayı büyüyünce verimsiz}
 
@@ -235,3 +234,19 @@ def get_user_reports(user):
 
 def get_all_reports():
     return Report.objects.all().order_by("-report_date").select_related("listing")
+
+
+
+
+# List Images
+
+def add_images_to_listing(listing, image_files, is_cover=False):
+    created_images = []
+    for image_file in image_files:
+        img_obj = ListingImage.objects.create(
+            listing=listing,
+            image=image_file,
+            is_cover=is_cover
+        )
+        created_images.append(img_obj)
+    return created_images

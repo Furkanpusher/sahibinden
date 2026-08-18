@@ -34,10 +34,12 @@ class CarDetailView(APIView):
     
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
+    # The request is authenticated as a user, or is a read-only request.
+
     def dispatch(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
         self.car = get_car_by_id(pk)
-        return super().dispatch(request, *args, **kwargs) # asıl dispatch devam ediyor
+        return super().dispatch(request, *args, **kwargs) # root dispatch continues
 
 
     def get(self, request, pk):

@@ -16,7 +16,10 @@ Including another URLconf
 """  
 
 from django.contrib import admin
+from django.conf import settings
 from django.urls import path, include
+from django.conf.urls.static import static
+
 # pyrefly: ignore [missing-import]
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
@@ -32,8 +35,10 @@ urlpatterns = [
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
 
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# admin/ 
+# admin/
 # api-auth/
 # accounts/
 # api/listings/ all-cars/ [name='all-cars']

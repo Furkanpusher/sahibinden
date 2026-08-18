@@ -2,8 +2,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
-from listings.serializers import ListingSerializer, FavoriteSerializer, ReportSerializer
-from ..services import toggle_favorite, get_user_favorites, report_listing, get_user_reports
+from listings.serializers import FavoriteSerializer, ReportSerializer, ListingImageSerializer
+from ..services import (toggle_favorite, get_user_favorites,
+                        report_listing, get_user_reports,
+                        add_images_to_listing,
+                        )   
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.shortcuts import get_object_or_404
+from listings.models import Listing
 
 
 # FAVORİTE VİEWS
@@ -72,3 +78,21 @@ class UserReportsListView(APIView):
         reports = get_user_reports(user=request.user)
         serializer = ReportSerializer(reports, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+class ListingImageUploadView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser] 
+    
+    def post(self, request, pk):
+        listing = get_object_or_404(Listing, pk=pk)
+        # Sadece ilan sahibi fotoğraf yükleyebilir
+        if listing.listing_owner != request.user:
+            return Response({"detail": "Yalnızca kendi ilanınıza fotoğraf ekleyebilirsiniz."}, status=status.HTTP_403_FORBIDDEN)
+        # 'images' anahtarıyla gelen dosyaları al (tek veya çoklu)
+        files = request.FILES.getlist('images')
+        if not files:
+            return Response({"detail": "Hiçbir fotoğraf seçilmedi."}, status=status.HTTP_400_BAD_REQUEST)
+        images = add_images_to_listing(listing, files)
+        return Response(ListingImageSerializer(images, many=True).data, status=status.HTTP_201_CREATED)
