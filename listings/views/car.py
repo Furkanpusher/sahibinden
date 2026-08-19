@@ -11,15 +11,13 @@ from ..services import (get_all_cars, filter_cars, get_car_by_id, get_car_filter
 
 class CarListingView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
-
-
     # because get_permissions() in view return [permission() for permission in self.permission_classes]
-    
     # for each item in permission_classes, get_permissions() creates an object instance of it.
     
-
     def get(self, request):
         if request.query_params:
+       # A dictionary of key/value parameters in the content type header.
+
             cars = filter_cars(**request.query_params.dict())
         else:
             cars = get_all_cars()
@@ -28,21 +26,19 @@ class CarListingView(APIView):
 
     def post(self, request): # İlan ekleme
         serializer = CarListingSerializer(data=request.data) 
-        # list sahibi post ile gönderilmiyor o yüzden serializer json üzerinden alıyoruz
-        
-        
+        # for the body json data, we can use request.data
+    
         if serializer.is_valid():
             car = create_listing(CarListing, user=request.user, data=serializer.validated_data)
             return Response(CarListingSerializer(car).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+
 class CarDetailView(APIView):
     
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-
-
-    # permission_classes work as 
-
+    # permission_classes work as just an array. django does get_permissions to all this permission object
     # user is authenticated, or is a read-only request.
 
     def dispatch(self, request, *args, **kwargs):
@@ -56,7 +52,7 @@ class CarDetailView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    def put(self, request, pk): # ilan güncelleme
+    def put(self, request, pk): # list updating
         self.check_object_permissions(request, self.car) # is he the owner?
         
         # does for permission in self.get_permissions():
@@ -68,8 +64,8 @@ class CarDetailView(APIView):
         return Response(CarListingSerializer(updated_car).data, status=status.HTTP_200_OK)
 
 
-    def delete(self, request, pk):  # İlan silme 
-        self.check_object_permissions(request, self.car)  # Permission kontrolü
+    def delete(self, request, pk):  # list deletion
+        self.check_object_permissions(request, self.car)  
         
         delete_listing(user=request.user, pk=pk)
         return Response({"detail": "İlan başarıyla silindi."}, status=status.HTTP_200_OK)

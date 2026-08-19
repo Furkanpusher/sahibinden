@@ -17,7 +17,7 @@ from .serializers import RegisterSerializer
 class LoginView(APIView):
     permission_classes = [AllowAny]  # everyone can log in
 
-    authentication_classes = []  # Never check tokens on this endpoint
+    authentication_classes = []  # don't check any tokens it doesnt matter
     # (Even if there is an old/invalid token in localStorage, the login request should not be affected)
 
 

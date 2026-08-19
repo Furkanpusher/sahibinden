@@ -68,19 +68,18 @@ export default function CarListPage() {
     transmissions: [],
   });
 
-  // 1. API İsteği: Sadece `appliedFilters` değiştiğinde çalışır!
   useEffect(() => {
     setLoading(true);
     setError(null);
     setCurrentPage(1);
 
-    fetchListings("/all-cars/", appliedFilters)
+    fetchListings("/all-cars/", appliedFilters) // GET http://localhost:8001/api/listings/all-cars/?city=İstanbul&brand=BMW
       .then(setCars)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [appliedFilters]);
 
-  // 2. Filtreler değiştikçe seçenekleri ve dinamik sayıları güncelleme
+  // DINAMICALLY UPDATING THE NUMBERS OF FOUND OBJECTS IN FILTER DROPDOWN
   useEffect(() => {
     const params = {};
     if (tempFilters.city) params.city = tempFilters.city;

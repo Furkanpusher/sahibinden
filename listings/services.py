@@ -119,7 +119,9 @@ def get_car_filter_options(selected_city=None, selected_brand=None, selected_tra
     if selected_transmission:
         cities_filter["transmission_type"] = selected_transmission
     cities_qs = base_qs.filter(**cities_filter).values("city").annotate(count=models.Count("id")).order_by("city")
+    print(f"cities_qs --> {cities_qs}", flush=True)
     cities = [{"name": item["city"], "count": item["count"]} for item in cities_qs if item["city"]]
+    print(f"cities --> {cities}", flush=True)
     
     # Markalar: Seçili şehir veya vites varsa filtrele (fakat marka filtresi uygulama)
     brands_filter = {}
@@ -128,7 +130,9 @@ def get_car_filter_options(selected_city=None, selected_brand=None, selected_tra
     if selected_transmission:
         brands_filter["transmission_type"] = selected_transmission
     brands_qs = base_qs.filter(**brands_filter).values("brand").annotate(count=models.Count("id")).order_by("brand")
+    print(f"brands_qs --> {brands_qs}", flush=True)
     brands = [{"name": item["brand"], "count": item["count"]} for item in brands_qs if item["brand"]]
+    print(f"brands --> {brands}", flush=True)
     
     # Vites Tipleri: Seçili şehir veya marka varsa filtrele (fakat vites filtresi uygulama)
     transmissions_filter = {}
@@ -137,7 +141,9 @@ def get_car_filter_options(selected_city=None, selected_brand=None, selected_tra
     if selected_brand:
         transmissions_filter["brand__exact"] = selected_brand
     transmissions_qs = base_qs.filter(**transmissions_filter).values("transmission_type").annotate(count=models.Count("id")).order_by("transmission_type")
+    print(f"transmissions_qs --> {transmissions_qs}", flush=True)
     transmissions = [{"name": item["transmission_type"], "count": item["count"]} for item in transmissions_qs if item["transmission_type"]]
+    print(f"transmissions --> {transmissions}", flush=True)
     
     options = {
         "cities": cities,
@@ -145,6 +151,7 @@ def get_car_filter_options(selected_city=None, selected_brand=None, selected_tra
         "transmissions": transmissions,
         "districts": [] 
     }
+    print(f"options --> {options}", flush=True)
     
     # İlçeler: Seçili şehir zorunlu, marka ve vites de varsa filtrele
     if selected_city:
