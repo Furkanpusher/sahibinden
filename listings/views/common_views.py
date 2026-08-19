@@ -31,7 +31,7 @@ class UserFavoritesListView(APIView):
 
     def get(self, request):
         favorites = get_user_favorites(user=request.user)
-        serializer = FavoriteSerializer(favorites, many=True)
+        serializer = FavoriteSerializer(favorites, many=True) # user dönmemeli
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

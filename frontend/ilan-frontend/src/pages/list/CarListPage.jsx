@@ -11,6 +11,7 @@ import {
 import { fetchListings } from "../../api";
 import { FilterInput, FilterSelect } from "../../components/ListingUI";
 import UserMenu from "../../components/UserMenu";
+import Pagination from "../../components/Pagination";
 
 const defaultImages = [
   "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
@@ -37,6 +38,10 @@ export default function CarListPage() {
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // 📄 Sayfalama State'leri
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(24);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -67,6 +72,7 @@ export default function CarListPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
+    setCurrentPage(1);
 
     fetchListings("/all-cars/", appliedFilters)
       .then(setCars)
@@ -321,33 +327,51 @@ export default function CarListPage() {
 
             {/* Car Grid */}
             {!loading && !error && cars.length > 0 && (
-              <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8">
-                {cars.map((car) => (
-                  <Link to={`/car/${car.id}`} key={car.id} className="group min-w-0">
-                    <div className="relative mb-2 aspect-[4/3] w-full overflow-hidden rounded-lg border border-[#232E3D] bg-[#161F2B] transition-all duration-300 group-hover:border-[#4A5568] group-hover:shadow-lg group-hover:shadow-black/10">
-                      {/* 📸 Çözümlenen Görsel */}
-                      <img
-                        src={getCarCoverImage(car)}
-                        alt={car.title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                      />
-                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                    </div>
+              <>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8">
+                  {cars
+                    .slice(
+                      (currentPage - 1) * itemsPerPage,
+                      currentPage * itemsPerPage
+                    )
+                    .map((car) => (
+                      <Link to={`/car/${car.id}`} key={car.id} className="group min-w-0">
+                        <div className="relative mb-2 aspect-[4/3] w-full overflow-hidden rounded-lg border border-[#232E3D] bg-[#161F2B] transition-all duration-300 group-hover:border-[#4A5568] group-hover:shadow-lg group-hover:shadow-black/10">
+                          {/* 📸 Çözümlenen Görsel */}
+                          <img
+                            src={getCarCoverImage(car)}
+                            alt={car.title}
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          />
+                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                        </div>
 
-                    <h2
-                      className="px-1 text-xs font-medium leading-5 text-[#8B95A3] transition-colors group-hover:text-[#E8A33D]"
-                      title={car.title}
-                    >
-                      {formatTitle(car.title)}
-                    </h2>
-                    {(car.city || car.district) && (
-                      <p className="px-1 mt-0.5 text-[11px] text-[#667384]">
-                        {[car.city, car.district].filter(Boolean).join(", ")}
-                      </p>
-                    )}
-                  </Link>
-                ))}
-              </div>
+                        <h2
+                          className="px-1 text-xs font-medium leading-5 text-[#8B95A3] transition-colors group-hover:text-[#E8A33D]"
+                          title={car.title}
+                        >
+                          {formatTitle(car.title)}
+                        </h2>
+                        {(car.city || car.district) && (
+                          <p className="px-1 mt-0.5 text-[11px] text-[#667384]">
+                            {[car.city, car.district].filter(Boolean).join(", ")}
+                          </p>
+                        )}
+                      </Link>
+                    ))}
+                </div>
+
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={cars.length}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={setCurrentPage}
+                  onItemsPerPageChange={(val) => {
+                    setItemsPerPage(val);
+                    setCurrentPage(1);
+                  }}
+                />
+              </>
             )}
           </main>
         </div>

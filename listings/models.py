@@ -112,8 +112,11 @@ class HouseListing(Listing): # Ev listelemeleri
 # favorites --> list_id user_id (user favori görüp silebilmeli) (ilanı silince favoriden de silinmeli)
 # reported --> listing base class eklenebilir
 
+#many to many field
+class Favorite(models.Model): 
 
-class Favorite(models.Model):
+    # for adding extra fields, I use the Favorite model instead of ManyToManyField
+
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name = "favorited_by") # ilan kaldırılırsa favorilerden de silincek
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name = "favorites") # user kaldırılırsa favorilerden silincek
     created_at = models.DateTimeField(auto_now_add = True)
@@ -130,6 +133,7 @@ class Favorite(models.Model):
      
 class Report(models.Model):
     listing = models.ForeignKey(Listing, on_delete=models.CASCADE, related_name="reports")
+    # 1 To Many
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name = "reports")
     report_date = models.DateTimeField(auto_now_add = True) 
     description = models.TextField()
