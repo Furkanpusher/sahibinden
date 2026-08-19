@@ -1,49 +1,42 @@
-import AuthPage from './pages/auth/Auth.jsx'
+import AuthPage from "./pages/auth/Auth.jsx";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import HomePage from "./pages/homepage/HomePage.jsx";
-import CarListPage from "./pages/list/CarListPage.jsx";
-import HouseListPage from "./pages/list/HouseListPage.jsx";
-import CarDetailPage from "./pages/detail/CarDetailPage.jsx";
-import HouseDetailPage from "./pages/detail/HouseDetailPage.jsx";
-import CarCreatePage from "./pages/create/CarCreatePage.jsx";
-import HouseCreatePage from "./pages/create/HouseCreatePage.jsx";
-import CarUpdatePage from "./pages/update/CarUpdatePage.jsx";
-import HouseUpdatePage from "./pages/update/HouseUpdatePage.jsx";
-import StaffReportsPage from "./pages/staff/StaffReportsPage.jsx"; 
-import UserFavoritesPage from "./pages/profile/UserFavoritesPage.jsx"
-import UserListingsPage from "./pages/profile/UserListingsPage.jsx"
-import UserReportsPage from "./pages/profile/UserReportsPage.jsx"
-
-
-
+import Home from "./pages/homepage/Home.jsx";
+import CarList from "./pages/list/Car.jsx";
+import HouseList from "./pages/list/House.jsx";
+import CarDetail from "./pages/detail/Car.jsx";
+import HouseDetail from "./pages/detail/House.jsx";
+import CarCreate from "./pages/create/Car.jsx";
+import HouseCreate from "./pages/create/House.jsx";
+import CarUpdate from "./pages/update/Car.jsx";
+import HouseUpdate from "./pages/update/House.jsx";
+import StaffReports from "./pages/staff/StaffReports.jsx";
+import UserFavorites from "./pages/profile/UserFavorites.jsx";
+import UserListings from "./pages/profile/UserListings.jsx";
+import UserReports from "./pages/profile/UserReports.jsx";
 
 export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/all-cars" element={<CarListPage />} />
-        <Route path="/all-houses" element={<HouseListPage />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/all-cars" element={<CarList />} />
+        <Route path="/all-houses" element={<HouseList />} />
         <Route path="/login" element={<AuthPage />} />
-        <Route path="/car/:id" element={<CarDetailPage />} />
-        <Route path="/house/:id" element={<HouseDetailPage />} />
-        <Route path = "/araba-ilan-olustur" element={<CarCreatePage />}/>
-        <Route path = "/ev-ilan-olustur" element={<HouseCreatePage />}/>
-        <Route path = "/araba-ilan-guncelle/:id" element={<CarUpdatePage />}/>
-        <Route path = "/ev-ilan-guncelle/:id" element={<HouseUpdatePage />}/>
+        <Route path="/car/:id" element={<CarDetail />} />
+        <Route path="/house/:id" element={<HouseDetail />} />
+        <Route path="/araba-ilan-olustur" element={<CarCreate />} />
+        <Route path="/ev-ilan-olustur" element={<HouseCreate />} />
+        <Route path="/araba-ilan-guncelle/:id" element={<CarUpdate />} />
+        <Route path="/ev-ilan-guncelle/:id" element={<HouseUpdate />} />
 
-         {/* Staff routeları */}
-        <Route path="/staff/reports" element={<StaffReportsPage />} /> 
+        {/* Staff routes */}
+        <Route path="/staff/reports" element={<StaffReports />} />
 
-        {/* Profile routers */}
-
-        <Route path="/favorilerim" element={<UserFavoritesPage />} />
-        <Route path="/ilanlarim" element={<UserListingsPage />} />
-        <Route path="/raporlarim" element={<UserReportsPage />} />
-
-
+        {/* Profile routes */}
+        <Route path="/favorilerim" element={<UserFavorites />} />
+        <Route path="/ilanlarim" element={<UserListings />} />
+        <Route path="/raporlarim" element={<UserReports />} />
       </Routes>
     </BrowserRouter>
   );
 }
- 

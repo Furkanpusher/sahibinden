@@ -30,22 +30,23 @@ class HouseListView(APIView):
 
 class HouseDetailView(APIView): 
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
-     # başta initial --> self.get_permissions() fakat bizim get_permissions() olmadığı için ata sınıf yani APIViewdaki get_permissions çalışır
-     # ve onda da  return [permission() for permission in self.permission_classes] bu satır olduğu için permission classes böyle kullanılır
+     # First initial --> self.get_permissions(), but since we don't have get_permissions(), the ancestor class, namely get_permissions in APIView, works.
+     # and since there is this line return [permission() for permission in self.permission_classes] permission classes are used like this
 
-    def dispatch(self, request, *args, **kwargs):
-        pk = kwargs.get("pk") # sürekli çekmemek için
+
+    def dispatch(self, request, *args, **kwargs): # not vital but good for avoiding code repetition
+        pk = kwargs.get("pk") 
         self.house = get_house_by_id(pk)
-        return super().dispatch(request, *args, **kwargs) # root dispatch devam
+        return super().dispatch(request, *args, **kwargs) # root dispatch contunies
 
 
 
-    def get(self, request, pk):
+    def get(self, request, pk): # get the house
 
         serializer = HouseListingSerializer(self.house)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def put(self, request, pk):
+    def put(self, request, pk): # update the house
         self.check_object_permissions(request, self.house)
         updated_house, errors = update_listing(self.house, HouseListingSerializer, request.data, partial=True)
         if errors:
@@ -53,8 +54,8 @@ class HouseDetailView(APIView):
         return Response(HouseListingSerializer(updated_house).data, status=status.HTTP_200_OK)
 
 
-    def delete(self, request, pk):
-        self.check_object_permissions(request, self.house) # üstteki permission_classes dan alır
+    def delete(self, request, pk): # delete the house
+        self.check_object_permissions(request, self.house) 
         delete_listing(user=request.user, pk=pk)
         return Response({"detail": "Ev ilanı başarıyla silindi."}, status=status.HTTP_200_OK)
 
@@ -72,6 +73,27 @@ class HouseFilterOptionsView(APIView):
             selected_number_of_rooms=selected_rooms,
             selected_floor=selected_floor
         )
+    
+    #      "cities": [
+    #     {"name": "Ankara", "count": 14},
+    #     {"name": "İstanbul", "count": 42},
+    #     {"name": "İzmir", "count": 20}
+    # ],
+    # "number_of_rooms": [
+    #     {"name": "1+1", "count": 10},
+    #     {"name": "2+1", "count": 35},
+    #     {"name": "3+1", "count": 28}
+    # ],
+    # "floors": [
+    #     {"name": "1. Kat", "count": 15},
+    #     {"name": "3. Kat", "count": 22}
+    # ],
+    # "districts": [ 
+    #     {"name": "Beşiktaş", "count": 12},
+    #     {"name": "Kadıköy", "count": 18},
+    #     {"name": "Şişli", "count": 12}
+    # ]
+
         return Response(options, status=status.HTTP_200_OK)
 
 

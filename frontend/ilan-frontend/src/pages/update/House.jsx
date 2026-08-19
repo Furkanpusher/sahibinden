@@ -182,11 +182,10 @@ export default function HouseUpdatePage() {
           </Section>
 
           {alert !== null && (
-            <div className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm ${
-              alert.type === "success"
+            <div className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm ${alert.type === "success"
                 ? "border-[#2B5240] bg-[#1B3A2E] text-[#6FCF97]"
                 : "border-[#522B2B] bg-[#3A1B1B] text-[#E88080]"
-            }`}>
+              }`}>
               {alert.type === "success" ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
               <span>{alert.message}</span>
             </div>

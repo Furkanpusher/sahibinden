@@ -40,7 +40,8 @@ export default function AuthPage() {
 
       if (res.ok) {
         if (mode === "login") {
-          // Token'ları ve Kullanıcı Bilgilerini Sakla
+          // when logined succesfully, write this data to localStorage
+          // this data will be used in axios interceptors or other functions
           const token = data.access || data.access_token;
           localStorage.setItem("access_token", token);
           localStorage.setItem("access", token);
@@ -49,7 +50,6 @@ export default function AuthPage() {
           if (data.user_id) localStorage.setItem("user_id", String(data.user_id));
           if (data.user) localStorage.setItem("user", JSON.stringify(data.user));
 
-          // 🛡️ Staff (Yetkili) kontrolünü kaydet
           const isStaff = Boolean(data.is_staff || data.user?.is_staff);
           localStorage.setItem("is_staff", String(isStaff));
 
@@ -106,11 +106,10 @@ export default function AuthPage() {
                 setMode("login");
                 setStatus(null);
               }}
-              className={`flex-1 py-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                mode === "login"
-                  ? "text-[#E8A33D] bg-[#1C2733]"
-                  : "text-[#8B95A3] hover:text-[#EDEFF2]"
-              }`}
+              className={`flex-1 py-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${mode === "login"
+                ? "text-[#E8A33D] bg-[#1C2733]"
+                : "text-[#8B95A3] hover:text-[#EDEFF2]"
+                }`}
             >
               <LogIn size={16} /> Giriş Yap
             </button>
@@ -119,11 +118,10 @@ export default function AuthPage() {
                 setMode("register");
                 setStatus(null);
               }}
-              className={`flex-1 py-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
-                mode === "register"
-                  ? "text-[#E8A33D] bg-[#1C2733]"
-                  : "text-[#8B95A3] hover:text-[#EDEFF2]"
-              }`}
+              className={`flex-1 py-4 text-sm font-medium transition-colors flex items-center justify-center gap-2 ${mode === "register"
+                ? "text-[#E8A33D] bg-[#1C2733]"
+                : "text-[#8B95A3] hover:text-[#EDEFF2]"
+                }`}
             >
               <UserPlus size={16} /> Kayıt Ol
             </button>
@@ -178,17 +176,16 @@ export default function AuthPage() {
               {loading
                 ? "Gönderiliyor..."
                 : mode === "login"
-                ? "Giriş Yap"
-                : "Kayıt Ol"}
+                  ? "Giriş Yap"
+                  : "Kayıt Ol"}
             </button>
 
             {status && (
               <div
-                className={`flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm ${
-                  status.type === "success"
-                    ? "bg-[#1B3A2E] text-[#6FCF97] border border-[#2B5240]"
-                    : "bg-[#3A1B1B] text-[#E88080] border border-[#522B2B]"
-                }`}
+                className={`flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm ${status.type === "success"
+                  ? "bg-[#1B3A2E] text-[#6FCF97] border border-[#2B5240]"
+                  : "bg-[#3A1B1B] text-[#E88080] border border-[#522B2B]"
+                  }`}
               >
                 {status.type === "success" ? (
                   <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
@@ -197,20 +194,12 @@ export default function AuthPage() {
                 )}
                 <div className="break-words">
                   <div>{status.message}</div>
-                  {status.detail && (
-                    <div className="mt-1 text-xs opacity-70 break-all">
-                      access token: {status.detail.slice(0, 40)}...
-                    </div>
-                  )}
                 </div>
               </div>
             )}
           </form>
         </div>
 
-        <p className="text-center text-[#4A5568] text-xs mt-6">
-          API: {API_BASE}
-        </p>
       </div>
     </div>
   );

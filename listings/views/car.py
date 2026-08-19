@@ -54,7 +54,6 @@ class CarDetailView(APIView):
 
     def put(self, request, pk): # list updating
         self.check_object_permissions(request, self.car) # is he the owner?
-        
         # does for permission in self.get_permissions():
         #   permission.has_object_permission(request, self, self.car)
 

@@ -16,7 +16,7 @@ export async function fetchListings(path, params = {}) {
 
 export async function postListing(path, data) {
   const token = localStorage.getItem("access_token");
-
+  // if token is not exist, it means user is not logged in. throw an error.
   if (!token) {
     throw new Error("Lütfen önce giriş yapın.");
   }
@@ -38,7 +38,7 @@ export async function postListing(path, data) {
   return res.json();
 }
 
-// 📸 ÇOKLU FOTOĞRAF YÜKLEME FONKSİYONU
+// Photo adding
 export async function uploadListingImages(listingId, files) {
   const token = localStorage.getItem("access_token");
 
@@ -47,7 +47,6 @@ export async function uploadListingImages(listingId, files) {
   }
 
   const formData = new FormData();
-  // Backend'deki getlist('images') için her dosyayı 'images' key'i ile ekliyoruz
   for (let i = 0; i < files.length; i++) {
     formData.append("images", files[i]);
   }
@@ -55,7 +54,6 @@ export async function uploadListingImages(listingId, files) {
   const res = await fetch(`${API_BASE}/listing/${listingId}/upload-images/`, {
     method: "POST",
     headers: {
-      // Content-Type yazmıyoruz! Tarayıcı boundary ile kendisi ayarlar.
       "Authorization": `Bearer ${token}`,
     },
     body: formData,
