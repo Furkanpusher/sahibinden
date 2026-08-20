@@ -104,13 +104,10 @@ class HouseListing(Listing):
 # many to many field
 class Favorite(models.Model):
 
-    # for adding extra fields, I use the Favorite model instead of ManyToManyField
-
-    # ilan kaldırılırsa favorilerden de silincek
     listing = models.ForeignKey(
         Listing, on_delete=models.CASCADE, related_name="favorited_by")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
-                             related_name="favorites")  # user kaldırılırsa favorilerden silincek
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE, related_name="favorites")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:  # metaconfig for our model
@@ -124,7 +121,6 @@ class Favorite(models.Model):
 class Report(models.Model):
     listing = models.ForeignKey(
         Listing, on_delete=models.CASCADE, related_name="reports")
-    # 1 To Many
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
                              on_delete=models.CASCADE, related_name="reports")
     report_date = models.DateTimeField(auto_now_add=True)

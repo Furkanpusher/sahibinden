@@ -23,17 +23,3 @@ class IsStaffUser(permissions.BasePermission):
     def has_permission(self, request, view):
         # overriding the root has_permission() function with exact args
         return bool(request.user and request.user.is_authenticated and request.user.is_staff)
-
-
-# class IsAuthenticatedOrReadOnly(BasePermission):
-#     """
-#     THIS IS BUILT IN FUNCTION JUST FOR DOCUMENTATİON
-#     The request is authenticated as a user, or is a read-only request.
-#     """
-
-#     def has_permission(self, request, view):
-#         return bool(
-#             request.method in SAFE_METHODS or
-#             request.user and
-#             request.user.is_authenticated
-#         )

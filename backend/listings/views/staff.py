@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404
 
 
 class StaffReportListView(APIView):  # sees reported ads
-
     permission_classes = [IsStaffUser]  # Accesses if staff = true
 
     def get(self, request):

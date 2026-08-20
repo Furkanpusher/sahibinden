@@ -16,10 +16,10 @@ env variables  DONE
 pagination will move to the backend DONE
 frontend folder structure DONE
 response popups (used sonner) DONE
-fiter problem
+fiter problem DONE
 profile
 rediscachede listings in main listing page
-PEP-8
+PEP-8 
 fix the commentlines
 mintlify
 logout - login problem

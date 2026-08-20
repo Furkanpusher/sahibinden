@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (
     CarListingView, HouseListView,
     CarDetailView, HouseDetailView,
+    CarFilterOptionsView, HouseFilterOptionsView,
     FavoriteToggleView, UserFavoritesListView,
     ReportListingView, UserReportsListView,
     StaffReportListView, StaffDeleteReportView, StaffDeleteListingView,
@@ -18,6 +19,10 @@ urlpatterns = [
     path("car/<int:pk>/", CarDetailView.as_view(),
          name="car-detail"),  # detail page
     path("house/<int:pk>/", HouseDetailView.as_view(), name="house-detail"),
+
+    path("car-options/", CarFilterOptionsView.as_view(),
+         name="car-options"),  # dropdowns
+    path("house-options/", HouseFilterOptionsView.as_view(), name="house-options"),
 
 
     path("listing/<int:pk>/favorite/", FavoriteToggleView.as_view(),

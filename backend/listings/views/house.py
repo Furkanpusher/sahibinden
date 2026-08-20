@@ -20,8 +20,8 @@ class HousePagination(PageNumberPagination):
 class HouseListView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
-    # ev kategorisine girince
     def get(self, request):
+        # ReadOnly
         filter_params = request.query_params.copy()
         filter_params.pop('page', None)
         filter_params.pop('page_size', None)
@@ -44,6 +44,7 @@ class HouseListView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        # IsAuthenticated
         serializer = HouseListingSerializer(data=request.data)
         if serializer.is_valid():
             house = create_listing(

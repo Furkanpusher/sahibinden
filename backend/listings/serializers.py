@@ -18,7 +18,6 @@ class ListingSerializer(serializers.ModelSerializer):
 
     # important for frontend routing
     listing_type = serializers.SerializerMethodField()
-    # this field is not in the database, get_listing_type() function calculates it and adds to JSON object
 
     class Meta:
         model = Listing
@@ -34,8 +33,7 @@ class ListingSerializer(serializers.ModelSerializer):
 
 
 class CarListingSerializer(serializers.ModelSerializer):
-    listing_owner = serializers.PrimaryKeyRelatedField(
-        read_only=True)  # post ile gönderemezsin
+    listing_owner = serializers.PrimaryKeyRelatedField(read_only=True)
     images = ListingImageSerializer(many=True, read_only=True)
 
     class Meta:

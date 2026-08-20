@@ -10,16 +10,16 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+# pyrefly: ignore [missing-import]
+from corsheaders.defaults import default_headers
+from datetime import timedelta
 from pathlib import Path
 import os
 # pyrefly: ignore [missing-import]
 from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-from datetime import timedelta
 # pyrefly: ignore [missing-import]
-from corsheaders.defaults import default_headers
-
 
 
 load_dotenv()
@@ -47,12 +47,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'listings', # bizim app
-    'accounts', # login, register falan için
-    "rest_framework", # drf
+    'listings',  # listings app
+    'accounts',  # accounts app for login, register etc
+    "rest_framework",  # drf
     'corsheaders',
-     'drf_spectacular',
-    
+    'drf_spectacular',
+
 ]
 
 REST_FRAMEWORK = {
@@ -144,7 +144,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
-MEDIA_URL = "/media/" # ilan foto falan buraya
+MEDIA_URL = "/media/"  # ilan foto falan buraya
 MEDIA_ROOT = BASE_DIR / "media"
 
 
@@ -155,17 +155,17 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 AUTH_USER_MODEL = "accounts.CustomUser"  # we use our own custom user model
-CORS_ALLOWED_ORIGINS = [ # react iletişimi için
+CORS_ALLOWED_ORIGINS = [  # for react coms
     "http://localhost:5173",
-    "http://127.0.0.1:5173", # for container communication
+    "http://127.0.0.1:5173",  # for container coms
 ]
 
 CORS_ALLOW_HEADERS = list(default_headers) + ["authorization"]
 
 
-SIMPLE_JWT = { # jwt token timeout ları
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),   
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),      
-    "AUTH_HEADER_TYPES": ("Bearer", "JWT"), # headerdehem bearer hem hwt kabul et
+SIMPLE_JWT = {  # jwt token timeouts
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    # header should accept bot jwt and bearer headers
+    "AUTH_HEADER_TYPES": ("Bearer", "JWT"),
 }
-
