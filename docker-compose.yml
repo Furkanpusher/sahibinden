@@ -4,9 +4,9 @@ services:
     container_name: sahibinden_db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME:-sahibinden}
-      POSTGRES_USER: ${DB_USER:-furkan}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-147890}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
@@ -25,9 +25,9 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - DB_NAME=${DB_NAME:-sahibinden}
-      - DB_USER=${DB_USER:-furkan}
-      - DB_PASSWORD=${DB_PASSWORD:-147890}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=db
       - DB_PORT=5432
     depends_on:

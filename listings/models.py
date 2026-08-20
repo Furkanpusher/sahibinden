@@ -8,21 +8,20 @@ class Listing(models.Model):# Common information for cars and house
 
 
     city = models.CharField(max_length = 250, default = "", blank = True, db_index = True)
-    district = models.CharField(max_length = 250, default = "", blank= True, db_index = True) # migrationda hata vermemesi için ""
+    district = models.CharField(max_length = 250, default = "", blank= True, db_index = True) 
 
 
-    # WHERE, JOIN veya ORDER BY gibi sorgu işlemlerinde kullanılacaksa db_index=True yapmak lazım
-    price = models.DecimalField(max_digits = 12, decimal_places = 2, default = 0) # 100 milyar ...
+    price = models.DecimalField(max_digits = 12, decimal_places = 2, default = 0)
     listing_date = models.DateField(null = True, blank = True)
 
-    listing_owner = models.ForeignKey( # bi user olmalı
+    listing_owner = models.ForeignKey( 
     
         settings.AUTH_USER_MODEL, # CustomUser
-        on_delete = models.CASCADE, # user silinince ilanları silinmeli 
-        related_name = 'ilanlar', # reverse ilişki için mesela user.ilanlar() diyebilirim
+        on_delete = models.CASCADE, 
+        related_name = 'ilanlar', # reverse relationship
         # select * from listings where user_id = 1 yerine user.ilanlar() derim.
 
-         null = False,  #her ilanın 1 ownerı olmalı!
+         null = False,  
         blank = False, 
 
     )
@@ -33,13 +32,12 @@ class Listing(models.Model):# Common information for cars and house
 
 
 
-    #NOT: Blank --> doğrulama / form katmanında çalışıyor
-    #     Null --> Veritabanı katmanında çalışır
+   
 
     listing_update = models.DateTimeField(auto_now = True)
 
-    class Meta: # modelin veritabanında nasıl çalıştığını kontrol eder formatlama ile alakalı
-        ordering = ["-listing_date"] # enyenilerden göstercek - sayesinde
+    class Meta: 
+        ordering = ["-listing_date"] 
 
     def __str__(self):
         return self.title or f"İlan #{self.pk}"
@@ -47,11 +45,11 @@ class Listing(models.Model):# Common information for cars and house
 
 class CarListing(Listing):
 
-    # listing_ptr adlı bir tablo oluşuyor bu inheritten sonra
-    # carlisting gösterirken hep önce listing sorgusundan sonra join yapıyor
-    # yani önce ortak bilgileri listing'den sonra da ek bilgileri alcak
+    # A table named listing_ptr is created after this inherit
+    # When showing carlisting, it always joins first after the listing query.
+    # In other words, it will first receive the common information from the listing and then additional information.
 
-    # listing_ptr_id sütunu oluştu artık ve 2 tablo idleri 1-1 ilişki var.
+    # The listing_ptr_id column is now created and there is a 1-1 relationship between 2 table ids.
 
     TRANSMISSION_OPTIONS = [ # 3seçenek
         ("manuel", "Manuel"),
@@ -93,7 +91,7 @@ class CarListing(Listing):
 
 
 
-class HouseListing(Listing): # Ev listelemeleri
+class HouseListing(Listing): 
     meter_squared = models.PositiveIntegerField(null=True, blank=True)
     building_aged = models.CharField(max_length=50, blank=True)
     number_of_floors = models.PositiveIntegerField(null=True, blank=True)
@@ -109,9 +107,6 @@ class HouseListing(Listing): # Ev listelemeleri
         return self.title or f"{self.number_of_rooms} - {self.city}"
 
 
-# favorites --> list_id user_id (user favori görüp silebilmeli) (ilanı silince favoriden de silinmeli)
-# reported --> listing base class eklenebilir
-
 #many to many field
 class Favorite(models.Model): 
 
@@ -121,9 +116,9 @@ class Favorite(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name = "favorites") # user kaldırılırsa favorilerden silincek
     created_at = models.DateTimeField(auto_now_add = True)
     
-    class Meta: # modelimiz için bir config dosyası gibi, metadaatayı güncellemek için 
-        unique_together = ("listing", "user") # aynı kullanıcı ilanı 2 kez favorileyemesin 
-        ordering = ["-created_at"] # en son favoriler başa düşcek
+    class Meta: # metaconfig for our model
+        unique_together = ("listing", "user") 
+        ordering = ["-created_at"]
     
     def __str__(self):
         return f"{self.user} - {self.listing.title}"
@@ -139,8 +134,8 @@ class Report(models.Model):
     description = models.TextField()
 
     class Meta: 
-        unique_together = ("listing", "user") # 1 liste 1 kere reportlanabilir aynı kullanıcı tarafından
-        ordering = ["-report_date"] # en son reportlanan başa düşcek
+        unique_together = ("listing", "user") 
+        ordering = ["-report_date"] 
 
 
     

@@ -12,6 +12,16 @@ staffuser
 password123
 
 
-# resim eklenebilir ya  4
-# yorum satırları türkçeyap
-# facvori, listeleri, reportları 3 
+env variables
+pagination will move to the backend
+frontend folder structure
+response popups
+fiter problem
+profile
+rediscachede listings in main listing page
+PEP-8
+fix the commentlines
+mintlify
+logout - login problem
+while creating listing, remove the date part and make it auto_now_add = True
+reduce endpoints(from top level to bottom level group your endpoints)

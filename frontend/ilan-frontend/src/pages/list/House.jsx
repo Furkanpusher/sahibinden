@@ -39,11 +39,16 @@ export default function HouseListPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 📄 Sayfalama State'leri
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(24);
-
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // 📄 Sayfalama State'leri
+  const [currentPage, setCurrentPage] = useState(
+    parseInt(searchParams.get("page")) || 1
+  );
+  const [itemsPerPage, setItemsPerPage] = useState(
+    parseInt(searchParams.get("page_size")) || 24
+  );
+  const [totalCount, setTotalCount] = useState(0);
 
   // 1. Sayfa ilk açıldığında URL'deki parametreleri başlangıç değeri yapıyoruz
   const initialFilters = {
@@ -66,17 +71,25 @@ export default function HouseListPage() {
     number_of_rooms: [],
   });
 
-  // 1. API İsteği: Sadece `appliedFilters` değiştiğinde çalışır!
+  // 1. API İsteği: Filtre, sayfa numarası veya sayfa başı adet değiştiğinde çalışır
   useEffect(() => {
     setLoading(true);
     setError(null);
-    setCurrentPage(1);
 
-    fetchListings("/all-houses/", appliedFilters)
-      .then(setHouses)
+    const queryParams = {
+      ...appliedFilters,
+      page: currentPage,
+      page_size: itemsPerPage,
+    };
+
+    fetchListings("/all-houses/", queryParams)
+      .then((data) => {
+        setHouses(data.results || []);
+        setTotalCount(data.count || 0);
+      })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
-  }, [appliedFilters]);
+  }, [appliedFilters, currentPage, itemsPerPage]);
 
   // 2. Filtreler değiştikçe seçenekleri ve dinamik sayıları güncelleme
   useEffect(() => {
@@ -109,8 +122,10 @@ export default function HouseListPage() {
   const handleApplyFilters = (e) => {
     if (e) e.preventDefault();
 
+    setCurrentPage(1); // Filtre değişince 1. sayfaya sıfırla
+
     const cleanParams = Object.fromEntries(
-      Object.entries(tempFilters).filter(([_, v]) => v !== "")
+      Object.entries({ ...tempFilters, page: 1, page_size: itemsPerPage }).filter(([_, v]) => v !== "")
     );
     setSearchParams(cleanParams);
     setAppliedFilters(tempFilters);
@@ -125,9 +140,24 @@ export default function HouseListPage() {
       city: "",
       district: "",
     };
+    setCurrentPage(1);
     setTempFilters(emptyFilters);
     setAppliedFilters(emptyFilters);
     setSearchParams({});
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    const current = Object.fromEntries(searchParams.entries());
+    setSearchParams({ ...current, page });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleItemsPerPageChange = (val) => {
+    setItemsPerPage(val);
+    setCurrentPage(1);
+    const current = Object.fromEntries(searchParams.entries());
+    setSearchParams({ ...current, page: 1, page_size: val });
   };
 
   const formatTitle = (title) => {
@@ -174,9 +204,9 @@ export default function HouseListPage() {
                 + İlan Oluştur
               </Link>
 
-              {!loading && houses.length > 0 && (
+              {!loading && totalCount > 0 && (
                 <span className="w-fit rounded-lg border border-[#232E3D] bg-[#161F2B] px-3 py-1.5 text-xs font-medium text-[#8B95A3]">
-                  {houses.length} sonuç
+                  {totalCount} sonuç
                 </span>
               )}
             </div>
@@ -317,45 +347,37 @@ export default function HouseListPage() {
             {!loading && !error && houses.length > 0 && (
               <>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8">
-                  {houses
-                    .slice(
-                      (currentPage - 1) * itemsPerPage,
-                      currentPage * itemsPerPage
-                    )
-                    .map((house) => (
-                      <Link to={`/house/${house.id}`} key={house.id} className="group min-w-0">
-                        <div className="relative mb-2 aspect-[4/3] w-full overflow-hidden rounded-lg border border-[#232E3D] bg-[#161F2B] transition-all duration-300 group-hover:border-[#4A5568] group-hover:shadow-lg group-hover:shadow-black/10">
-                          {/* 📸 Çözümlenen Görsel */}
-                          <img
-                            src={getHouseCoverImage(house)}
-                            alt={house.title}
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                          />
-                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                        </div>
+                  {houses.map((house) => (
+                    <Link to={`/house/${house.id}`} key={house.id} className="group min-w-0">
+                      <div className="relative mb-2 aspect-[4/3] w-full overflow-hidden rounded-lg border border-[#232E3D] bg-[#161F2B] transition-all duration-300 group-hover:border-[#4A5568] group-hover:shadow-lg group-hover:shadow-black/10">
+                        {/* 📸 Çözümlenen Görsel */}
+                        <img
+                          src={getHouseCoverImage(house)}
+                          alt={house.title}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                      </div>
 
-                        <h2 className="px-1 text-xs font-medium leading-5 text-[#8B95A3] transition-colors group-hover:text-[#E8A33D]" title={house.title}>
-                          {formatTitle(house.title)}
-                        </h2>
+                      <h2 className="px-1 text-xs font-medium leading-5 text-[#8B95A3] transition-colors group-hover:text-[#E8A33D]" title={house.title}>
+                        {formatTitle(house.title)}
+                      </h2>
 
-                        {(house.city || house.district) && (
-                          <p className="px-1 mt-0.5 text-[11px] text-[#667384]">
-                            {[house.city, house.district].filter(Boolean).join(", ")}
-                          </p>
-                        )}
-                      </Link>
-                    ))}
+                      {(house.city || house.district) && (
+                        <p className="px-1 mt-0.5 text-[11px] text-[#667384]">
+                          {[house.city, house.district].filter(Boolean).join(", ")}
+                        </p>
+                      )}
+                    </Link>
+                  ))}
                 </div>
 
                 <Pagination
                   currentPage={currentPage}
-                  totalItems={houses.length}
+                  totalItems={totalCount}
                   itemsPerPage={itemsPerPage}
-                  onPageChange={setCurrentPage}
-                  onItemsPerPageChange={(val) => {
-                    setItemsPerPage(val);
-                    setCurrentPage(1);
-                  }}
+                  onPageChange={handlePageChange}
+                  onItemsPerPageChange={handleItemsPerPageChange}
                 />
               </>
             )}

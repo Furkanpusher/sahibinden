@@ -28,9 +28,9 @@ print("proje/urls.py çalıştı")
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api-auth/', include('rest_framework.urls')), # DRF tarayıcı içi Log in / Log out için
-    path('accounts/', include('accounts.urls')), # accountsdaki urls.py 
-    path('api/listings/', include('listings.urls')), # listingsdeki urls.py
+    path('api-auth/', include('rest_framework.urls')), 
+    path('accounts/', include('accounts.urls')), 
+    path('api/listings/', include('listings.urls')),
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
     path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
 ]
