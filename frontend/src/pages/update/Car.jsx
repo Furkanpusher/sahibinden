@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { fetchListings, formatApiError } from "../../api";
 import { getCities, getDistricts, getCarBrands, getCarModels } from "../../data/helper";
 
-const TRANSMISSION_OPTIONS = ["manuel", "otomatik", "yarı otomatik"];
+const TRANSMISSION_OPTIONS = ["Düz", "Otomatik", "Yarı Otomatik"];
 const FUEL_OPTIONS = ["Benzin", "Dizel", "LPG", "Elektrik", "Hibrit"];
 const BODY_OPTIONS = ["Sedan", "Hatchback", "SUV", "Pickup", "Minivan", "Coupe", "Cabrio"];
 
@@ -304,7 +304,7 @@ export default function CarUpdatePage() {
                   <option value="">Seçiniz</option>
                   {TRANSMISSION_OPTIONS.map((t) => (
                     <option key={t} value={t}>
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
+                      {t === "Düz" ? "Düz (Manuel)" : t}
                     </option>
                   ))}
                 </select>

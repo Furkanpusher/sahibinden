@@ -19,7 +19,7 @@ const defaultImages = [
   "/car-6.jpg", "/car-7.jpg", "/car-8.jpg", "/car-9.jpg", "/car-10.jpg",
 ];
 
-const TRANSMISSIONS = ["manuel", "otomatik", "yarı otomatik"];
+const TRANSMISSIONS = ["Düz", "Otomatik", "Yarı Otomatik"];
 const BACKEND_BASE = "http://127.0.0.1:8001";
 
 // 📸 Fotoğraf URL Çözümleyici (Öncelik: Galeri/Kapak > Ana Resim > Default Havuzu)
@@ -288,7 +288,9 @@ export default function CarListPage() {
                 >
                   <option value="">Tüm Vites Tipleri</option>
                   {TRANSMISSIONS.map((t) => (
-                    <option key={t} value={t}>{t}</option>
+                    <option key={t} value={t}>
+                      {t === "Düz" ? "Düz (Manuel)" : t}
+                    </option>
                   ))}
                 </FilterSelect>
 

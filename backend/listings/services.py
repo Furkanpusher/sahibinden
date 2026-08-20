@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
-from listings.models import Listing, CarListing, HouseListing, Favorite, Report, ListingImage
+from .models import Listing, CarListing, HouseListing, Favorite, Report, ListingImage
+from .filters import CarFilter, HouseFilter
 
 
 """ BASIC GET METHODS """
@@ -30,83 +31,37 @@ def get_house_by_id(pk):
 # Car listing search & filter
 
 
-def filter_cars(**filters):
-    qs = CarListing.objects.select_related("listing_owner").all()
-
-    if filters.get("brand"):
-        qs = qs.filter(brand__iexact=filters["brand"])
-
-    if filters.get("model"):
-        qs = qs.filter(model__iexact=filters["model"])
-
-    if filters.get("transmission_type"):
-        qs = qs.filter(transmission_type__iexact=filters["transmission_type"])
-
-    if filters.get("price_min"):
-        qs = qs.filter(price__gte=filters["price_min"])
-
-    if filters.get("price_max"):
-        qs = qs.filter(price__lte=filters["price_max"])
-
-    if filters.get("city"):
-        qs = qs.filter(city__iexact=filters["city"])
-
-    if filters.get("district"):
-        qs = qs.filter(district__iexact=filters["district"])
-
-    return qs
+def filter_cars(query_params=None, **kwargs):
+    params = query_params if query_params is not None else kwargs
+    qs = CarListing.objects.select_related("listing_owner").all().order_by("-id")
+    return CarFilter(params, queryset=qs).qs
 
 
 # House listing search & filter
-def filter_houses(**filters):
-    qs = HouseListing.objects.select_related("listing_owner").all()
-
-    if filters.get("meter_squared"):
-        qs = qs.filter(meter_squared__gte=filters["meter_squared"])
-
-    if filters.get("number_of_rooms"):
-        qs = qs.filter(number_of_rooms=filters["number_of_rooms"])
-
-    if filters.get("building_aged"):
-        qs = qs.filter(building_aged=filters["building_aged"])
-
-    if filters.get("floor"):
-        qs = qs.filter(floor=filters["floor"])
-
-    if filters.get("price_min"):
-        qs = qs.filter(price__gte=filters["price_min"])
-
-    if filters.get("price_max"):
-        qs = qs.filter(price__lte=filters["price_max"])
-
-    if filters.get("city"):
-        qs = qs.filter(city__iexact=filters["city"])
-
-    if filters.get("district"):
-        qs = qs.filter(district__iexact=filters["district"])
-
-    return qs
+def filter_houses(query_params=None, **kwargs):
+    params = query_params if query_params is not None else kwargs
+    qs = HouseListing.objects.select_related("listing_owner").all().order_by("-id")
+    return HouseFilter(params, queryset=qs).qs
 
 
 """ LISTING CRUD OPERATIONS """
 
-# Create a new listing
-
 
 def create_listing(model_class, user, data):
+    # Create a new listing
     return model_class.objects.create(listing_owner=user, **data)
 
 
-# Delete a listing (only owner is authorized)
 def delete_listing(user, pk):
+    # Delete a listing (only owner is authorized)
     listing = get_object_or_404(Listing, pk=pk)
     if listing.listing_owner != user:
         raise PermissionDenied("You can only delete your own listing.")
     listing.delete()
 
 
-# Update a listing with partial update support
 def update_listing(instance, serializer_class, data, partial=True):
+    # Update a listing with partial update support
     serializer = serializer_class(instance, data=data, partial=partial)
     if serializer.is_valid():
         updated_instance = serializer.save()
