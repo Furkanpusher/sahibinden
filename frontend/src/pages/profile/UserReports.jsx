@@ -50,7 +50,8 @@ export default function UserReportsPage() {
         return res.json();
       })
       .then((data) => {
-        const sorted = data.sort((a, b) => b.id - a.id);
+        const list = Array.isArray(data) ? data : (data?.results || []);
+        const sorted = [...list].sort((a, b) => b.id - a.id);
         setReports(sorted);
       })
       .catch((err) => setError(err.message))
@@ -161,7 +162,10 @@ export default function UserReportsPage() {
                   >
                     {/* Sol: İlan Görseli ve Bilgisi */}
                     <div className="flex items-center gap-4 w-full md:w-auto">
-                      <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-[#0F1720] border border-[#232E3D]">
+                      <Link
+                        to={detailUrl}
+                        className="group/img relative h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-[#0F1720] border border-[#232E3D] transition-transform hover:scale-105"
+                      >
                         <img
                           src={defaultImg}
                           alt={listing.title}
@@ -171,18 +175,20 @@ export default function UserReportsPage() {
                           {isCar ? <Car size={10} className="text-[#E8A33D]" /> : <HomeIcon size={10} className="text-[#3B82F6]" />}
                           {isCar ? "Araç" : "Ev"}
                         </span>
-                      </div>
+                      </Link>
 
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-bold text-[#E8A33D]">
+                          <Link to={detailUrl} className="text-sm font-bold text-[#E8A33D] hover:underline">
                             {formatPrice(listing.price)}
-                          </span>
+                          </Link>
                         </div>
 
-                        <h3 className="text-sm font-medium text-[#EDEFF2] truncate mt-0.5" title={listing.title}>
-                          {listing.title}
-                        </h3>
+                        <Link to={detailUrl} className="block">
+                          <h3 className="text-sm font-medium text-[#EDEFF2] truncate mt-0.5 transition-colors hover:text-[#E8A33D]" title={listing.title}>
+                            {listing.title}
+                          </h3>
+                        </Link>
 
                         <div className="mt-1 flex items-center gap-3 text-xs text-[#8B95A3]">
                           {(listing.city || listing.district) && (

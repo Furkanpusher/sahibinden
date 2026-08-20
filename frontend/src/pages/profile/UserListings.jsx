@@ -45,14 +45,17 @@ export default function UserListings() {
     setLoading(true);
     // Hem arabaları hem evleri çekip kullanıcının olanları filtreliyoruz
     Promise.all([
-      fetchListings("/all-cars/"),
-      fetchListings("/all-houses/"),
+      fetchListings("/all-cars/", { page_size: 50 }),
+      fetchListings("/all-houses/", { page_size: 50 }),
     ])
-      .then(([cars, houses]) => {
-        const userCars = (cars || [])
+      .then(([carsData, housesData]) => {
+        const carList = Array.isArray(carsData) ? carsData : (carsData?.results || []);
+        const houseList = Array.isArray(housesData) ? housesData : (housesData?.results || []);
+
+        const userCars = carList
           .filter((c) => String(c.listing_owner) === String(currentUserId))
           .map((c) => ({ ...c, listing_type: "car" }));
-        const userHouses = (houses || [])
+        const userHouses = houseList
           .filter((h) => String(h.listing_owner) === String(currentUserId))
           .map((h) => ({ ...h, listing_type: "house" }));
         // İlanları ID'ye göre azalan (en son eklenen en başta) sıralıyoruz
@@ -205,28 +208,30 @@ export default function UserListings() {
                     className="group relative flex flex-col overflow-hidden rounded-xl border border-[#232E3D] bg-[#161F2B] p-2.5 transition-all duration-300 hover:border-[#4A5568] hover:shadow-lg hover:shadow-black/20"
                   >
                     {/* Görsel ve Tip Rozeti */}
-                    <div className="relative mb-2 aspect-[4/3] w-full overflow-hidden rounded-lg bg-[#0F1720]">
+                    <Link to={detailUrl} className="group/img relative mb-2 block aspect-[4/3] w-full overflow-hidden rounded-lg bg-[#0F1720]">
                       <img
                         src={defaultImg}
                         alt={item.title}
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover/img:scale-105"
                       />
                       <span className="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-[#0F1720]/80 px-2 py-0.5 text-[10px] font-semibold text-[#EDEFF2] backdrop-blur-sm border border-[#232E3D]">
                         {isCar ? <Car size={11} className="text-[#E8A33D]" /> : <HomeIcon size={11} className="text-[#3B82F6]" />}
                         {isCar ? "Araç" : "Ev"}
                       </span>
-                    </div>
+                    </Link>
                     {/* Fiyat */}
-                    <div className="px-1 text-sm font-bold text-[#E8A33D]">
+                    <Link to={detailUrl} className="block px-1 text-sm font-bold text-[#E8A33D] hover:underline">
                       {formatPrice(item.price)}
-                    </div>
+                    </Link>
                     {/* Başlık */}
-                    <h2
-                      className="px-1 mt-1 text-xs font-medium leading-4 text-[#EDEFF2] line-clamp-2"
-                      title={item.title}
-                    >
-                      {formatTitle(item.title)}
-                    </h2>
+                    <Link to={detailUrl} className="block">
+                      <h2
+                        className="px-1 mt-1 text-xs font-medium leading-4 text-[#EDEFF2] line-clamp-2 transition-colors hover:text-[#E8A33D]"
+                        title={item.title}
+                      >
+                        {formatTitle(item.title)}
+                      </h2>
+                    </Link>
                     {/* Konum */}
                     {(item.city || item.district) && (
                       <div className="px-1 mt-1 flex items-center gap-1 text-[11px] text-[#667384] truncate">

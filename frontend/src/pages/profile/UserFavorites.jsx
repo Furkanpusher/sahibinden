@@ -43,8 +43,8 @@ export default function UserFavorites() {
         return res.json();
       })
       .then((data) => {
-        // İlanları ID'ye göre azalan (en yeniden eskiye) sıralayabiliriz
-        const sorted = data.sort((a, b) => b.id - a.id);
+        const list = Array.isArray(data) ? data : (data?.results || []);
+        const sorted = [...list].sort((a, b) => b.id - a.id);
         setFavorites(sorted);
       })
       .catch((err) => setError(err.message))

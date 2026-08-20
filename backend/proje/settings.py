@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     "rest_framework",  # drf
     'corsheaders',
     'drf_spectacular',
-
+    'django_filters',
 ]
 
 REST_FRAMEWORK = {

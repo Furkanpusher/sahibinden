@@ -73,6 +73,14 @@ class HouseDetailView(APIView):
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(HouseListingSerializer(updated_house).data, status=status.HTTP_200_OK)
 
+    def patch(self, request, pk):
+        self.check_object_permissions(request, self.house)
+        updated_house, errors = update_listing(
+            self.house, HouseListingSerializer, request.data, partial=True)
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(HouseListingSerializer(updated_house).data, status=status.HTTP_200_OK)
+
     def delete(self, request, pk):
         self.check_object_permissions(request, self.house)
         delete_listing(user=request.user, pk=pk)

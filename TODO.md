@@ -19,9 +19,9 @@ response popups (used sonner) DONE
 fiter problem DONE
 profile
 rediscachede listings in main listing page
-PEP-8 
-fix the commentlines
+PEP-8 DONE
+fix the commentlines DONE
 mintlify
-logout - login problem
-while creating listing, remove the date part and make it auto_now_add = True
+logout - login problem   DONE
+while creating listing, remove the date part and make it auto_now_add = True DONE
 reduce endpoints(from top level to bottom level group your endpoints)

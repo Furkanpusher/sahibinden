@@ -15,6 +15,7 @@ export default function HouseUpdatePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
+  const [initialForm, setInitialForm] = useState(null);
   const [form, setForm] = useState({
     title: "", price: "", city: "", district: "",
     number_of_rooms: "", meter_squared: "", building_aged: "",
@@ -27,18 +28,20 @@ export default function HouseUpdatePage() {
     fetchListings(`/house/${id}/`)
       .then((data) => {
         if (!data) return;
-        setForm({
+        const initialData = {
           title: data.title || "",
-          price: data.price || "",
+          price: data.price !== null && data.price !== undefined ? String(data.price) : "",
           city: data.city || "",
           district: data.district || "",
           number_of_rooms: data.number_of_rooms || "",
-          meter_squared: data.meter_squared || "",
+          meter_squared: data.meter_squared !== null && data.meter_squared !== undefined ? String(data.meter_squared) : "",
           building_aged: data.building_aged || "",
           floor: data.floor || "",
-          number_of_floors: data.number_of_floors || "",
+          number_of_floors: data.number_of_floors !== null && data.number_of_floors !== undefined ? String(data.number_of_floors) : "",
           credit_eligibility: Boolean(data.credit_eligibility),
-        });
+        };
+        setForm(initialData);
+        setInitialForm(initialData);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -51,23 +54,38 @@ export default function HouseUpdatePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
 
-    const payload = Object.fromEntries(
-      Object.entries(form).map(([k, v]) => [k, v === "" ? null : v])
-    );
+    // Sadece değişen alanları tespit et (Partial update)
+    const changedPayload = {};
+    if (initialForm) {
+      Object.keys(form).forEach((key) => {
+        if (form[key] !== initialForm[key]) {
+          const val = form[key];
+          changedPayload[key] = val === "" ? null : val;
+        }
+      });
+    }
+
+    // Hiçbir alan değişmediyse gereksiz istek gönderme
+    if (Object.keys(changedPayload).length === 0) {
+      toast.info("Herhangi bir değişiklik yapılmadı.");
+      navigate(`/house/${id}`);
+      return;
+    }
+
+    setSaving(true);
 
     try {
       const token = localStorage.getItem("access") || localStorage.getItem("token") || localStorage.getItem("access_token");
       const API_URL = import.meta.env?.VITE_API_URL || "http://127.0.0.1:8001/api";
 
       const response = await fetch(`${API_URL}/listings/house/${id}/`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(changedPayload),
       });
 
       const resData = await response.json().catch(() => ({}));

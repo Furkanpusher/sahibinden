@@ -77,9 +77,14 @@ class CarDetailView(APIView):
 
     def put(self, request, pk):  # list updating
         self.check_object_permissions(request, self.car)  # is he the owner?
-        # does for permission in self.get_permissions():
-        #   permission.has_object_permission(request, self, self.car)
+        updated_car, errors = update_listing(
+            self.car, CarListingSerializer, request.data, partial=True)
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(CarListingSerializer(updated_car).data, status=status.HTTP_200_OK)
 
+    def patch(self, request, pk):  # partial list updating
+        self.check_object_permissions(request, self.car)
         updated_car, errors = update_listing(
             self.car, CarListingSerializer, request.data, partial=True)
         if errors:

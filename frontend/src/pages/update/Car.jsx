@@ -16,6 +16,7 @@ export default function CarUpdatePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
 
+  const [initialForm, setInitialForm] = useState(null);
   const [form, setForm] = useState({
     title: "", city: "", district: "", price: "",
     brand: "", series: "", model: "", year: "", km: "",
@@ -38,16 +39,16 @@ export default function CarUpdatePage() {
     fetchListings(`/car/${id}/`)
       .then((data) => {
         if (!data) return;
-        setForm({
+        const initialData = {
           title: data.title || "",
           city: data.city || "",
           district: data.district || "",
-          price: data.price || "",
+          price: data.price !== null && data.price !== undefined ? String(data.price) : "",
           brand: data.brand || "",
           series: data.series || "",
           model: data.model || "",
-          year: data.year || "",
-          km: data.km || "",
+          year: data.year !== null && data.year !== undefined ? String(data.year) : "",
+          km: data.km !== null && data.km !== undefined ? String(data.km) : "",
           transmission_type: data.transmission_type || "",
           fuel_type: data.fuel_type || "",
           body_type: data.body_type || "",
@@ -60,9 +61,11 @@ export default function CarUpdatePage() {
           fuel_tank: data.fuel_tank || "",
           changed_parts: data.changed_parts || "",
           from_whom: data.from_whom || "",
-          tramer: data.tramer || "",
+          tramer: data.tramer !== null && data.tramer !== undefined ? String(data.tramer) : "",
           for_trade: Boolean(data.for_trade),
-        });
+        };
+        setForm(initialData);
+        setInitialForm(initialData);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -82,25 +85,39 @@ export default function CarUpdatePage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setSaving(true);
 
-    // Boş string alanları null yap, car_status -> status olarak gönder
-    const { car_status, ...rest } = form;
-    const payload = Object.fromEntries(
-      Object.entries({ ...rest, status: car_status }).map(([k, v]) => [k, v === "" ? null : v])
-    );
+    // Sadece değişen alanları tespit et (Partial update)
+    const changedPayload = {};
+    if (initialForm) {
+      Object.keys(form).forEach((key) => {
+        if (form[key] !== initialForm[key]) {
+          const backendKey = key === "car_status" ? "status" : key;
+          const val = form[key];
+          changedPayload[backendKey] = val === "" ? null : val;
+        }
+      });
+    }
+
+    // Hiçbir alan değişmediyse gereksiz istek gönderme
+    if (Object.keys(changedPayload).length === 0) {
+      toast.info("Herhangi bir değişiklik yapılmadı.");
+      navigate(`/car/${id}`);
+      return;
+    }
+
+    setSaving(true);
 
     try {
       const token = localStorage.getItem("access") || localStorage.getItem("token") || localStorage.getItem("access_token");
       const API_URL = import.meta.env?.VITE_API_URL || "http://127.0.0.1:8001/api";
 
       const response = await fetch(`${API_URL}/listings/car/${id}/`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(changedPayload),
       });
 
       const resData = await response.json().catch(() => ({}));
