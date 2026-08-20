@@ -20,7 +20,6 @@ export default function CreateHousePage() {
   const [form, setForm] = useState({
     title: "",
     price: "",
-    listing_date: "",
     city: "",
     district: "",
     number_of_rooms: "",
@@ -160,25 +159,15 @@ export default function CreateHousePage() {
               />
             </Field>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Fiyat (₺) *">
-                <input
-                  type="number"
-                  placeholder="4500000"
-                  value={form.price}
-                  onChange={handleChange("price")}
-                  required
-                />
-              </Field>
-
-              <Field label="İlan Tarihi">
-                <input
-                  type="date"
-                  value={form.listing_date}
-                  onChange={handleChange("listing_date")}
-                />
-              </Field>
-            </div>
+            <Field label="Fiyat (₺) *">
+              <input
+                type="number"
+                placeholder="4500000"
+                value={form.price}
+                onChange={handleChange("price")}
+                required
+              />
+            </Field>
 
             {/* 🏙️ ŞEHİR & İLÇE DROPDOWNLARI */}
             <div className="grid grid-cols-2 gap-4">

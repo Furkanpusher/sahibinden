@@ -18,7 +18,7 @@ export default function CreateCarPage() {
   const [previewUrls, setPreviewUrls] = useState([]);
 
   const [form, setForm] = useState({
-    title: "", city: "", district: "", price: "", listing_date: "",
+    title: "", city: "", district: "", price: "",
     brand: "", series: "", model: "", year: "", km: "",
     transmission_type: "", fuel_type: "", body_type: "", color: "",
     engine_size: "", engine_power: "", traction: "", car_status: "",
@@ -161,25 +161,15 @@ export default function CreateCarPage() {
               />
             </Field>
 
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Fiyat (₺) *">
-                <input
-                  type="number"
-                  placeholder="850000"
-                  value={form.price}
-                  onChange={handleChange("price")}
-                  required
-                />
-              </Field>
-
-              <Field label="İlan Tarihi">
-                <input
-                  type="date"
-                  value={form.listing_date}
-                  onChange={handleChange("listing_date")}
-                />
-              </Field>
-            </div>
+            <Field label="Fiyat (₺) *">
+              <input
+                type="number"
+                placeholder="850000"
+                value={form.price}
+                onChange={handleChange("price")}
+                required
+              />
+            </Field>
 
             {/* 🏙️ ŞEHİR & İLÇE DROPDOWNLARI */}
             <div className="grid grid-cols-2 gap-4">

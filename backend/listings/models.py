@@ -13,7 +13,7 @@ class Listing(models.Model):  # Common information for cars and house
         max_length=250, default="", blank=True, db_index=True)
 
     price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    listing_date = models.DateField(null=True, blank=True)
+    listing_date = models.DateField(auto_now_add=True)
 
     listing_owner = models.ForeignKey(
 

@@ -16,7 +16,7 @@ export default function HouseUpdatePage() {
   const [error, setError] = useState(null);
 
   const [form, setForm] = useState({
-    title: "", price: "", listing_date: "", city: "", district: "",
+    title: "", price: "", city: "", district: "",
     number_of_rooms: "", meter_squared: "", building_aged: "",
     floor: "", number_of_floors: "", credit_eligibility: false,
   });
@@ -30,7 +30,6 @@ export default function HouseUpdatePage() {
         setForm({
           title: data.title || "",
           price: data.price || "",
-          listing_date: data.listing_date || "",
           city: data.city || "",
           district: data.district || "",
           number_of_rooms: data.number_of_rooms || "",
@@ -128,14 +127,9 @@ export default function HouseUpdatePage() {
             <Field label="İlan Başlığı *">
               <input type="text" placeholder="Kadıköy Moda 3+1 Daire" value={form.title} onChange={handleChange("title")} required />
             </Field>
-            <div className="grid grid-cols-2 gap-4">
-              <Field label="Fiyat (₺) *">
-                <input type="number" placeholder="4500000" value={form.price} onChange={handleChange("price")} required />
-              </Field>
-              <Field label="İlan Tarihi">
-                <input type="date" value={form.listing_date} onChange={handleChange("listing_date")} />
-              </Field>
-            </div>
+            <Field label="Fiyat (₺) *">
+              <input type="number" placeholder="4500000" value={form.price} onChange={handleChange("price")} required />
+            </Field>
             <div className="grid grid-cols-2 gap-4">
               <Field label="Şehir"><input placeholder="İstanbul" value={form.city} onChange={handleChange("city")} /></Field>
               <Field label="İlçe"><input placeholder="Kadıköy" value={form.district} onChange={handleChange("district")} /></Field>

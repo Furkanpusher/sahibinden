@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Lock, Mail, Phone, LogIn, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -16,6 +16,14 @@ export default function AuthPage() {
     phone_number: "",
   });
   const [loading, setLoading] = useState(false);
+
+  // if the user already logged in, redirect to the main page
+  useEffect(() => {
+    const token = localStorage.getItem("access_token") || localStorage.getItem("access");
+    if (token) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate]);
 
   const handleChange = (field) => (e) =>
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
