@@ -25,16 +25,7 @@ class CarListingView(APIView):
     # for each item in permission_classes, get_permissions() creates an object instance of it.
 
     def get(self, request):
-        # Extract the pagination parameters from request query
-        filter_params = request.query_params.copy()
-        filter_params.pop('page', None)
-        filter_params.pop('page_size', None)
-
-        # Check if there are any filter parameters
-        if filter_params:
-            cars = filter_cars(**filter_params.dict())
-        else:
-            cars = get_all_cars()
+        cars = filter_cars(request.query_params)
 
         # Paginator
         paginator = CarPagination()

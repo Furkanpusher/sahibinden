@@ -6,7 +6,7 @@ from rest_framework.pagination import PageNumberPagination
 from listings.models import HouseListing
 from listings.serializers import HouseListingSerializer
 from listings.permissions import IsOwnerOrReadOnly
-from ..services import (get_all_houses, filter_houses, get_house_by_id,
+from ..services import (filter_houses, get_house_by_id,
                         create_listing, delete_listing, update_listing)
 
 
@@ -21,15 +21,7 @@ class HouseListView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
-        # ReadOnly
-        filter_params = request.query_params.copy()
-        filter_params.pop('page', None)
-        filter_params.pop('page_size', None)
-
-        if filter_params:
-            houses = filter_houses(**filter_params.dict())
-        else:
-            houses = get_all_houses()
+        houses = filter_houses(request.query_params)
 
         paginator = HousePagination()
         page = paginator.paginate_queryset(
