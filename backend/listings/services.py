@@ -9,6 +9,7 @@ from listings.models import Listing, CarListing, HouseListing, Favorite, Report,
 # Groups by a specific field and calculates count for each item (GROUP BY + COUNT)
 def _get_counts(queryset, field_name): #(query_set, city)
     qs = queryset.values(field_name).annotate(count=models.Count("id")).order_by(field_name)
+    
     # this returns a given fields distinct values and the count of each value
     # qs example output: (qs is a query set)
     #  <QuerySet [

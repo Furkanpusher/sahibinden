@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useSearchParams } from "react-router-dom"; 
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   SlidersHorizontal,
@@ -52,7 +52,7 @@ export default function HouseListPage() {
 
   // 1. Sayfa ilk açıldığında URL'deki parametreleri başlangıç değeri yapıyoruz
   const initialFilters = {
-    number_of_rooms: searchParams.get("number_of_rooms") || "", 
+    number_of_rooms: searchParams.get("number_of_rooms") || "",
     price_min: searchParams.get("price_min") || "",
     price_max: searchParams.get("price_max") || "",
     city: searchParams.get("city") || "",
@@ -298,7 +298,7 @@ export default function HouseListPage() {
                   value={tempFilters.price_min}
                   onChange={handleChange("price_min")}
                 />
-                
+
                 <FilterInput
                   label="Max. Fiyat"
                   type="number"

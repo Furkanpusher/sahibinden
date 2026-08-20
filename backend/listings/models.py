@@ -30,10 +30,6 @@ class Listing(models.Model):# Common information for cars and house
 
 
 
-
-
-   
-
     listing_update = models.DateTimeField(auto_now = True)
 
     class Meta: 
