@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X } from "lucide-react";
-import { fetchListings } from "../../api";
+import { toast } from "sonner";
+import { fetchListings, formatApiError } from "../../api";
 
 const defaultImages = [
   "/house-1.jpg", "/house-2.jpg", "/house-3.jpg", "/house-4.jpg", "/house-5.jpg",
@@ -40,6 +41,7 @@ export default function HouseDetailPage() {
   const token = localStorage.getItem("access") || localStorage.getItem("token") || localStorage.getItem("access_token");
   const storedUser = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
   const currentUserId = localStorage.getItem("user_id") || storedUser?.id || storedUser?.pk || localStorage.getItem("userId");
+  const isStaff = localStorage.getItem("is_staff") === "true";
 
   const API_URL = import.meta.env?.VITE_API_URL || "http://127.0.0.1:8001/api";
 
@@ -83,12 +85,12 @@ export default function HouseDetailPage() {
                   Boolean(ownerId) && 
                   String(currentUserId) === String(ownerId);
 
+  const canEditOrDelete = isOwner || isStaff;
+
   // 🔹 FAVORİYE EKLE / ÇIKAR (TOGGLE)
   const handleToggleFavorite = async () => {
     if (!token) {
-      if (window.confirm("Bu ilanı favoriye eklemek için giriş yapmalısınız. Giriş sayfasına yönlendirilsin mi?")) {
-        navigate("/login");
-      }
+      toast.error("Favoriye eklemek için lütfen önce giriş yapın.");
       return;
     }
 
@@ -104,12 +106,13 @@ export default function HouseDetailPage() {
 
       const resData = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(resData.detail || "Favori işlemi gerçekleştirilemedi.");
+        throw new Error(formatApiError(resData) || "Favori işlemi gerçekleştirilemedi.");
       }
 
       setIsFavorited(resData.is_favorited);
+      toast.success(resData.is_favorited ? "İlan favorilere eklendi." : "İlan favorilerden çıkarıldı.");
     } catch (err) {
-      alert(`Hata: ${err.message}`);
+      toast.error(err.message || "Favori işlemi başarısız.");
     } finally {
       setIsFavoriting(false);
     }
@@ -120,9 +123,7 @@ export default function HouseDetailPage() {
     e.preventDefault();
 
     if (!token) {
-      if (window.confirm("İlanı şikayet etmek için giriş yapmalısınız. Giriş sayfasına yönlendirilsin mi?")) {
-        navigate("/login");
-      }
+      toast.error("İlanı şikayet etmek için lütfen giriş yapın.");
       return;
     }
 
@@ -141,15 +142,14 @@ export default function HouseDetailPage() {
 
       const resData = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const errorMsg = resData.detail || resData.non_field_errors?.[0] || "Şikayet iletilemedi.";
-        throw new Error(errorMsg);
+        throw new Error(formatApiError(resData) || "Şikayet iletilemedi.");
       }
 
-      alert("Şikayetiniz başarıyla iletildi. İncelenecektir.");
+      toast.success("Şikayetiniz başarıyla iletildi. İncelenecektir.");
       setIsReportModalOpen(false);
       setReportDescription("");
     } catch (err) {
-      alert(`Hata: ${err.message}`);
+      toast.error(err.message || "Şikayet iletilemedi.");
     } finally {
       setIsReporting(false);
     }
@@ -173,14 +173,13 @@ export default function HouseDetailPage() {
 
       const resData = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const errorMessage = resData.detail || resData.hata || resData.message || "İlan silinemedi.";
-        throw new Error(errorMessage);
+        throw new Error(formatApiError(resData) || "İlan silinemedi.");
       }
 
-      alert("Ev ilanı başarıyla silindi.");
+      toast.success("Ev ilanı başarıyla silindi.");
       navigate("/all-houses");
     } catch (err) {
-      alert(`Hata: ${err.message}`);
+      toast.error(err.message || "Silme işlemi başarısız.");
     } finally {
       setIsDeleting(false);
     }

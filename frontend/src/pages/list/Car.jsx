@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -12,12 +12,14 @@ import { fetchListings } from "../../api";
 import { FilterInput, FilterSelect } from "../../components/ListingUI";
 import UserMenu from "../../components/UserMenu";
 import Pagination from "../../components/Pagination";
+import { getCities, getDistricts, getCarBrands, getCarModels } from "../../data/helper";
 
 const defaultImages = [
   "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
   "/car-6.jpg", "/car-7.jpg", "/car-8.jpg", "/car-9.jpg", "/car-10.jpg",
 ];
 
+const TRANSMISSIONS = ["manuel", "otomatik", "yarı otomatik"];
 const BACKEND_BASE = "http://127.0.0.1:8001";
 
 // 📸 Fotoğraf URL Çözümleyici (Öncelik: Galeri/Kapak > Ana Resim > Default Havuzu)
@@ -53,6 +55,7 @@ export default function CarListPage() {
   // 1. Sayfa ilk açıldığında URL'deki parametreleri başlangıç değeri yapıyoruz
   const initialFilters = {
     brand: searchParams.get("brand") || "",
+    model: searchParams.get("model") || "",
     transmission_type: searchParams.get("transmission_type") || "",
     price_min: searchParams.get("price_min") || "",
     price_max: searchParams.get("price_max") || "",
@@ -66,12 +69,11 @@ export default function CarListPage() {
   // 🔹 UYGULANAN STATE: Sadece "Filtrele" butonuna basılınca güncellenir (istek tetikler)
   const [appliedFilters, setAppliedFilters] = useState(initialFilters);
 
-  const [options, setOptions] = useState({
-    cities: [],
-    districts: [],
-    brands: [],
-    transmissions: [],
-  });
+  // 🔹 Dropdown Seçenekleri (Helper'dan dinamik daralan veriler)
+  const cities = useMemo(() => getCities(), []);
+  const districts = useMemo(() => getDistricts(tempFilters.city), [tempFilters.city]);
+  const carBrands = useMemo(() => getCarBrands(), []);
+  const carModels = useMemo(() => getCarModels(tempFilters.brand), [tempFilters.brand]);
 
   // 1. API İsteği: Filtre, sayfa numarası veya sayfa başı adet değiştiğinde backend'e istek atar
   useEffect(() => {
@@ -94,25 +96,6 @@ export default function CarListPage() {
       .finally(() => setLoading(false));
   }, [appliedFilters, currentPage, itemsPerPage]);
 
-  // DINAMICALLY UPDATING THE NUMBERS OF FOUND OBJECTS IN FILTER DROPDOWN
-  useEffect(() => {
-    const params = {};
-    if (tempFilters.city) params.city = tempFilters.city;
-    if (tempFilters.brand) params.brand = tempFilters.brand;
-    if (tempFilters.transmission_type) params.transmission_type = tempFilters.transmission_type;
-
-    fetchListings("/car-options/", params)
-      .then((data) => {
-        setOptions({
-          cities: data.cities || [],
-          districts: data.districts || [],
-          brands: data.brands || [],
-          transmissions: data.transmissions || [],
-        });
-      })
-      .catch((err) => console.error("Filtre seçenekleri alınamadı:", err));
-  }, [tempFilters.city, tempFilters.brand, tempFilters.transmission_type]);
-
   // Input ve Select değiştikçe SADECE taslak state'i (tempFilters) güncelliyoruz
   const handleChange = (field) => (e) => {
     const newValue = e.target.value;
@@ -120,6 +103,7 @@ export default function CarListPage() {
       ...prev,
       [field]: newValue,
       ...(field === "city" ? { district: "" } : {}), // Şehir değişirse seçili ilçeyi sıfırla
+      ...(field === "brand" ? { model: "" } : {}), // Marka değişirse seçili modeli sıfırla
     }));
   };
 
@@ -140,6 +124,7 @@ export default function CarListPage() {
   const handleResetFilters = () => {
     const emptyFilters = {
       brand: "",
+      model: "",
       transmission_type: "",
       price_min: "",
       price_max: "",
@@ -252,11 +237,22 @@ export default function CarListPage() {
                   onChange={handleChange("brand")}
                 >
                   <option value="">Tüm Markalar</option>
-                  {options.brands.map((b) => {
-                    const val = typeof b === "object" ? b.name : b;
-                    const countStr = typeof b === "object" && b.count ? ` (${b.count})` : "";
-                    return <option key={val} value={val}>{val}{countStr}</option>;
-                  })}
+                  {carBrands.map((b) => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </FilterSelect>
+
+                {/* Model Dropdown (Markaya göre dinamik) */}
+                <FilterSelect
+                  label="Model"
+                  value={tempFilters.model}
+                  onChange={handleChange("model")}
+                  disabled={!tempFilters.brand}
+                >
+                  <option value="">{tempFilters.brand ? "Tüm Modeller" : "Önce Marka Seçin"}</option>
+                  {carModels.map((m) => (
+                    <option key={m} value={m}>{m}</option>
+                  ))}
                 </FilterSelect>
 
                 {/* Şehir Dropdown */}
@@ -266,26 +262,22 @@ export default function CarListPage() {
                   onChange={handleChange("city")}
                 >
                   <option value="">Tüm Şehirler</option>
-                  {options.cities.map((c) => {
-                    const val = typeof c === "object" ? c.name : c;
-                    const countStr = typeof c === "object" && c.count ? ` (${c.count})` : "";
-                    return <option key={val} value={val}>{val}{countStr}</option>;
-                  })}
+                  {cities.map((c) => (
+                    <option key={c.id || c.name} value={c.name}>{c.name}</option>
+                  ))}
                 </FilterSelect>
 
-                {/* Semt / İlçe Dropdown */}
+                {/* Semt / İlçe Dropdown (Şehre göre dinamik) */}
                 <FilterSelect
                   label="Semt / İlçe"
                   value={tempFilters.district}
                   onChange={handleChange("district")}
                   disabled={!tempFilters.city}
                 >
-                  <option value="">Tüm İlçeler</option>
-                  {options.districts.map((d) => {
-                    const val = typeof d === "object" ? d.name : d;
-                    const countStr = typeof d === "object" && d.count ? ` (${d.count})` : "";
-                    return <option key={val} value={val}>{val}{countStr}</option>;
-                  })}
+                  <option value="">{tempFilters.city ? "Tüm İlçeler" : "Önce Şehir Seçin"}</option>
+                  {districts.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
                 </FilterSelect>
 
                 {/* Vites Tipi Dropdown */}
@@ -295,11 +287,9 @@ export default function CarListPage() {
                   onChange={handleChange("transmission_type")}
                 >
                   <option value="">Tüm Vites Tipleri</option>
-                  {options.transmissions.map((t) => {
-                    const val = typeof t === "object" ? t.name : t;
-                    const countStr = typeof t === "object" && t.count ? ` (${t.count})` : "";
-                    return <option key={val} value={val}>{val}{countStr}</option>;
-                  })}
+                  {TRANSMISSIONS.map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
                 </FilterSelect>
 
                 <FilterInput

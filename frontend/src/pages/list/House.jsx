@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -12,7 +12,9 @@ import { fetchListings } from "../../api";
 import { FilterInput, FilterSelect } from "../../components/ListingUI";
 import UserMenu from "../../components/UserMenu";
 import Pagination from "../../components/Pagination";
+import { getCities, getDistricts } from "../../data/helper";
 
+const ROOM_OPTIONS = ["1+0", "1+1", "2+1", "3+1", "4+1", "5+1", "Dupleks"];
 const defaultImages = [
   "/house-1.jpg", "/house-2.jpg", "/house-3.jpg", "/house-4.jpg", "/house-5.jpg",
   "/house-6.jpg", "/house-7.jpg", "/house-8.jpg", "/house-9.jpg", "/house-10.jpg",
@@ -65,11 +67,9 @@ export default function HouseListPage() {
   // 🔹 UYGULANAN STATE: Sadece "Filtrele" butonuna basılınca güncellenir (istek tetikler)
   const [appliedFilters, setAppliedFilters] = useState(initialFilters);
 
-  const [options, setOptions] = useState({
-    cities: [],
-    districts: [],
-    number_of_rooms: [],
-  });
+  // 🔹 Dropdown Seçenekleri (Helper'dan dinamik daralan veriler)
+  const cities = useMemo(() => getCities(), []);
+  const districts = useMemo(() => getDistricts(tempFilters.city), [tempFilters.city]);
 
   // 1. API İsteği: Filtre, sayfa numarası veya sayfa başı adet değiştiğinde çalışır
   useEffect(() => {
@@ -90,23 +90,6 @@ export default function HouseListPage() {
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [appliedFilters, currentPage, itemsPerPage]);
-
-  // 2. Filtreler değiştikçe seçenekleri ve dinamik sayıları güncelleme
-  useEffect(() => {
-    const params = {};
-    if (tempFilters.city) params.city = tempFilters.city;
-    if (tempFilters.number_of_rooms) params.number_of_rooms = tempFilters.number_of_rooms;
-
-    fetchListings("/house-options/", params)
-      .then((data) => {
-        setOptions({
-          cities: data.cities || [],
-          districts: data.districts || [],
-          number_of_rooms: data.number_of_rooms || [],
-        });
-      })
-      .catch((err) => console.error("Filtre seçenekleri alınamadı:", err));
-  }, [tempFilters.city, tempFilters.number_of_rooms]);
 
   // Input ve Select değiştikçe SADECE taslak state'i (tempFilters) güncelliyoruz
   const handleChange = (field) => (e) => {
@@ -140,6 +123,10 @@ export default function HouseListPage() {
       city: "",
       district: "",
     };
+    setCurrentPage(1);
+    setTempFilters(emptyFilters);
+    setAppliedFilters(emptyFilters);
+    setSearchParams({});
     setCurrentPage(1);
     setTempFilters(emptyFilters);
     setAppliedFilters(emptyFilters);
@@ -245,15 +232,9 @@ export default function HouseListPage() {
                   onChange={handleChange("number_of_rooms")}
                 >
                   <option value="">Tüm Oda Sayıları</option>
-                  {options.number_of_rooms.map((r) => {
-                    const val = typeof r === "object" ? r.name : r;
-                    const countStr = typeof r === "object" && r.count ? ` (${r.count})` : "";
-                    return (
-                      <option key={val} value={val}>
-                        {val}{countStr}
-                      </option>
-                    );
-                  })}
+                  {ROOM_OPTIONS.map((r) => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
                 </FilterSelect>
 
                 <FilterSelect
@@ -262,15 +243,9 @@ export default function HouseListPage() {
                   onChange={handleChange("city")}
                 >
                   <option value="">Tüm Şehirler</option>
-                  {options.cities.map((c) => {
-                    const val = typeof c === "object" ? c.name : c;
-                    const countStr = typeof c === "object" && c.count ? ` (${c.count})` : "";
-                    return (
-                      <option key={val} value={val}>
-                        {val}{countStr}
-                      </option>
-                    );
-                  })}
+                  {cities.map((c) => (
+                    <option key={c.id || c.name} value={c.name}>{c.name}</option>
+                  ))}
                 </FilterSelect>
 
                 <FilterSelect
@@ -279,16 +254,10 @@ export default function HouseListPage() {
                   onChange={handleChange("district")}
                   disabled={!tempFilters.city}
                 >
-                  <option value="">Tüm İlçeler</option>
-                  {options.districts.map((d) => {
-                    const val = typeof d === "object" ? d.name : d;
-                    const countStr = typeof d === "object" && d.count ? ` (${d.count})` : "";
-                    return (
-                      <option key={val} value={val}>
-                        {val}{countStr}
-                      </option>
-                    );
-                  })}
+                  <option value="">{tempFilters.city ? "Tüm İlçeler" : "Önce Şehir Seçin"}</option>
+                  {districts.map((d) => (
+                    <option key={d} value={d}>{d}</option>
+                  ))}
                 </FilterSelect>
 
                 <FilterInput

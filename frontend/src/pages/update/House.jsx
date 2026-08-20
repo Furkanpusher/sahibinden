@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Home, CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import { fetchListings } from "../../api";
+import { ArrowLeft, Home, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { fetchListings, formatApiError } from "../../api";
 
 const ROOM_OPTIONS = ["1+0", "1+1", "2+1", "3+1", "4+1", "5+1", "Dupleks"];
 const BUILDING_AGE_OPTIONS = ["0 (Yeni)", "1-5", "6-10", "11-15", "16-20", "21 ve üzeri"];
@@ -12,7 +13,6 @@ export default function HouseUpdatePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [alert, setAlert] = useState(null);
   const [error, setError] = useState(null);
 
   const [form, setForm] = useState({
@@ -53,7 +53,6 @@ export default function HouseUpdatePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setAlert(null);
 
     const payload = Object.fromEntries(
       Object.entries(form).map(([k, v]) => [k, v === "" ? null : v])
@@ -75,14 +74,13 @@ export default function HouseUpdatePage() {
       const resData = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        const errorMessage = resData.detail || resData.hata || resData.message || JSON.stringify(resData);
-        throw new Error(errorMessage);
+        throw new Error(formatApiError(resData));
       }
 
-      setAlert({ type: "success", message: "Ev ilanı başarıyla güncellendi!" });
+      toast.success("Ev ilanı başarıyla güncellendi!");
       setTimeout(() => navigate(`/house/${id}`), 1200);
     } catch (err) {
-      setAlert({ type: "error", message: err.message });
+      toast.error(err.message || "Güncelleme sırasında bir hata oluştu.");
     } finally {
       setSaving(false);
     }
@@ -180,16 +178,6 @@ export default function HouseUpdatePage() {
               <span className="text-sm text-[#8B95A3]">Krediye Uygun</span>
             </label>
           </Section>
-
-          {alert !== null && (
-            <div className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm ${alert.type === "success"
-                ? "border-[#2B5240] bg-[#1B3A2E] text-[#6FCF97]"
-                : "border-[#522B2B] bg-[#3A1B1B] text-[#E88080]"
-              }`}>
-              {alert.type === "success" ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-              <span>{alert.message}</span>
-            </div>
-          )}
 
           <button type="submit" disabled={saving}
             className="w-full rounded-lg bg-[#E8A33D] py-3 text-sm font-semibold text-[#0F1720] transition-colors hover:bg-[#F0B058] disabled:opacity-50">

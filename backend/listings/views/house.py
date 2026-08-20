@@ -1,13 +1,13 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from listings.models import HouseListing
 from listings.serializers import HouseListingSerializer
 from listings.permissions import IsOwnerOrReadOnly
-from ..services import (get_all_houses, filter_houses, get_house_by_id, 
-                        get_house_filter_options, create_listing, delete_listing, update_listing)
+from ..services import (get_all_houses, filter_houses, get_house_by_id,
+                        create_listing, delete_listing, update_listing)
 
 
 class HousePagination(PageNumberPagination):
@@ -32,7 +32,8 @@ class HouseListView(APIView):
             houses = get_all_houses()
 
         paginator = HousePagination()
-        page = paginator.paginate_queryset(queryset=houses, request=request, view=self)
+        page = paginator.paginate_queryset(
+            queryset=houses, request=request, view=self)
 
         if page is not None:
             serializer = HouseListingSerializer(page, many=True)
@@ -45,16 +46,17 @@ class HouseListView(APIView):
     def post(self, request):
         serializer = HouseListingSerializer(data=request.data)
         if serializer.is_valid():
-            house = create_listing(HouseListing, user=request.user, data=serializer.validated_data)
+            house = create_listing(
+                HouseListing, user=request.user, data=serializer.validated_data)
             return Response(HouseListingSerializer(house).data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class HouseDetailView(APIView): 
+class HouseDetailView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def dispatch(self, request, *args, **kwargs):
-        pk = kwargs.get("pk") 
+        pk = kwargs.get("pk")
         self.house = get_house_by_id(pk)
         return super().dispatch(request, *args, **kwargs)
 
@@ -64,28 +66,13 @@ class HouseDetailView(APIView):
 
     def put(self, request, pk):
         self.check_object_permissions(request, self.house)
-        updated_house, errors = update_listing(self.house, HouseListingSerializer, request.data, partial=True)
+        updated_house, errors = update_listing(
+            self.house, HouseListingSerializer, request.data, partial=True)
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(HouseListingSerializer(updated_house).data, status=status.HTTP_200_OK)
 
     def delete(self, request, pk):
-        self.check_object_permissions(request, self.house) 
+        self.check_object_permissions(request, self.house)
         delete_listing(user=request.user, pk=pk)
         return Response({"detail": "Ev ilanı başarıyla silindi."}, status=status.HTTP_200_OK)
-
-
-class HouseFilterOptionsView(APIView):
-    permission_classes = [AllowAny]
-
-    def get(self, request):
-        selected_city = request.query_params.get("city")
-        selected_rooms = request.query_params.get("number_of_rooms")
-        selected_floor = request.query_params.get("floor")
-
-        options = get_house_filter_options(
-            selected_city=selected_city,
-            selected_number_of_rooms=selected_rooms,
-            selected_floor=selected_floor
-        )
-        return Response(options, status=status.HTTP_200_OK)

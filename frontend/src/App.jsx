@@ -1,5 +1,6 @@
-import AuthPage from "./pages/auth/Auth.jsx";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster } from "sonner";
+import AuthPage from "./pages/auth/Auth.jsx";
 import Home from "./pages/homepage/Home.jsx";
 import CarList from "./pages/list/Car.jsx";
 import HouseList from "./pages/list/House.jsx";
@@ -17,6 +18,7 @@ import UserReports from "./pages/profile/UserReports.jsx";
 export default function App() {
   return (
     <BrowserRouter>
+      <Toaster richColors position="top-right" theme="dark" closeButton />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/all-cars" element={<CarList />} />

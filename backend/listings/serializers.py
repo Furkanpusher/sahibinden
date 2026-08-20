@@ -3,7 +3,6 @@ from .models import Listing, CarListing, HouseListing, Favorite, Report, Listing
 from rest_framework import serializers
 
 
-
 class ListingImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = ListingImage
@@ -11,36 +10,40 @@ class ListingImageSerializer(serializers.ModelSerializer):
 
 
 class ListingSerializer(serializers.ModelSerializer):
-    
+
     listing_owner = serializers.PrimaryKeyRelatedField(read_only=True)
     # only shows the id rather than the whole object
 
     images = ListingImageSerializer(many=True, read_only=True)
 
-    listing_type = serializers.SerializerMethodField() # really important for frontend routing
+    # important for frontend routing
+    listing_type = serializers.SerializerMethodField()
     # this field is not in the database, get_listing_type() function calculates it and adds to JSON object
 
     class Meta:
         model = Listing
-        fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner', 'listing_date', 'listing_update', 'listing_type', 'images']
+        fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner',
+                  'listing_date', 'listing_update', 'listing_type', 'images']
 
-    def get_listing_type(self, obj): # must be get_<field_name>
+    def get_listing_type(self, obj):  # must be get_<field_name>
         if hasattr(obj, 'carlisting'):
             return 'car'
         elif hasattr(obj, 'houselisting'):
             return 'house'
         return 'unknown'
 
+
 class CarListingSerializer(serializers.ModelSerializer):
-    listing_owner = serializers.PrimaryKeyRelatedField(read_only=True) # post ile gönderemezsin
+    listing_owner = serializers.PrimaryKeyRelatedField(
+        read_only=True)  # post ile gönderemezsin
     images = ListingImageSerializer(many=True, read_only=True)
 
-    class Meta: 
+    class Meta:
         model = CarListing
         fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner', 'listing_date',
-                'brand', 'series', 'model', 'year', 'transmission_type', 'km', 'fuel_type', 'body_type',
-                'color', 'engine_size', 'engine_power', 'traction', 'status', 'avg_fuel_consumption',
-                'fuel_tank', 'changed_parts', 'for_trade', 'from_whom', 'tramer', 'images']
+                  'brand', 'series', 'model', 'year', 'transmission_type', 'km', 'fuel_type', 'body_type',
+                  'color', 'engine_size', 'engine_power', 'traction', 'status', 'avg_fuel_consumption',
+                  'fuel_tank', 'changed_parts', 'for_trade', 'from_whom', 'tramer', 'images']
 
 
 class HouseListingSerializer(serializers.ModelSerializer):
@@ -55,7 +58,7 @@ class HouseListingSerializer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    listing = ListingSerializer(read_only = True)
+    listing = ListingSerializer(read_only=True)
 
     class Meta:
         model = Favorite
@@ -68,5 +71,3 @@ class ReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = ['id', 'listing', 'description', 'report_date', 'user']
-
-

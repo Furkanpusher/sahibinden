@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { User, Lock, Mail, Phone, LogIn, UserPlus, CheckCircle2, XCircle } from "lucide-react";
+import { User, Lock, Mail, Phone, LogIn, UserPlus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { formatApiError } from "../../api";
 
 const API_BASE = "http://localhost:8001/accounts";
 
@@ -13,7 +15,6 @@ export default function AuthPage() {
     email: "",
     phone_number: "",
   });
-  const [status, setStatus] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleChange = (field) => (e) =>
@@ -22,7 +23,6 @@ export default function AuthPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setStatus(null);
 
     const endpoint = mode === "login" ? "/login/" : "/register/";
     const payload =
@@ -36,12 +36,10 @@ export default function AuthPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
 
       if (res.ok) {
         if (mode === "login") {
-          // when logined succesfully, write this data to localStorage
-          // this data will be used in axios interceptors or other functions
           const token = data.access || data.access_token;
           localStorage.setItem("access_token", token);
           localStorage.setItem("access", token);
@@ -53,32 +51,17 @@ export default function AuthPage() {
           const isStaff = Boolean(data.is_staff || data.user?.is_staff);
           localStorage.setItem("is_staff", String(isStaff));
 
-          setStatus({
-            type: "success",
-            message: "Giriş başarılı, yönlendiriliyorsun...",
-            detail: token,
-          });
-
+          toast.success("Giriş başarılı, yönlendiriliyorsunuz...");
           setTimeout(() => navigate("/"), 600);
         } else {
-          setStatus({
-            type: "success",
-            message: "Kayıt başarılı, şimdi giriş yapabilirsin.",
-          });
+          toast.success("Kayıt başarılı, şimdi giriş yapabilirsiniz.");
           setMode("login");
         }
       } else {
-        const ilkHata =
-          typeof data === "object"
-            ? Object.values(data).flat()[0]
-            : "Bir hata oluştu.";
-        setStatus({ type: "error", message: String(ilkHata) });
+        toast.error(formatApiError(data));
       }
     } catch (err) {
-      setStatus({
-        type: "error",
-        message: "Sunucuya bağlanılamadı. Django çalışıyor mu?",
-      });
+      toast.error("Sunucuya bağlanılamadı. Django çalışıyor mu?");
     } finally {
       setLoading(false);
     }
@@ -180,23 +163,6 @@ export default function AuthPage() {
                   : "Kayıt Ol"}
             </button>
 
-            {status && (
-              <div
-                className={`flex items-start gap-2 rounded-lg px-3 py-2.5 text-sm ${status.type === "success"
-                  ? "bg-[#1B3A2E] text-[#6FCF97] border border-[#2B5240]"
-                  : "bg-[#3A1B1B] text-[#E88080] border border-[#522B2B]"
-                  }`}
-              >
-                {status.type === "success" ? (
-                  <CheckCircle2 size={16} className="mt-0.5 shrink-0" />
-                ) : (
-                  <XCircle size={16} className="mt-0.5 shrink-0" />
-                )}
-                <div className="break-words">
-                  <div>{status.message}</div>
-                </div>
-              </div>
-            )}
           </form>
         </div>
 

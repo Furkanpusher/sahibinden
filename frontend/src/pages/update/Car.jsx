@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Car, CheckCircle2, XCircle, Loader2 } from "lucide-react";
-import { fetchListings } from "../../api";
+import { ArrowLeft, Car, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { fetchListings, formatApiError } from "../../api";
 import { getCities, getDistricts, getCarBrands, getCarModels } from "../../data/helper";
 
 const TRANSMISSION_OPTIONS = ["manuel", "otomatik", "yarı otomatik"];
@@ -13,7 +14,6 @@ export default function CarUpdatePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [alert, setAlert] = useState(null);
   const [error, setError] = useState(null);
 
   const [form, setForm] = useState({
@@ -84,7 +84,6 @@ export default function CarUpdatePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    setAlert(null);
 
     // Boş string alanları null yap, car_status -> status olarak gönder
     const { car_status, ...rest } = form;
@@ -108,14 +107,13 @@ export default function CarUpdatePage() {
       const resData = await response.json().catch(() => ({}));
 
       if (!response.ok) {
-        const errorMessage = resData.detail || resData.hata || resData.message || JSON.stringify(resData);
-        throw new Error(errorMessage);
+        throw new Error(formatApiError(resData));
       }
 
-      setAlert({ type: "success", message: "İlan başarıyla güncellendi!" });
+      toast.success("İlan başarıyla güncellendi!");
       setTimeout(() => navigate(`/car/${id}`), 1200);
     } catch (err) {
-      setAlert({ type: "error", message: err.message });
+      toast.error(err.message || "Güncelleme sırasında bir hata oluştu.");
     } finally {
       setSaving(false);
     }
@@ -350,17 +348,6 @@ export default function CarUpdatePage() {
               <span className="text-sm text-[#8B95A3]">Takasa uygun</span>
             </label>
           </Section>
-
-          {alert !== null && (
-            <div className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm ${
-              alert.type === "success"
-                ? "border-[#2B5240] bg-[#1B3A2E] text-[#6FCF97]"
-                : "border-[#522B2B] bg-[#3A1B1B] text-[#E88080]"
-            }`}>
-              {alert.type === "success" ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-              <span>{alert.message}</span>
-            </div>
-          )}
 
           <button
             type="submit"

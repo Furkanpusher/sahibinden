@@ -12,10 +12,10 @@ staffuser
 password123
 
 
-env variables
-pagination will move to the backend
-frontend folder structure
-response popups
+env variables  DONE
+pagination will move to the backend DONE
+frontend folder structure DONE
+response popups (used sonner) DONE
 fiter problem
 profile
 rediscachede listings in main listing page

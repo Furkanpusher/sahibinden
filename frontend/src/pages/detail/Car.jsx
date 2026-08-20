@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { fetchListings } from "../../api";
+import { toast } from "sonner";
+import { fetchListings, formatApiError } from "../../api";
 
 const defaultImages = [
   "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
@@ -10,7 +11,6 @@ const defaultImages = [
 
 const BACKEND_BASE = "http://127.0.0.1:8001";
 
-// Resim URL'ini tam adrese çevirir (/media/.. -> http://127.0.0.1:8001/media/..)
 const formatImgUrl = (url) => {
   if (!url) return null;
   if (url.startsWith("http://") || url.startsWith("https://")) return url;
@@ -23,27 +23,30 @@ export default function CarDetailPage() {
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  // 📸 Galeri Seçili Fotoğraf İndeksi
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  // 🔹 Favori State'leri
+  // Favori ve Şikayet State'leri
   const [isFavorited, setIsFavorited] = useState(false);
   const [isFavoriting, setIsFavoriting] = useState(false);
-
-  // 🔹 Şikayet (Report) State'leri
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [reportDescription, setReportDescription] = useState("");
   const [isReporting, setIsReporting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
+  // Kullanıcı bilgileri
   const token = localStorage.getItem("access") || localStorage.getItem("token") || localStorage.getItem("access_token");
-  const storedUser = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
-  const currentUserId = localStorage.getItem("user_id") || storedUser?.id || storedUser?.pk || localStorage.getItem("userId");
+  const currentUserId = localStorage.getItem("user_id");
+  const isStaff = localStorage.getItem("is_staff") === "true";
 
+  const isOwner =
+    car?.listing_owner && currentUserId
+      ? String(car.listing_owner.id || car.listing_owner) === String(currentUserId)
+      : false;
+
+  const canEditOrDelete = isOwner || isStaff;
   const API_URL = import.meta.env?.VITE_API_URL || "http://127.0.0.1:8001/api";
 
-  // 1. İlan Detayını ve Kullanıcının Favori Durumunu Çek
+  // 🔹 İLAN VE FAVORİ DURUMUNU ÇEK
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -51,44 +54,31 @@ export default function CarDetailPage() {
     fetchListings(`/car/${id}/`)
       .then((data) => {
         setCar(data);
-
-        // Kullanıcı giriş yapmışsa favori durumunu kontrol et
         if (token) {
           fetch(`${API_URL}/listings/my-favorites/`, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
           })
-            .then((res) => (res.ok ? res.json() : []))
-            .then((favList) => {
-              if (Array.isArray(favList)) {
-                const found = favList.some(
-                  (fav) => String(fav.listing?.id) === String(id)
-                );
-                setIsFavorited(found);
+            .then((r) => (r.ok ? r.json() : []))
+            .then((favs) => {
+              if (Array.isArray(favs)) {
+                const favMatch = favs.some((f) => {
+                  const favListingId = f.listing?.id || f.listing || f.id;
+                  return String(favListingId) === String(id);
+                });
+                setIsFavorited(favMatch);
               }
             })
-            .catch((err) => console.error("Favori durumu alınamadı:", err));
+            .catch(() => {});
         }
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id, token, API_URL]);
 
-  const ownerId = car?.listing_owner?.id || car?.listing_owner?.pk || car?.listing_owner;
-
-  const isOwner = Boolean(token) && 
-                  Boolean(currentUserId) && 
-                  Boolean(ownerId) && 
-                  String(currentUserId) === String(ownerId);
-
   // 🔹 FAVORİYE EKLE / ÇIKAR
   const handleToggleFavorite = async () => {
     if (!token) {
-      if (window.confirm("Bu ilanı favoriye eklemek için giriş yapmalısınız. Giriş sayfasına yönlendirilsin mi?")) {
-        navigate("/login");
-      }
+      toast.error("Favoriye eklemek için lütfen önce giriş yapın.");
       return;
     }
 
@@ -104,12 +94,13 @@ export default function CarDetailPage() {
 
       const resData = await response.json().catch(() => ({}));
       if (!response.ok) {
-        throw new Error(resData.detail || "Favori işlemi gerçekleştirilemedi.");
+        throw new Error(formatApiError(resData) || "Favori işlemi gerçekleştirilemedi.");
       }
 
       setIsFavorited(resData.is_favorited);
+      toast.success(resData.is_favorited ? "İlan favorilere eklendi." : "İlan favorilerden çıkarıldı.");
     } catch (err) {
-      alert(`Hata: ${err.message}`);
+      toast.error(err.message || "Favori işlemi başarısız.");
     } finally {
       setIsFavoriting(false);
     }
@@ -120,9 +111,7 @@ export default function CarDetailPage() {
     e.preventDefault();
 
     if (!token) {
-      if (window.confirm("İlanı şikayet etmek için giriş yapmalısınız. Giriş sayfasına yönlendirilsin mi?")) {
-        navigate("/login");
-      }
+      toast.error("İlanı şikayet etmek için lütfen giriş yapın.");
       return;
     }
 
@@ -141,15 +130,14 @@ export default function CarDetailPage() {
 
       const resData = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const errorMsg = resData.detail || resData.non_field_errors?.[0] || "Şikayet iletilemedi.";
-        throw new Error(errorMsg);
+        throw new Error(formatApiError(resData) || "Şikayet iletilemedi.");
       }
 
-      alert("Şikayetiniz başarıyla iletildi. İncelenecektir.");
+      toast.success("Şikayetiniz başarıyla iletildi. İncelenecektir.");
       setIsReportModalOpen(false);
       setReportDescription("");
     } catch (err) {
-      alert(`Hata: ${err.message}`);
+      toast.error(err.message || "Şikayet iletilemedi.");
     } finally {
       setIsReporting(false);
     }
@@ -169,13 +157,12 @@ export default function CarDetailPage() {
       });
       const resData = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const errorMessage = resData.detail || resData.hata || resData.message || JSON.stringify(resData);
-        throw new Error(`[HTTP ${response.status}] ${errorMessage}`);
+        throw new Error(formatApiError(resData) || "İlan silinemedi.");
       }
-      alert("İlan başarıyla silindi.");
+      toast.success("İlan başarıyla silindi.");
       navigate("/all-cars");
     } catch (err) {
-      alert(`Hata: ${err.message}`);
+      toast.error(err.message || "Silme işlemi başarısız.");
     } finally {
       setIsDeleting(false);
     }

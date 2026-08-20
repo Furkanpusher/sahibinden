@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Car, CheckCircle2, XCircle, Loader2, Upload, Image as ImageIcon, X } from "lucide-react";
+import { ArrowLeft, Car, Loader2, Upload, Image as ImageIcon, X } from "lucide-react";
+import { toast } from "sonner";
 import { postListing, uploadListingImages } from "../../api";
 import { getCities, getDistricts, getCarBrands, getCarModels } from "../../data/helper";
 
@@ -11,7 +12,6 @@ const BODY_OPTIONS = ["Sedan", "Hatchback", "SUV", "Pickup", "Minivan", "Coupe",
 export default function CreateCarPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState(null);
 
   // 📸 Fotoğraf State'leri
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -65,7 +65,6 @@ export default function CreateCarPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setAlert(null);
 
     // Boş string alanları null yap, car_status → status olarak gönder
     const { car_status, ...rest } = form;
@@ -82,10 +81,10 @@ export default function CreateCarPage() {
         await uploadListingImages(createdCar.id, selectedFiles);
       }
 
-      setAlert({ type: "success", message: "İlan ve fotoğraflar başarıyla yüklendi!" });
+      toast.success("İlan ve fotoğraflar başarıyla yüklendi!");
       setTimeout(() => navigate("/all-cars"), 1200);
     } catch (err) {
-      setAlert({ type: "error", message: err.message });
+      toast.error(err.message || "İlan oluşturulurken bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -342,17 +341,6 @@ export default function CreateCarPage() {
               <span className="text-sm text-[#8B95A3]">Takasa uygun</span>
             </label>
           </Section>
-
-          {alert !== null && (
-            <div className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm ${
-              alert.type === "success"
-                ? "border-[#2B5240] bg-[#1B3A2E] text-[#6FCF97]"
-                : "border-[#522B2B] bg-[#3A1B1B] text-[#E88080]"
-            }`}>
-              {alert.type === "success" ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-              <span>{alert.message}</span>
-            </div>
-          )}
 
           <button
             type="submit"

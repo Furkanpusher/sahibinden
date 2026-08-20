@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, ShieldAlert, Trash2, Check, ExternalLink, AlertTriangle } from "lucide-react";
+import { toast } from "sonner";
 
 export default function StaffReportsPage() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export default function StaffReportsPage() {
   // 1. Staff Yetki Kontrolü ve Şikayetleri Çekme
   useEffect(() => {
     if (!token || !isStaff) {
-      alert("Bu sayfaya sadece yetkili (staff) kullanıcılar erişebilir.");
+      toast.error("Bu sayfaya sadece yetkili (staff) kullanıcılar erişebilir.");
       navigate("/");
       return;
     }
@@ -63,8 +64,9 @@ export default function StaffReportsPage() {
 
       // Listeden çıkar
       setReports((prev) => prev.filter((r) => r.id !== reportId));
+      toast.success("Şikayet kapatıldı.");
     } catch (err) {
-      alert(`Hata: ${err.message}`);
+      toast.error(err.message || "Şikayet kapatılamadı.");
     } finally {
       setProcessingId(null);
     }
@@ -83,11 +85,11 @@ export default function StaffReportsPage() {
 
       if (!res.ok) throw new Error("İlan silinemedi.");
 
-      alert("İlan yayından kaldırıldı.");
+      toast.success("İlan başarıyla yayından kaldırıldı.");
       // Bu ilana ait tüm şikayetleri listeden temizle
       setReports((prev) => prev.filter((r) => r.listing?.id !== listingId));
     } catch (err) {
-      alert(`Hata: ${err.message}`);
+      toast.error(err.message || "İlan silinemedi.");
     } finally {
       setProcessingId(null);
     }

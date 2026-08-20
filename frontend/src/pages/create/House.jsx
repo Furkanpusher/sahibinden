@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { ArrowLeft, Home, CheckCircle2, XCircle, Loader2, Upload, X } from "lucide-react";
+import { ArrowLeft, Home, Loader2, Upload, X } from "lucide-react";
+import { toast } from "sonner";
 import { postListing, uploadListingImages } from "../../api";
 import { getCities, getDistricts } from "../../data/helper";
 
@@ -11,7 +12,6 @@ const FLOOR_OPTIONS = ["Kot 1", "Giriş Katı", "Bahçe Katı", "1. Kat", "2. Ka
 export default function CreateHousePage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [alert, setAlert] = useState(null);
 
   // 📸 Fotoğraf State'leri
   const [selectedFiles, setSelectedFiles] = useState([]);
@@ -66,7 +66,6 @@ export default function CreateHousePage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setAlert(null);
 
     const payload = Object.fromEntries(
       Object.entries(form).map(([k, v]) => [k, v === "" ? null : v])
@@ -81,10 +80,10 @@ export default function CreateHousePage() {
         await uploadListingImages(createdHouse.id, selectedFiles);
       }
 
-      setAlert({ type: "success", message: "Ev ilanı ve fotoğraflar başarıyla yüklendi!" });
+      toast.success("Ev ilanı ve fotoğraflar başarıyla yüklendi!");
       setTimeout(() => navigate("/all-houses"), 1200);
     } catch (err) {
-      setAlert({ type: "error", message: err.message });
+      toast.error(err.message || "Ev ilanı oluşturulurken bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -274,17 +273,6 @@ export default function CreateHousePage() {
               <span className="text-sm text-[#8B95A3]">Krediye Uygun</span>
             </label>
           </Section>
-
-          {alert !== null && (
-            <div className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-sm ${
-              alert.type === "success"
-                ? "border-[#2B5240] bg-[#1B3A2E] text-[#6FCF97]"
-                : "border-[#522B2B] bg-[#3A1B1B] text-[#E88080]"
-            }`}>
-              {alert.type === "success" ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
-              <span>{alert.message}</span>
-            </div>
-          )}
 
           <button
             type="submit"
