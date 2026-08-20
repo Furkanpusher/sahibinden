@@ -7,8 +7,9 @@ from listings.models import CarListing
 from listings.serializers import CarListingSerializer
 from listings.permissions import IsOwnerOrReadOnly
 from rest_framework.pagination import PageNumberPagination
-from ..services import (get_all_cars, filter_cars, get_car_by_id,
+from ..services import (filter_listings, get_listing_by_id,
                         create_listing, delete_listing, update_listing)
+from ..filters import CarFilter
 
 
 class CarPagination(PageNumberPagination):
@@ -25,7 +26,7 @@ class CarListingView(APIView):
     # for each item in permission_classes, get_permissions() creates an object instance of it.
 
     def get(self, request):
-        cars = filter_cars(request.query_params)
+        cars = filter_listings(CarListing, CarFilter, request.query_params)
 
         # Paginator
         paginator = CarPagination()
@@ -59,7 +60,7 @@ class CarDetailView(APIView):
 
     def dispatch(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
-        self.car = get_car_by_id(pk)
+        self.car = get_listing_by_id(CarListing, pk=pk)
         return super().dispatch(request, *args, **kwargs)  # root dispatch continues
 
     def get(self, request, pk):

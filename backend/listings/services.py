@@ -1,47 +1,31 @@
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
-from .models import Listing, CarListing, HouseListing, Favorite, Report, ListingImage
-from .filters import CarFilter, HouseFilter
+from .models import Listing, Favorite, Report, ListingImage
 
 
 """ BASIC GET METHODS """
 
-# Retrieves all car listings with their owners
+# Retrieves all listings of a specific model with their owners
 
 
-def get_all_cars():
-    return CarListing.objects.select_related("listing_owner").all().order_by("-id")
+def get_all_listings(model_class):
+    return model_class.objects.select_related("listing_owner").all().order_by("-listing_date")
 
 
-# Retrieves all house listings with their owners
-def get_all_houses():
-    return HouseListing.objects.select_related("listing_owner").all().order_by("-id")
+# Retrieves a listing by ID for a given model
+def get_listing_by_id(model_class, pk):
+    return get_object_or_404(model_class, pk=pk)
 
 
-def get_car_by_id(pk):
-    return get_object_or_404(CarListing, pk=pk)
+""" FILTERING FUNCTION """
 
 
-def get_house_by_id(pk):
-    return get_object_or_404(HouseListing, pk=pk)
+def filter_listings(model_class, filter_class, query_params):
+    # you must specify which model and filter class you will use
 
-
-""" FILTERING FUNCTIONS """
-
-# Car listing search & filter
-
-
-def filter_cars(query_params=None, **kwargs):
-    params = query_params if query_params is not None else kwargs
-    qs = CarListing.objects.select_related("listing_owner").all().order_by("-id")
-    return CarFilter(params, queryset=qs).qs
-
-
-# House listing search & filter
-def filter_houses(query_params=None, **kwargs):
-    params = query_params if query_params is not None else kwargs
-    qs = HouseListing.objects.select_related("listing_owner").all().order_by("-id")
-    return HouseFilter(params, queryset=qs).qs
+    qs = model_class.objects.select_related(
+        "listing_owner").all().order_by("-listing_date")
+    return filter_class(query_params, queryset=qs).qs
 
 
 """ LISTING CRUD OPERATIONS """
@@ -71,14 +55,11 @@ def update_listing(instance, serializer_class, data, partial=True):
 
 """ FAVORITES """
 
-# Toggle favorite status for a listing
-
 
 def toggle_favorite(user, pk):
+    # Toggle favorite status for a listing
     listing = get_object_or_404(Listing, pk=pk)
-
-    # get_or_create prevents duplicate objects in the database
-    favorite, created = Favorite.objects.get_or_create(
+    favorite, created = Favorite.objects.get_or_create(  # get_or_create prevents duplicate objects in the database
         user=user, listing=listing)
 
     # If already favorited, delete it on click (toggle behavior)
@@ -94,8 +75,6 @@ def get_user_favorites(user):
 
 
 """ REPORTS """
-
-# Report a listing
 
 
 def report_listing(user, pk, description=""):
@@ -128,8 +107,6 @@ def get_all_reports():
 
 
 """ LISTING IMAGES """
-
-# Upload and attach images to a listing
 
 
 def add_images_to_listing(listing, image_files, is_cover=False):

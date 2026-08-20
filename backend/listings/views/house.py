@@ -6,8 +6,9 @@ from rest_framework.pagination import PageNumberPagination
 from listings.models import HouseListing
 from listings.serializers import HouseListingSerializer
 from listings.permissions import IsOwnerOrReadOnly
-from ..services import (filter_houses, get_house_by_id,
+from ..services import (filter_listings, get_listing_by_id,
                         create_listing, delete_listing, update_listing)
+from ..filters import HouseFilter
 
 
 class HousePagination(PageNumberPagination):
@@ -21,7 +22,8 @@ class HouseListView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
-        houses = filter_houses(request.query_params)
+        houses = filter_listings(
+            HouseListing, HouseFilter, request.query_params)
 
         paginator = HousePagination()
         page = paginator.paginate_queryset(
@@ -50,7 +52,7 @@ class HouseDetailView(APIView):
 
     def dispatch(self, request, *args, **kwargs):
         pk = kwargs.get("pk")
-        self.house = get_house_by_id(pk)
+        self.house = get_listing_by_id(HouseListing, pk=pk)
         return super().dispatch(request, *args, **kwargs)
 
     def get(self, request, pk):
