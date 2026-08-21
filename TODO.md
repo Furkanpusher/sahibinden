@@ -25,8 +25,12 @@ mintlify
 logout - login problem   DONE
 while creating listing, remove the date part and make it auto_now_add = True DONE
 reduce endpoints(from top level to bottom level group your endpoints) DONE
+accces token süresi dolunca oturum süresi dolmuştur de logout edip logine yönlendir
 
 
-# api/listings/cars speed : first 102,4566, last 40,0601
-# api/listings/house speed: first 92,2397, last 39,0232
 
+# api/listings/cars speed : 40,0601
+# api/listings/house speed: 39,0232
+
+# cache li api/listings/cars speed :  13,2518
+# cache li api/listings/house speed:  15,5752
