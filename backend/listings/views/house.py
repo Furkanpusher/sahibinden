@@ -9,6 +9,7 @@ from listings.permissions import IsOwnerOrReadOnly
 from ..services import (filter_listings, get_listing_by_id,
                         create_listing, delete_listing, update_listing)
 from ..filters import HouseFilter
+from django.core.cache import cache
 
 
 class HousePagination(PageNumberPagination):
@@ -18,32 +19,61 @@ class HousePagination(PageNumberPagination):
     max_page_size = 50
 
 
+CACHE_TIMEOUT = 60 * 60  # 1 hour
+CACHEABLE_PAGES = {"1", "2"}
+CACHE_KEY_PREFIX = "house_listings_page"
+
+
 class HouseListView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
-        houses = filter_listings(
-            HouseListing, HouseFilter, request.query_params)
 
+        page_number = request.query_params.get("page", "1")
+        has_custom_fiters = any(key != "page" for key in request.query_params)
+        is_cacheable = (not has_custom_fiters) and (
+            page_number in CACHEABLE_PAGES)
+        cache_key = f"{CACHE_KEY_PREFIX}_{page_number}"
+
+        # 2. Cache check
+        if is_cacheable:
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                return Response(cached_data, status=status.HTTP_200_OK)
+        # get pagination
+        house_queryset = filter_listings(
+            HouseListing, HouseFilter, request.query_params
+        )
         paginator = HousePagination()
-        page = paginator.paginate_queryset(
-            queryset=houses, request=request, view=self)
+        paginated_houses = paginator.paginate_queryset(
+            queryset=house_queryset, request=request, view=self
+        )
 
-        if page is not None:
-            serializer = HouseListingSerializer(page, many=True)
-            return paginator.get_paginated_response(serializer.data)
+        if paginated_houses is not None:
+            serializer = HouseListingSerializer(paginated_houses, many=True)
+            response = paginator.get_paginated_response(serializer.data)
+            if is_cacheable:
+                cache.set(cache_key, response.data, timeout=CACHE_TIMEOUT)
+            return response
 
         # Fallback
-        serializer = HouseListingSerializer(houses, many=True)
+        serializer = HouseListingSerializer(house_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        # IsAuthenticated
+
         serializer = HouseListingSerializer(data=request.data)
         if serializer.is_valid():
             house = create_listing(
-                HouseListing, user=request.user, data=serializer.validated_data)
+                HouseListing,
+                user=request.user,
+                data=serializer.validated_data)
+            # if creation is successfull flush the cache
+            cache.delete_many(keys=[
+                f"{CACHE_KEY_PREFIX}_{page}" for page in CACHEABLE_PAGES
+            ])
             return Response(HouseListingSerializer(house).data, status=status.HTTP_201_CREATED)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
