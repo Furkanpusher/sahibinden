@@ -108,6 +108,20 @@ DATABASES = {
     }
 }
 
+# Redis Cache Configuration
+# https://docs.djangoproject.com/en/5.2/topics/cache/
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1"),
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+        "TIMEOUT": 60 * 15,  # 15 minutes default cache TTL
+        # TTL: Time to Live - Önbelleğe alınan verinin kaç saniye sonra silineceğini belirler
+    }
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
