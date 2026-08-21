@@ -6,7 +6,6 @@ from django.core.cache import cache
 CACHE_TIMEOUT = 60 * 60  # 1 hour
 CACHEABLE_PAGES = {"1", "2"}
 
-# Prefix Tanımları
 CAR_CACHE_PREFIX = "car_listings_page"
 HOUSE_CACHE_PREFIX = "house_listings_page"
 
