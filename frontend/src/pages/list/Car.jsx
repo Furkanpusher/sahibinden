@@ -86,7 +86,7 @@ export default function CarListPage() {
       page_size: itemsPerPage,
     };
 
-    fetchListings("/all-cars/", queryParams)
+    fetchListings("/cars/", queryParams)
       .then((data) => {
         // Backend pagination yapısına göre state'leri doldur
         setCars(data.results || []);
@@ -354,7 +354,7 @@ export default function CarListPage() {
               <>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8">
                   {cars.map((car) => (
-                    <Link to={`/car/${car.id}`} key={car.id} className="group min-w-0">
+                    <Link to={`/cars/${car.id}`} key={car.id} className="group min-w-0">
                       <div className="relative mb-2 aspect-[4/3] w-full overflow-hidden rounded-lg border border-[#232E3D] bg-[#161F2B] transition-all duration-300 group-hover:border-[#4A5568] group-hover:shadow-lg group-hover:shadow-black/10">
                         {/* 📸 Çözümlenen Görsel */}
                         <img

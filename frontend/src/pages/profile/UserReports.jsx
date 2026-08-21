@@ -39,8 +39,8 @@ export default function UserReportsPage() {
     }
 
     setLoading(true);
-    // 🎯 BURASI: /api/listings/my-reports/ endpoint'ine istek atar
-    fetch("http://localhost:8001/api/listings/my-reports/", {
+    // 🎯 BURASI: /api/listings/reports/ endpoint'ine istek atar
+    fetch("http://localhost:8001/api/listings/reports/", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -150,7 +150,7 @@ export default function UserReportsPage() {
                 if (!listing) return null;
 
                 const isCar = listing.listing_type === "car";
-                const detailUrl = isCar ? `/car/${listing.id}` : `/house/${listing.id}`;
+                const detailUrl = isCar ? `/cars/${listing.id}` : `/houses/${listing.id}`;
                 const defaultImg = isCar
                   ? carImages[listing.id % carImages.length]
                   : houseImages[listing.id % houseImages.length];

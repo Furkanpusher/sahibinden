@@ -25,7 +25,7 @@ export default function HouseUpdatePage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetchListings(`/house/${id}/`)
+    fetchListings(`/houses/${id}/`)
       .then((data) => {
         if (!data) return;
         const initialData = {
@@ -69,7 +69,7 @@ export default function HouseUpdatePage() {
     // Hiçbir alan değişmediyse gereksiz istek gönderme
     if (Object.keys(changedPayload).length === 0) {
       toast.info("Herhangi bir değişiklik yapılmadı.");
-      navigate(`/house/${id}`);
+      navigate(`/houses/${id}`);
       return;
     }
 
@@ -79,7 +79,7 @@ export default function HouseUpdatePage() {
       const token = localStorage.getItem("access") || localStorage.getItem("token") || localStorage.getItem("access_token");
       const API_URL = import.meta.env?.VITE_API_URL || "http://127.0.0.1:8001/api";
 
-      const response = await fetch(`${API_URL}/listings/house/${id}/`, {
+      const response = await fetch(`${API_URL}/listings/houses/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -95,7 +95,7 @@ export default function HouseUpdatePage() {
       }
 
       toast.success("Ev ilanı başarıyla güncellendi!");
-      setTimeout(() => navigate(`/house/${id}`), 1200);
+      setTimeout(() => navigate(`/houses/${id}`), 1200);
     } catch (err) {
       toast.error(err.message || "Güncelleme sırasında bir hata oluştu.");
     } finally {
@@ -115,7 +115,7 @@ export default function HouseUpdatePage() {
     return (
       <div className="min-h-screen bg-[#0F1720] flex flex-col items-center justify-center text-[#8B95A3]">
         <p className="mb-4">İlan yüklenemedi: {error}</p>
-        <Link to="/all-houses" className="text-[#E8A33D] text-sm hover:underline">
+        <Link to="/houses" className="text-[#E8A33D] text-sm hover:underline">
           Ev listesine dön
         </Link>
       </div>
@@ -125,7 +125,7 @@ export default function HouseUpdatePage() {
   return (
     <div className="min-h-screen bg-[#0F1720] px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-2xl">
-        <Link to={`/house/${id}`} className="group mb-6 inline-flex items-center gap-1.5 text-sm text-[#8B95A3] hover:text-[#EDEFF2] transition-colors">
+        <Link to={`/houses/${id}`} className="group mb-6 inline-flex items-center gap-1.5 text-sm text-[#8B95A3] hover:text-[#EDEFF2] transition-colors">
           <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
           İlan Detayına Dön
         </Link>

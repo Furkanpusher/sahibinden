@@ -21,11 +21,11 @@ export default function App() {
       <Toaster richColors position="top-right" theme="dark" closeButton />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/all-cars" element={<CarList />} />
-        <Route path="/all-houses" element={<HouseList />} />
+        <Route path="/cars" element={<CarList />} />
+        <Route path="/houses" element={<HouseList />} />
         <Route path="/login" element={<AuthPage />} />
-        <Route path="/car/:id" element={<CarDetail />} />
-        <Route path="/house/:id" element={<HouseDetail />} />
+        <Route path="/cars/:id" element={<CarDetail />} />
+        <Route path="/houses/:id" element={<HouseDetail />} />
         <Route path="/araba-ilan-olustur" element={<CarCreate />} />
         <Route path="/ev-ilan-olustur" element={<HouseCreate />} />
         <Route path="/araba-ilan-guncelle/:id" element={<CarUpdate />} />

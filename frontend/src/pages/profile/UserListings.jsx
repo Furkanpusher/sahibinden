@@ -45,8 +45,8 @@ export default function UserListings() {
     setLoading(true);
     // Hem arabaları hem evleri çekip kullanıcının olanları filtreliyoruz
     Promise.all([
-      fetchListings("/all-cars/", { page_size: 50 }),
-      fetchListings("/all-houses/", { page_size: 50 }),
+      fetchListings("/cars/", { page_size: 50 }),
+      fetchListings("/houses/", { page_size: 50 }),
     ])
       .then(([carsData, housesData]) => {
         const carList = Array.isArray(carsData) ? carsData : (carsData?.results || []);
@@ -197,7 +197,7 @@ export default function UserListings() {
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
               {filteredListings.map((item) => {
                 const isCar = item.listing_type === "car";
-                const detailUrl = isCar ? `/car/${item.id}` : `/house/${item.id}`;
+                const detailUrl = isCar ? `/cars/${item.id}` : `/houses/${item.id}`;
                 const updateUrl = isCar ? `/araba-ilan-guncelle/${item.id}` : `/ev-ilan-guncelle/${item.id}`;
                 const defaultImg = isCar
                   ? item.imageUrl || carImages[item.id % carImages.length]

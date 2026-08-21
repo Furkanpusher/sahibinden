@@ -54,14 +54,14 @@ export default function HomePage() {
         {/* Categories */}
         <div className="grid w-full max-w-4xl grid-cols-1 gap-5 md:grid-cols-2">
           <CategoryCard
-            to="/all-cars"
+            to="/cars"
             icon={<Car size={28} />}
             title="Araç İlanları"
             desc="Marka, model, vites tipi, fiyat ve konuma göre araçları filtrele."
           />
 
           <CategoryCard
-            to="/all-houses"
+            to="/houses"
             icon={<HomeIcon size={28} />}
             title="Ev İlanları"
             desc="Oda sayısı, fiyat aralığı ve konuma göre ev ilanlarını keşfet."

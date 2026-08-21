@@ -82,7 +82,7 @@ export default function HouseListPage() {
       page_size: itemsPerPage,
     };
 
-    fetchListings("/all-houses/", queryParams)
+    fetchListings("/houses/", queryParams)
       .then((data) => {
         setHouses(data.results || []);
         setTotalCount(data.count || 0);
@@ -317,7 +317,7 @@ export default function HouseListPage() {
               <>
                 <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8">
                   {houses.map((house) => (
-                    <Link to={`/house/${house.id}`} key={house.id} className="group min-w-0">
+                    <Link to={`/houses/${house.id}`} key={house.id} className="group min-w-0">
                       <div className="relative mb-2 aspect-[4/3] w-full overflow-hidden rounded-lg border border-[#232E3D] bg-[#161F2B] transition-all duration-300 group-hover:border-[#4A5568] group-hover:shadow-lg group-hover:shadow-black/10">
                         {/* 📸 Çözümlenen Görsel */}
                         <img

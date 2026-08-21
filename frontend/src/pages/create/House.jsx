@@ -72,7 +72,7 @@ export default function CreateHousePage() {
 
     try {
       // 1. Ev İlanını oluştur
-      const createdHouse = await postListing("/all-houses/", payload);
+      const createdHouse = await postListing("/houses/", payload);
 
       // 2. Seçilen fotoğrafları ilana yükle
       if (selectedFiles.length > 0 && createdHouse?.id) {
@@ -80,7 +80,7 @@ export default function CreateHousePage() {
       }
 
       toast.success("Ev ilanı ve fotoğraflar başarıyla yüklendi!");
-      setTimeout(() => navigate("/all-houses"), 1200);
+      setTimeout(() => navigate("/houses"), 1200);
     } catch (err) {
       toast.error(err.message || "Ev ilanı oluşturulurken bir hata oluştu.");
     } finally {
@@ -91,7 +91,7 @@ export default function CreateHousePage() {
   return (
     <div className="min-h-screen bg-[#0F1720] px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-2xl">
-        <Link to="/all-houses" className="group mb-6 inline-flex items-center gap-1.5 text-sm text-[#8B95A3] hover:text-[#EDEFF2] transition-colors">
+        <Link to="/houses" className="group mb-6 inline-flex items-center gap-1.5 text-sm text-[#8B95A3] hover:text-[#EDEFF2] transition-colors">
           <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
           Ev İlanları
         </Link>

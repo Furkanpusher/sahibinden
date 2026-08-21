@@ -55,7 +55,7 @@ export default function StaffReportsPage() {
 
     setProcessingId(reportId);
     try {
-      const res = await fetch(`${API_URL}/listings/staff/reports/${reportId}/delete/`, {
+      const res = await fetch(`${API_URL}/listings/staff/reports/${reportId}/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -78,7 +78,7 @@ export default function StaffReportsPage() {
 
     setProcessingId(reportId);
     try {
-      const res = await fetch(`${API_URL}/listings/staff/listings/${listingId}/delete/`, {
+      const res = await fetch(`${API_URL}/listings/staff/listings/${listingId}/`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -153,8 +153,8 @@ export default function StaffReportsPage() {
             
             // 📍 1. BURAYA EKLİYORUZ (İlanın tipine göre link belirleniyor)
             const detailUrl = report.listing?.listing_type === "house"
-                ? `/house/${report.listing?.id}`
-                : `/car/${report.listing?.id}`;
+                ? `/houses/${report.listing?.id}`
+                : `/cars/${report.listing?.id}`;
             return (
                 <div
                 key={report.id}

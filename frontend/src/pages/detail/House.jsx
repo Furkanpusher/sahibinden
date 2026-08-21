@@ -50,13 +50,13 @@ export default function HouseDetailPage() {
     setLoading(true);
     setError(null);
 
-    fetchListings(`/house/${id}/`)
+    fetchListings(`/houses/${id}/`)
       .then((data) => {
         setHouse(data);
 
         // Kullanıcı giriş yapmışsa bu ev favorilerinde var mı kontrol et
         if (token) {
-          fetch(`${API_URL}/listings/my-favorites/`, {
+          fetch(`${API_URL}/listings/favorites/`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
@@ -96,7 +96,7 @@ export default function HouseDetailPage() {
 
     setIsFavoriting(true);
     try {
-      const response = await fetch(`${API_URL}/listings/listing/${id}/favorite/`, {
+      const response = await fetch(`${API_URL}/listings/listings/${id}/favorite/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -129,7 +129,7 @@ export default function HouseDetailPage() {
 
     setIsReporting(true);
     try {
-      const response = await fetch(`${API_URL}/listings/listing/${id}/report/`, {
+      const response = await fetch(`${API_URL}/listings/listings/${id}/report/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -163,7 +163,7 @@ export default function HouseDetailPage() {
 
     setIsDeleting(true);
     try {
-      const response = await fetch(`${API_URL}/listings/house/${id}/`, {
+      const response = await fetch(`${API_URL}/listings/houses/${id}/`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -177,7 +177,7 @@ export default function HouseDetailPage() {
       }
 
       toast.success("Ev ilanı başarıyla silindi.");
-      navigate("/all-houses");
+      navigate("/houses");
     } catch (err) {
       toast.error(err.message || "Silme işlemi başarısız.");
     } finally {
@@ -197,7 +197,7 @@ export default function HouseDetailPage() {
     return (
       <div className="min-h-screen bg-[#0F1720] flex flex-col items-center justify-center text-[#8B95A3]">
         <p className="mb-4">İlan bulunamadı.</p>
-        <Link to="/all-houses" className="text-[#E8A33D] text-sm hover:underline">
+        <Link to="/houses" className="text-[#E8A33D] text-sm hover:underline">
           Ev listesine dön
         </Link>
       </div>
@@ -231,7 +231,7 @@ export default function HouseDetailPage() {
     <div className="min-h-screen bg-[#0F1720] px-4 py-5 text-[#EDEFF2] sm:px-6 lg:px-8 lg:py-7">
       <div className="max-w-5xl mx-auto">
         <Link
-          to="/all-houses"
+          to="/houses"
           className="group mb-5 inline-flex items-center gap-2 text-sm font-medium text-[#8B95A3] transition-colors hover:text-[#EDEFF2]"
         >
           <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />

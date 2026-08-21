@@ -36,7 +36,7 @@ export default function CarUpdatePage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    fetchListings(`/car/${id}/`)
+    fetchListings(`/cars/${id}/`)
       .then((data) => {
         if (!data) return;
         const initialData = {
@@ -101,7 +101,7 @@ export default function CarUpdatePage() {
     // Hiçbir alan değişmediyse gereksiz istek gönderme
     if (Object.keys(changedPayload).length === 0) {
       toast.info("Herhangi bir değişiklik yapılmadı.");
-      navigate(`/car/${id}`);
+      navigate(`/cars/${id}`);
       return;
     }
 
@@ -111,7 +111,7 @@ export default function CarUpdatePage() {
       const token = localStorage.getItem("access") || localStorage.getItem("token") || localStorage.getItem("access_token");
       const API_URL = import.meta.env?.VITE_API_URL || "http://127.0.0.1:8001/api";
 
-      const response = await fetch(`${API_URL}/listings/car/${id}/`, {
+      const response = await fetch(`${API_URL}/listings/cars/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -127,7 +127,7 @@ export default function CarUpdatePage() {
       }
 
       toast.success("İlan başarıyla güncellendi!");
-      setTimeout(() => navigate(`/car/${id}`), 1200);
+      setTimeout(() => navigate(`/cars/${id}`), 1200);
     } catch (err) {
       toast.error(err.message || "Güncelleme sırasında bir hata oluştu.");
     } finally {
@@ -147,7 +147,7 @@ export default function CarUpdatePage() {
     return (
       <div className="min-h-screen bg-[#0F1720] flex flex-col items-center justify-center text-[#8B95A3]">
         <p className="mb-4">İlan bilgileri yüklenemedi: {error}</p>
-        <Link to="/all-cars" className="text-[#E8A33D] text-sm hover:underline">
+        <Link to="/cars" className="text-[#E8A33D] text-sm hover:underline">
           Araç listesine dön
         </Link>
       </div>
@@ -157,7 +157,7 @@ export default function CarUpdatePage() {
   return (
     <div className="min-h-screen bg-[#0F1720] px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-2xl">
-        <Link to={`/car/${id}`} className="group mb-6 inline-flex items-center gap-1.5 text-sm text-[#8B95A3] hover:text-[#EDEFF2] transition-colors">
+        <Link to={`/cars/${id}`} className="group mb-6 inline-flex items-center gap-1.5 text-sm text-[#8B95A3] hover:text-[#EDEFF2] transition-colors">
           <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
           İlan Detayına Dön
         </Link>

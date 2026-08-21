@@ -11,32 +11,30 @@ from .views import (
 
 urlpatterns = [
 
-    path("all-cars/", CarListingView.as_view(),
-         name="all-cars"),  # product page
-    path("all-houses/", HouseListView.as_view(), name="all-houses"),
+    # Cars
+    path("cars/", CarListingView.as_view(), name="car-list"),
+    path("cars/<int:pk>/", CarDetailView.as_view(), name="car-detail"),
 
-    path("car/<int:pk>/", CarDetailView.as_view(),
-         name="car-detail"),  # detail page
-    path("house/<int:pk>/", HouseDetailView.as_view(), name="house-detail"),
+    # Houses
+    path("houses/", HouseListView.as_view(), name="house-list"),
+    path("houses/<int:pk>/", HouseDetailView.as_view(), name="house-detail"),
 
-    path("listing/<int:pk>/favorite/", FavoriteToggleView.as_view(),
-         name="toggle-favorite"),  # favorites
-    path("my-favorites/", UserFavoritesListView.as_view(), name="user-favorites"),
+    # Common Functions(Favorites, Reports, Images)
+    path("listings/<int:pk>/favorite/",
+         FavoriteToggleView.as_view(), name="toggle-favorite"),
+    path("listings/<int:pk>/report/",
+         ReportListingView.as_view(), name="report-listing"),
+    path("listings/<int:pk>/images/",
+         ListingImageUploadView.as_view(), name="upload-images"),
 
-    path("listing/<int:pk>/report/", ReportListingView.as_view(),
-         name="report-listing"),  # reports
-    path("my-reports/", UserReportsListView.as_view(), name="user-reports"),
+    # User Specific Lists
+    path("favorites/", UserFavoritesListView.as_view(), name="user-favorites"),
+    path("reports/", UserReportsListView.as_view(), name="user-reports"),
 
-    # staff urls
-    path("staff/reports/", StaffReportListView.as_view(),
-         name="staff-reports"),  # staff
-    path("staff/reports/<int:pk>/delete/",
-         StaffDeleteReportView.as_view(), name="staff-delete-report"),
-    path("staff/listings/<int:pk>/delete/",
-         StaffDeleteListingView.as_view(), name="staff-delete-listing"),
-
-    # image
-    path('listing/<int:pk>/upload-images/',
-         ListingImageUploadView.as_view(), name='upload-listing-images'),
-
+    # Staff Specific Lists
+    path("staff/reports/", StaffReportListView.as_view(), name="staff-reports"),
+    path("staff/reports/<int:pk>/", StaffDeleteReportView.as_view(),
+         name="staff-delete-report"),
+    path("staff/listings/<int:pk>/", StaffDeleteListingView.as_view(),
+         name="staff-delete-listing")
 ]

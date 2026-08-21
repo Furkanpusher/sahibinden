@@ -67,7 +67,7 @@ export async function uploadListingImages(listingId, files) {
     formData.append("images", files[i]);
   }
 
-  const res = await fetch(`${API_BASE}/listing/${listingId}/upload-images/`, {
+  const res = await fetch(`${API_BASE}/listings/${listingId}/images/`, {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${token}`,

@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { 
-  ArrowLeft, 
-  Heart, 
-  Loader2, 
-  SearchX, 
-  Car, 
+import {
+  ArrowLeft,
+  Heart,
+  Loader2,
+  SearchX,
+  Car,
   Home as HomeIcon,
   Calendar,
   MapPin
@@ -33,7 +33,7 @@ export default function UserFavorites() {
       return;
     }
     setLoading(true);
-    fetch("http://localhost:8001/api/listings/my-favorites/", {
+    fetch("http://localhost:8001/api/listings/favorites/", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -66,7 +66,7 @@ export default function UserFavorites() {
   return (
     <div className="min-h-screen bg-[#0F1720] px-4 py-5 text-[#EDEFF2] sm:px-6 lg:px-8 lg:py-7">
       <div className="mx-auto max-w-7xl">
-        
+
         {/* Üst Bar */}
         <header className="mb-8 border-b border-[#232E3D] pb-5">
           <div className="flex items-center justify-between mb-5">
@@ -102,22 +102,20 @@ export default function UserFavorites() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("all")}
-                  className={`rounded-lg px-3 py-1.5 transition-colors ${
-                    activeTab === "all"
+                  className={`rounded-lg px-3 py-1.5 transition-colors ${activeTab === "all"
                       ? "bg-[#E8A33D] text-[#0F1720] font-semibold"
                       : "text-[#8B95A3] hover:text-[#EDEFF2]"
-                  }`}
+                    }`}
                 >
                   Tümü ({favorites.length})
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveTab("car")}
-                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-colors ${
-                    activeTab === "car"
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-colors ${activeTab === "car"
                       ? "bg-[#E8A33D] text-[#0F1720] font-semibold"
                       : "text-[#8B95A3] hover:text-[#EDEFF2]"
-                  }`}
+                    }`}
                 >
                   <Car size={13} />
                   Arabalar ({favorites.filter((f) => f.listing?.listing_type === "car").length})
@@ -125,11 +123,10 @@ export default function UserFavorites() {
                 <button
                   type="button"
                   onClick={() => setActiveTab("house")}
-                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-colors ${
-                    activeTab === "house"
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 transition-colors ${activeTab === "house"
                       ? "bg-[#E8A33D] text-[#0F1720] font-semibold"
                       : "text-[#8B95A3] hover:text-[#EDEFF2]"
-                  }`}
+                    }`}
                 >
                   <HomeIcon size={13} />
                   Evler ({favorites.filter((f) => f.listing?.listing_type === "house").length})
@@ -178,7 +175,7 @@ export default function UserFavorites() {
                 const listing = fav.listing;
                 if (!listing) return null;
                 const isCar = listing.listing_type === "car";
-                const detailUrl = isCar ? `/car/${listing.id}` : `/house/${listing.id}`;
+                const detailUrl = isCar ? `/cars/${listing.id}` : `/houses/${listing.id}`;
                 const defaultImg = isCar
                   ? carImages[listing.id % carImages.length]
                   : houseImages[listing.id % houseImages.length];
@@ -195,7 +192,7 @@ export default function UserFavorites() {
                         alt={listing.title}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
                       />
-                      
+
                       {/* Tip Rozeti (Araba / Ev) */}
                       <span className="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-[#0F1720]/80 px-2 py-0.5 text-[10px] font-semibold text-[#EDEFF2] backdrop-blur-sm border border-[#232E3D]">
                         {isCar ? <Car size={11} className="text-[#E8A33D]" /> : <HomeIcon size={11} className="text-[#3B82F6]" />}

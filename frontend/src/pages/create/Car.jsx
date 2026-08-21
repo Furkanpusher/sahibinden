@@ -74,7 +74,7 @@ export default function CreateCarPage() {
 
     try {
       // 1. İlanı oluştur
-      const createdCar = await postListing("/all-cars/", payload);
+      const createdCar = await postListing("/cars/", payload);
 
       // 2. Fotoğraflar varsa ilana yükle
       if (selectedFiles.length > 0 && createdCar?.id) {
@@ -82,7 +82,7 @@ export default function CreateCarPage() {
       }
 
       toast.success("İlan ve fotoğraflar başarıyla yüklendi!");
-      setTimeout(() => navigate("/all-cars"), 1200);
+      setTimeout(() => navigate("/cars"), 1200);
     } catch (err) {
       toast.error(err.message || "İlan oluşturulurken bir hata oluştu.");
     } finally {
@@ -93,7 +93,7 @@ export default function CreateCarPage() {
   return (
     <div className="min-h-screen bg-[#0F1720] px-4 py-8 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-2xl">
-        <Link to="/all-cars" className="group mb-6 inline-flex items-center gap-1.5 text-sm text-[#8B95A3] hover:text-[#EDEFF2] transition-colors">
+        <Link to="/cars" className="group mb-6 inline-flex items-center gap-1.5 text-sm text-[#8B95A3] hover:text-[#EDEFF2] transition-colors">
           <ArrowLeft size={16} className="transition-transform group-hover:-translate-x-1" />
           Araç İlanları
         </Link>
