@@ -32,7 +32,7 @@ def set_cached_listing_page(cache_key, data):
         cache.set(cache_key, data, timeout=CACHE_TIMEOUT)
 
 
-def invalidate_listing_cache(prefix):
+def flush_listing_cache(prefix):
     # if any listing is deleted, updated or created, flush the cache
     keys_to_delete = [f"{prefix}_{page}" for page in CACHEABLE_PAGES]
     cache.delete_many(keys_to_delete)
