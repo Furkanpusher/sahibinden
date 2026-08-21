@@ -36,6 +36,30 @@ class CarListingSerializer(serializers.ModelSerializer):
     listing_owner = serializers.PrimaryKeyRelatedField(read_only=True)
     images = ListingImageSerializer(many=True, read_only=True)
 
+    TRANSMISSION_MAP = {
+        "düz": "manuel",
+        "duz": "manuel",
+        "manuel": "manuel",
+        "manual": "manuel",
+        "otomatik": "otomatik",
+        "automatic": "otomatik",
+        "yarı otomatik": "yarı otomatik",
+        "yari otomatik": "yarı otomatik",
+    }
+
+    def to_internal_value(self, data):
+        if hasattr(data, "copy"):
+            data = data.copy()
+        else:
+            data = dict(data)
+
+        vites = data.get("transmission_type")
+        if isinstance(vites, str) and vites.strip():
+            vites_norm = vites.strip().lower()
+            data["transmission_type"] = self.TRANSMISSION_MAP.get(vites_norm, vites)
+
+        return super().to_internal_value(data)
+
     class Meta:
         model = CarListing
         fields = ['id', 'title', 'city', 'district', 'price', 'listing_owner', 'listing_date',

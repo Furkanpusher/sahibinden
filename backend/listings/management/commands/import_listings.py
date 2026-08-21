@@ -57,6 +57,26 @@ def temizle_bool(deger, pozitif_kelime):
     return pozitif_kelime.lower() in str(deger).lower() and "değil" not in str(deger).lower()
 
 
+VITES_MAP = {
+    "düz": "manuel",
+    "duz": "manuel",
+    "manuel": "manuel",
+    "manual": "manuel",
+    "otomatik": "otomatik",
+    "automatic": "otomatik",
+    "yarı otomatik": "yarı otomatik",
+    "yari otomatik": "yarı otomatik",
+}
+
+
+def temizle_vites(deger):
+    """'Düz', 'Manuel', 'Otomatik', 'Yarı Otomatik' -> modeldeki seçenek ('manuel', 'otomatik', 'yarı otomatik')."""
+    if not deger or not str(deger).strip():
+        return ""
+    v = str(deger).strip().lower()
+    return VITES_MAP.get(v, v)
+
+
 def araba_satirini_isle(satir):
     """CSV kolonları Türkçe kaldı (baslik, konum, fiyat...) - model alanları
     İngilizce (title, location, price...). Burada eşleştirme yapılıyor."""
@@ -70,7 +90,7 @@ def araba_satirini_isle(satir):
         model=satir.get("model", "") or "",
         year=temizle_sayi(satir.get("yil")),
         km=temizle_sayi(satir.get("kilometre")),
-        transmission_type=satir.get("vites_tipi", "") or "",
+        transmission_type=temizle_vites(satir.get("vites_tipi")),
         fuel_type=satir.get("yakit_tipi", "") or "",
         body_type=satir.get("kasa_tipi", "") or "",
         color=satir.get("renk", "") or "",
@@ -122,7 +142,8 @@ class Command(BaseCommand):
             raise CommandError(f"Dosya bulunamadı: {csv_yolu}")
 
         if not nesneler:
-            self.stdout.write(self.style.WARNING("CSV boş, yazılacak kayıt yok."))
+            self.stdout.write(self.style.WARNING(
+                "CSV boş, yazılacak kayıt yok."))
             return
 
         # NOT: multi-table inheritance kullanan modellerde (CarListing/HouseListing
@@ -135,5 +156,6 @@ class Command(BaseCommand):
                 nesne.save()
 
         self.stdout.write(
-            self.style.SUCCESS(f"{len(nesneler)} adet {tur} ilanı içeri aktarıldı.")
+            self.style.SUCCESS(
+                f"{len(nesneler)} adet {tur} ilanı içeri aktarıldı.")
         )

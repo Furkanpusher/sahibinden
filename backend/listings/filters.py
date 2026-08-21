@@ -7,18 +7,33 @@ class CarFilter(filters.FilterSet):
     model = filters.CharFilter(field_name="model", lookup_expr="iexact")
     city = filters.CharFilter(field_name="city", lookup_expr="iexact")
     district = filters.CharFilter(field_name="district", lookup_expr="iexact")
-    transmission_type = filters.CharFilter(
-        field_name="transmission_type", lookup_expr="iexact")
+    transmission_type = filters.CharFilter(method="filter_transmission")
     # Support both price_min / price_max and min_price / max_price
     price_min = filters.NumberFilter(field_name="price", lookup_expr="gte")
     price_max = filters.NumberFilter(field_name="price", lookup_expr="lte")
+
+    def filter_transmission(self, queryset, name, value):
+        if not value:
+            return queryset
+        val_norm = value.strip().lower()
+        mapping = {
+            "düz": "manuel",
+            "duz": "manuel",
+            "manuel": "manuel",
+            "manual": "manuel",
+            "otomatik": "otomatik",
+            "automatic": "otomatik",
+            "yarı otomatik": "yarı otomatik",
+            "yari otomatik": "yarı otomatik",
+        }
+        target_val = mapping.get(val_norm, val_norm)
+        return queryset.filter(transmission_type__iexact=target_val)
 
     class Meta:
         model = CarListing
         fields = [
             "brand", "model", "city", "district",
             "transmission_type", "price_min", "price_max"
-
         ]
 
 
