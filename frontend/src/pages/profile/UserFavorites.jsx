@@ -11,6 +11,7 @@ import {
   MapPin
 } from "lucide-react";
 import UserMenu from "../../components/UserMenu";
+import { authFetch } from "../../api";
 const carImages = [
   "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
   "/car-6.jpg", "/car-7.jpg", "/car-8.jpg", "/car-9.jpg", "/car-10.jpg",
@@ -33,11 +34,7 @@ export default function UserFavorites() {
       return;
     }
     setLoading(true);
-    fetch("http://localhost:8001/api/listings/favorites/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    authFetch("http://localhost:8001/api/listings/favorites/")
       .then((res) => {
         if (!res.ok) throw new Error("Favoriler yüklenirken bir sorun oluştu.");
         return res.json();

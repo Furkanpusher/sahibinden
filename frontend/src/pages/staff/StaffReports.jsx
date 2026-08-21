@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, ShieldAlert, Trash2, Check, ExternalLink, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { authFetch } from "../../api";
 
 export default function StaffReportsPage() {
   const navigate = useNavigate();
@@ -29,10 +30,9 @@ export default function StaffReportsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_URL}/listings/staff/reports/`, {
+      const res = await authFetch(`${API_URL}/listings/staff/reports/`, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -55,9 +55,8 @@ export default function StaffReportsPage() {
 
     setProcessingId(reportId);
     try {
-      const res = await fetch(`${API_URL}/listings/staff/reports/${reportId}/`, {
+      const res = await authFetch(`${API_URL}/listings/staff/reports/${reportId}/`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!res.ok) throw new Error("Şikayet silinemedi.");
@@ -78,9 +77,8 @@ export default function StaffReportsPage() {
 
     setProcessingId(reportId);
     try {
-      const res = await fetch(`${API_URL}/listings/staff/listings/${listingId}/`, {
+      const res = await authFetch(`${API_URL}/listings/staff/listings/${listingId}/`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
       });
 
       if (!res.ok) throw new Error("İlan silinemedi.");

@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Car, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchListings, formatApiError } from "../../api";
+import { fetchListings, formatApiError, authFetch } from "../../api";
 import { getCities, getDistricts, getCarBrands, getCarModels } from "../../data/helper";
 
 const TRANSMISSION_OPTIONS = ["Düz", "Otomatik", "Yarı Otomatik"];
@@ -111,11 +111,10 @@ export default function CarUpdatePage() {
       const token = localStorage.getItem("access") || localStorage.getItem("token") || localStorage.getItem("access_token");
       const API_URL = import.meta.env?.VITE_API_URL || "http://127.0.0.1:8001/api";
 
-      const response = await fetch(`${API_URL}/listings/cars/${id}/`, {
+      const response = await authFetch(`${API_URL}/listings/cars/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(changedPayload),
       });
@@ -129,10 +128,12 @@ export default function CarUpdatePage() {
       toast.success("İlan başarıyla güncellendi!");
       setTimeout(() => navigate(`/cars/${id}`), 1200);
     } catch (err) {
+      if (err.isSessionExpired) return;
       toast.error(err.message || "Güncelleme sırasında bir hata oluştu.");
     } finally {
       setSaving(false);
     }
+
   };
 
   if (loading) {

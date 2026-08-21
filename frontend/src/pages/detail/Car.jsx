@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
-import { fetchListings, formatApiError } from "../../api";
+import { fetchListings, formatApiError, authFetch } from "../../api";
 
 const defaultImages = [
   "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
@@ -77,18 +77,12 @@ export default function CarDetailPage() {
 
   // 🔹 FAVORİYE EKLE / ÇIKAR
   const handleToggleFavorite = async () => {
-    if (!token) {
-      toast.error("Favoriye eklemek için lütfen önce giriş yapın.");
-      return;
-    }
-
     setIsFavoriting(true);
     try {
-      const response = await fetch(`${API_URL}/listings/listings/${id}/favorite/`, {
+      const response = await authFetch(`${API_URL}/listings/listings/${id}/favorite/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -100,6 +94,7 @@ export default function CarDetailPage() {
       setIsFavorited(resData.is_favorited);
       toast.success(resData.is_favorited ? "İlan favorilere eklendi." : "İlan favorilerden çıkarıldı.");
     } catch (err) {
+      if (err.isSessionExpired) return;
       toast.error(err.message || "Favori işlemi başarısız.");
     } finally {
       setIsFavoriting(false);
@@ -110,18 +105,12 @@ export default function CarDetailPage() {
   const handleReportSubmit = async (e) => {
     e.preventDefault();
 
-    if (!token) {
-      toast.error("İlanı şikayet etmek için lütfen giriş yapın.");
-      return;
-    }
-
     setIsReporting(true);
     try {
-      const response = await fetch(`${API_URL}/listings/listings/${id}/report/`, {
+      const response = await authFetch(`${API_URL}/listings/listings/${id}/report/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           description: reportDescription.trim(),
@@ -137,6 +126,7 @@ export default function CarDetailPage() {
       setIsReportModalOpen(false);
       setReportDescription("");
     } catch (err) {
+      if (err.isSessionExpired) return;
       toast.error(err.message || "Şikayet iletilemedi.");
     } finally {
       setIsReporting(false);
@@ -148,11 +138,10 @@ export default function CarDetailPage() {
     if (!window.confirm("Bu ilanı silmek istediğinize emin misiniz?")) return;
     setIsDeleting(true);
     try {
-      const response = await fetch(`${API_URL}/listings/cars/${id}/`, {
+      const response = await authFetch(`${API_URL}/listings/cars/${id}/`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
       const resData = await response.json().catch(() => ({}));
@@ -162,6 +151,7 @@ export default function CarDetailPage() {
       toast.success("İlan başarıyla silindi.");
       navigate("/cars");
     } catch (err) {
+      if (err.isSessionExpired) return;
       toast.error(err.message || "Silme işlemi başarısız.");
     } finally {
       setIsDeleting(false);

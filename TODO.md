@@ -25,7 +25,7 @@ mintlify
 logout - login problem   DONE
 while creating listing, remove the date part and make it auto_now_add = True DONE
 reduce endpoints(from top level to bottom level group your endpoints) DONE
-accces token süresi dolunca oturum süresi dolmuştur de logout edip logine yönlendir
+accces token süresi dolunca bir aksiyon alınca oturum süresi dolmuştur de logout edip logine yönlendir
 
 
 

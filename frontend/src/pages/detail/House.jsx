@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X } from "lucide-react";
 import { toast } from "sonner";
-import { fetchListings, formatApiError } from "../../api";
+import { fetchListings, formatApiError, authFetch } from "../../api";
 
 const defaultImages = [
   "/house-1.jpg", "/house-2.jpg", "/house-3.jpg", "/house-4.jpg", "/house-5.jpg",
@@ -89,18 +89,12 @@ export default function HouseDetailPage() {
 
   // 🔹 FAVORİYE EKLE / ÇIKAR (TOGGLE)
   const handleToggleFavorite = async () => {
-    if (!token) {
-      toast.error("Favoriye eklemek için lütfen önce giriş yapın.");
-      return;
-    }
-
     setIsFavoriting(true);
     try {
-      const response = await fetch(`${API_URL}/listings/listings/${id}/favorite/`, {
+      const response = await authFetch(`${API_URL}/listings/listings/${id}/favorite/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -112,6 +106,7 @@ export default function HouseDetailPage() {
       setIsFavorited(resData.is_favorited);
       toast.success(resData.is_favorited ? "İlan favorilere eklendi." : "İlan favorilerden çıkarıldı.");
     } catch (err) {
+      if (err.isSessionExpired) return;
       toast.error(err.message || "Favori işlemi başarısız.");
     } finally {
       setIsFavoriting(false);
@@ -122,18 +117,12 @@ export default function HouseDetailPage() {
   const handleReportSubmit = async (e) => {
     e.preventDefault();
 
-    if (!token) {
-      toast.error("İlanı şikayet etmek için lütfen giriş yapın.");
-      return;
-    }
-
     setIsReporting(true);
     try {
-      const response = await fetch(`${API_URL}/listings/listings/${id}/report/`, {
+      const response = await authFetch(`${API_URL}/listings/listings/${id}/report/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           description: reportDescription.trim(),
@@ -149,6 +138,7 @@ export default function HouseDetailPage() {
       setIsReportModalOpen(false);
       setReportDescription("");
     } catch (err) {
+      if (err.isSessionExpired) return;
       toast.error(err.message || "Şikayet iletilemedi.");
     } finally {
       setIsReporting(false);
@@ -163,11 +153,10 @@ export default function HouseDetailPage() {
 
     setIsDeleting(true);
     try {
-      const response = await fetch(`${API_URL}/listings/houses/${id}/`, {
+      const response = await authFetch(`${API_URL}/listings/houses/${id}/`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
 
@@ -179,6 +168,7 @@ export default function HouseDetailPage() {
       toast.success("Ev ilanı başarıyla silindi.");
       navigate("/houses");
     } catch (err) {
+      if (err.isSessionExpired) return;
       toast.error(err.message || "Silme işlemi başarısız.");
     } finally {
       setIsDeleting(false);

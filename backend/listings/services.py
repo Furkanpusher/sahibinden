@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
 from .models import Listing, Favorite, Report, ListingImage
+from django.core.cache import cache
 
 
 """ BASIC GET METHODS """
@@ -9,6 +10,7 @@ from .models import Listing, Favorite, Report, ListingImage
 
 
 def get_all_listings(model_class):
+
     return model_class.objects.select_related("listing_owner").all().order_by("-listing_date")
 
 

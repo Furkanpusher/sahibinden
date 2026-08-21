@@ -99,7 +99,7 @@ class CarDetailView(APIView):
     def put(self, request, pk):  # list updating
         self.check_object_permissions(request, self.car)  # is he the owner?
         updated_car, errors = update_listing(
-            self.car, CarListingSerializer, request.data, partial=True)
+            self.car, CarListingSerializer, request.data, partial=False)
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         return Response(CarListingSerializer(updated_car).data, status=status.HTTP_200_OK)

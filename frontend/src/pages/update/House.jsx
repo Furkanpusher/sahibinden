@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, Home, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { fetchListings, formatApiError } from "../../api";
+import { fetchListings, formatApiError, authFetch } from "../../api";
 
 const ROOM_OPTIONS = ["1+0", "1+1", "2+1", "3+1", "4+1", "5+1", "Dupleks"];
 const BUILDING_AGE_OPTIONS = ["0 (Yeni)", "1-5", "6-10", "11-15", "16-20", "21 ve üzeri"];
@@ -76,14 +76,12 @@ export default function HouseUpdatePage() {
     setSaving(true);
 
     try {
-      const token = localStorage.getItem("access") || localStorage.getItem("token") || localStorage.getItem("access_token");
       const API_URL = import.meta.env?.VITE_API_URL || "http://127.0.0.1:8001/api";
 
-      const response = await fetch(`${API_URL}/listings/houses/${id}/`, {
+      const response = await authFetch(`${API_URL}/listings/houses/${id}/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { "Authorization": `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(changedPayload),
       });
@@ -97,10 +95,12 @@ export default function HouseUpdatePage() {
       toast.success("Ev ilanı başarıyla güncellendi!");
       setTimeout(() => navigate(`/houses/${id}`), 1200);
     } catch (err) {
+      if (err.isSessionExpired) return;
       toast.error(err.message || "Güncelleme sırasında bir hata oluştu.");
     } finally {
       setSaving(false);
     }
+
   };
 
   if (loading) {

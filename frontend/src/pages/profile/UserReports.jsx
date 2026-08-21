@@ -13,6 +13,7 @@ import {
   ArrowUpRight
 } from "lucide-react";
 import UserMenu from "../../components/UserMenu";
+import { authFetch } from "../../api";
 
 const carImages = [
   "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
@@ -39,12 +40,7 @@ export default function UserReportsPage() {
     }
 
     setLoading(true);
-    // 🎯 BURASI: /api/listings/reports/ endpoint'ine istek atar
-    fetch("http://localhost:8001/api/listings/reports/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
+    authFetch("http://localhost:8001/api/listings/reports/")
       .then((res) => {
         if (!res.ok) throw new Error("Raporlar yüklenirken bir hata oluştu.");
         return res.json();
