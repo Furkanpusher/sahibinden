@@ -11,6 +11,12 @@ from ..services import (filter_listings, get_listing_by_id,
                         create_listing, delete_listing, update_listing)
 from ..filters import CarFilter
 from django.core.cache import cache
+from ..cache_management import (
+    CAR_CACHE_PREFIX,
+    get_cached_listing_page,
+    set_cached_listing_page,
+    flush_listing_cache,
+)
 
 
 class CarPagination(PageNumberPagination):
@@ -30,54 +36,44 @@ class CarListingView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
+        # 1. Cache Check: return early on cache hit
+        cache_key, cached_data = get_cached_listing_page(
+            CAR_CACHE_PREFIX, request)
+        if cached_data:
+            return Response(cached_data, status=status.HTTP_200_OK)
 
-        page_number = request.query_params.get("page", "1")  # default page 1
-        has_custom_filters = any(key != "page" for key in request.query_params)
-        is_cacheable = (not has_custom_filters) and (
-            page_number in CACHEABLE_PAGES)
-        cache_key = f"{CACHE_KEY_PREFIX}_{page_number}"
-
-        # 2. Cache check - if hit return
-        if is_cacheable:
-            cached_data = cache.get(cache_key)
-            if cached_data:
-                return Response(cached_data, status=status.HTTP_200_OK)
-
-        # get pagination object
+        # 2. Database query and pagination
         car_queryset = filter_listings(
             CarListing, CarFilter, request.query_params)
         paginator = CarPagination()
         paginated_cars = paginator.paginate_queryset(
             car_queryset, request, view=self)
 
+        # 3. Serialization and caching
         if paginated_cars is not None:
             serializer = CarListingSerializer(paginated_cars, many=True)
             response = paginator.get_paginated_response(serializer.data)
 
-            if is_cacheable:  # if it's cachable and not in the cache before -> cache it
-                cache.set(cache_key, response.data, timeout=CACHE_TIMEOUT)
+            # Populate cache if request is cacheable (handled inside helper)
+            set_cached_listing_page(cache_key, response.data)
 
             return response
 
-        # Fallback if the pagination returns None(won't need it tho)
+        # Fallback if pagination is disabled or returns None
         serializer = CarListingSerializer(car_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
         serializer = CarListingSerializer(data=request.data)
-
         if serializer.is_valid():
             car = create_listing(
                 CarListing,
                 user=request.user,
                 data=serializer.validated_data
             )
-            # if creation is successful flush the first 2 pages from cache
-            cache.delete_many(keys=[
-                f"{CACHE_KEY_PREFIX}_{page}" for page in CACHEABLE_PAGES
-            ])
+            # flush the cache
+            flush_listing_cache(CAR_CACHE_PREFIX)
             return Response(CarListingSerializer(car).data, status=status.HTTP_201_CREATED)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -102,6 +98,9 @@ class CarDetailView(APIView):
             self.car, CarListingSerializer, request.data, partial=False)
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # flush the listing cache on update
+        flush_listing_cache(CAR_CACHE_PREFIX)
         return Response(CarListingSerializer(updated_car).data, status=status.HTTP_200_OK)
 
     def patch(self, request, pk):  # partial list updating
@@ -110,10 +109,14 @@ class CarDetailView(APIView):
             self.car, CarListingSerializer, request.data, partial=True)
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # flush the listing cache on update
+        flush_listing_cache(CAR_CACHE_PREFIX)
         return Response(CarListingSerializer(updated_car).data, status=status.HTTP_200_OK)
 
     def delete(self, request, pk):  # list deletion
         self.check_object_permissions(request, self.car)
-
         delete_listing(user=request.user, pk=pk)
+        # flush the listing cache on deletion
+        flush_listing_cache(CAR_CACHE_PREFIX)
         return Response({"detail": "İlan başarıyla silindi."}, status=status.HTTP_200_OK)

@@ -9,7 +9,12 @@ from listings.permissions import IsOwnerOrReadOnly
 from ..services import (filter_listings, get_listing_by_id,
                         create_listing, delete_listing, update_listing)
 from ..filters import HouseFilter
-from django.core.cache import cache
+from ..cache_management import (
+    HOUSE_CACHE_PREFIX,
+    get_cached_listing_page,
+    set_cached_listing_page,
+    flush_listing_cache,
+)
 
 
 class HousePagination(PageNumberPagination):
@@ -19,59 +24,46 @@ class HousePagination(PageNumberPagination):
     max_page_size = 50
 
 
-CACHE_TIMEOUT = 60 * 60  # 1 hour
-CACHEABLE_PAGES = {"1", "2"}
-CACHE_KEY_PREFIX = "house_listings_page"
-
-
 class HouseListView(APIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
+        # 1. Cache Check: return early on cache hit
+        cache_key, cached_data = get_cached_listing_page(
+            HOUSE_CACHE_PREFIX, request)
+        if cached_data:
+            return Response(cached_data, status=status.HTTP_200_OK)
 
-        page_number = request.query_params.get("page", "1")
-        has_custom_fiters = any(key != "page" for key in request.query_params)
-        is_cacheable = (not has_custom_fiters) and (
-            page_number in CACHEABLE_PAGES)
-        cache_key = f"{CACHE_KEY_PREFIX}_{page_number}"
-
-        # 2. Cache check
-        if is_cacheable:
-            cached_data = cache.get(cache_key)
-            if cached_data:
-                return Response(cached_data, status=status.HTTP_200_OK)
-        # get pagination
+        # 2. Database query and pagination
         house_queryset = filter_listings(
-            HouseListing, HouseFilter, request.query_params
-        )
+            HouseListing, HouseFilter, request.query_params)
         paginator = HousePagination()
         paginated_houses = paginator.paginate_queryset(
-            queryset=house_queryset, request=request, view=self
-        )
+            queryset=house_queryset, request=request, view=self)
 
+        # 3. Serialization and caching
         if paginated_houses is not None:
             serializer = HouseListingSerializer(paginated_houses, many=True)
             response = paginator.get_paginated_response(serializer.data)
-            if is_cacheable:
-                cache.set(cache_key, response.data, timeout=CACHE_TIMEOUT)
+
+            # Populate cache if request is cacheable
+            set_cached_listing_page(cache_key, response.data)
+
             return response
 
-        # Fallback
+        # Fallback if pagination is disabled or returns None
         serializer = HouseListingSerializer(house_queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-
         serializer = HouseListingSerializer(data=request.data)
         if serializer.is_valid():
             house = create_listing(
                 HouseListing,
                 user=request.user,
                 data=serializer.validated_data)
-            # if creation is successfull flush the cache
-            cache.delete_many(keys=[
-                f"{CACHE_KEY_PREFIX}_{page}" for page in CACHEABLE_PAGES
-            ])
+            # Flush the listing cache on creation
+            flush_listing_cache(HOUSE_CACHE_PREFIX)
             return Response(HouseListingSerializer(house).data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -89,23 +81,31 @@ class HouseDetailView(APIView):
         serializer = HouseListingSerializer(self.house)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def put(self, request, pk):
+    def put(self, request, pk):  # Full update
+        self.check_object_permissions(request, self.house)
+        updated_house, errors = update_listing(
+            self.house, HouseListingSerializer, request.data, partial=False)
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Flush the listing cache on update
+        flush_listing_cache(HOUSE_CACHE_PREFIX)
+        return Response(HouseListingSerializer(updated_house).data, status=status.HTTP_200_OK)
+
+    def patch(self, request, pk):  # Partial update
         self.check_object_permissions(request, self.house)
         updated_house, errors = update_listing(
             self.house, HouseListingSerializer, request.data, partial=True)
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Flush the listing cache on update
+        flush_listing_cache(HOUSE_CACHE_PREFIX)
         return Response(HouseListingSerializer(updated_house).data, status=status.HTTP_200_OK)
 
-    def patch(self, request, pk):
-        self.check_object_permissions(request, self.house)
-        updated_house, errors = update_listing(
-            self.house, HouseListingSerializer, request.data, partial=True)
-        if errors:
-            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(HouseListingSerializer(updated_house).data, status=status.HTTP_200_OK)
-
-    def delete(self, request, pk):
+    def delete(self, request, pk):  # List deletion
         self.check_object_permissions(request, self.house)
         delete_listing(user=request.user, pk=pk)
+        # Flush the listing cache on deletion
+        flush_listing_cache(HOUSE_CACHE_PREFIX)
         return Response({"detail": "Ev ilanı başarıyla silindi."}, status=status.HTTP_200_OK)
