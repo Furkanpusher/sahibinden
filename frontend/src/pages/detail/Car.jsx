@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X, ChevronLeft, ChevronRight, Scale, Check } from "lucide-react";
 import { toast } from "sonner";
 import { fetchListings, formatApiError, authFetch } from "../../api";
+import { useCompare } from "../../context/CompareContext";
 
 const defaultImages = [
   "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
@@ -20,6 +21,7 @@ const formatImgUrl = (url) => {
 export default function CarDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { toggleCompare, isInCompare } = useCompare();
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -289,12 +291,39 @@ export default function CarDetailPage() {
               </div>
             )}
 
-            {/* Fiyat Kutusu */}
+            {/* Fiyat Kutusu & Karşılaştır Butonu */}
             <div className="mt-4 rounded-xl border border-[#232E3D] bg-[#161F2B] p-5">
-              <p className="text-xs text-[#8B95A3] mb-1">Fiyat</p>
-              <p className="text-2xl font-bold text-[#E8A33D]">
-                {car.price ? `${Number(car.price).toLocaleString("tr-TR")} TL` : "Belirtilmemiş"}
-              </p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs text-[#8B95A3] mb-1">Fiyat</p>
+                  <p className="text-2xl font-bold text-[#E8A33D]">
+                    {car.price ? `${Number(car.price).toLocaleString("tr-TR")} TL` : "Belirtilmemiş"}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    toggleCompare(
+                      {
+                        id: car.id,
+                        title: car.title,
+                        image: activeImage,
+                        price: car.price,
+                      },
+                      "car"
+                    )
+                  }
+                  className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold transition-all ${
+                    isInCompare(car.id)
+                      ? "border-[#E8A33D] bg-[#E8A33D]/15 text-[#E8A33D]"
+                      : "border-[#232E3D] bg-[#0F1720] text-[#8B95A3] hover:border-[#4A5568] hover:text-[#EDEFF2]"
+                  }`}
+                >
+                  <Scale size={15} />
+                  <span>{isInCompare(car.id) ? "Karşılaştırmada" : "Karşılaştır"}</span>
+                </button>
+              </div>
             </div>
           </div>
 

@@ -7,12 +7,14 @@ import {
   SearchX,
   RotateCcw,
   Search,
+  Scale,
 } from "lucide-react";
 import { fetchListings } from "../../api";
 import { FilterInput, FilterSelect } from "../../components/ListingUI";
 import UserMenu from "../../components/UserMenu";
 import Pagination from "../../components/Pagination";
 import { getCities, getDistricts, getCarBrands, getCarModels } from "../../data/helper";
+import { useCompare } from "../../context/CompareContext";
 
 const defaultImages = [
   "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
@@ -38,6 +40,7 @@ const getCarCoverImage = (car) => {
 
 export default function CarListPage() {
   const navigate = useNavigate();
+  const { toggleCompare, isInCompare } = useCompare();
   const [cars, setCars] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -379,9 +382,12 @@ export default function CarListPage() {
             {!loading && !error && cars.length > 0 && (
               <>
                 <div className="overflow-x-auto rounded-xl border border-[#232E3D] bg-[#161F2B]/70 shadow-lg">
-                  <table className="w-full min-w-[850px] border-collapse text-left text-sm">
+                  <table className="w-full min-w-[880px] border-collapse text-left text-sm">
                     <thead>
                       <tr className="border-b border-[#232E3D] bg-[#1a2533] text-xs uppercase tracking-wider text-[#8B95A3]">
+                        <th className="py-3.5 px-3 w-[45px] font-semibold text-center" title="Karşılaştır">
+                          <Scale size={14} className="mx-auto text-[#8B95A3]" />
+                        </th>
                         <th className="py-3.5 px-4 w-[160px] font-semibold text-center">Görsel</th>
                         <th className="py-3.5 px-3 w-[120px] font-semibold">Model</th>
                         <th className="py-3.5 px-4 font-semibold">İlan Başlığı</th>
@@ -398,13 +404,42 @@ export default function CarListPage() {
                         const coverImg = getCarCoverImage(car);
                         const carModelName = car.model || car.series || "-";
                         const locationText = [car.city, car.district].filter(Boolean);
+                        const isSelected = isInCompare(car.id);
 
                         return (
                           <tr
                             key={car.id}
                             onClick={() => navigate(`/cars/${car.id}`)}
-                            className="group cursor-pointer transition-colors duration-150 hover:bg-[#1c293a]/70"
+                            className={`group cursor-pointer transition-colors duration-150 ${isSelected
+                              ? "bg-[#E8A33D]/10"
+                              : "hover:bg-[#1c293a]/70"
+                              }`}
                           >
+                            {/* Karşılaştır Seçim Kutusu */}
+                            <td
+                              className="py-3.5 px-3 text-center align-middle"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCompare(
+                                  {
+                                    id: car.id,
+                                    title: car.title,
+                                    image: coverImg,
+                                    price: car.price,
+                                  },
+                                  "car"
+                                );
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => { }}
+                                className="h-4 w-4 rounded border-[#2B3747] bg-[#0F1720] accent-[#E8A33D] cursor-pointer"
+                                title="Karşılaştırmaya Ekle / Çıkar"
+                              />
+                            </td>
+
                             {/* Görsel */}
                             <td className="p-3 align-middle text-center">
                               <Link

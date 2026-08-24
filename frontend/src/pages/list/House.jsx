@@ -7,12 +7,14 @@ import {
   SearchX,
   RotateCcw,
   Search,
+  Scale,
 } from "lucide-react";
 import { fetchListings } from "../../api";
 import { FilterInput, FilterSelect } from "../../components/ListingUI";
 import UserMenu from "../../components/UserMenu";
 import Pagination from "../../components/Pagination";
 import { getCities, getDistricts } from "../../data/helper";
+import { useCompare } from "../../context/CompareContext";
 
 const ROOM_OPTIONS = ["1+0", "1+1", "2+1", "3+1", "4+1", "5+1", "Dupleks"];
 const defaultImages = [
@@ -38,6 +40,7 @@ const getHouseCoverImage = (house) => {
 
 export default function HouseListPage() {
   const navigate = useNavigate();
+  const { toggleCompare, isInCompare } = useCompare();
   const [houses, setHouses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -337,9 +340,12 @@ export default function HouseListPage() {
             {!loading && !error && houses.length > 0 && (
               <>
                 <div className="overflow-x-auto rounded-xl border border-[#232E3D] bg-[#161F2B]/70 shadow-lg">
-                  <table className="w-full min-w-[780px] border-collapse text-left text-sm">
+                  <table className="w-full min-w-[820px] border-collapse text-left text-sm">
                     <thead>
                       <tr className="border-b border-[#232E3D] bg-[#1a2533] text-xs uppercase tracking-wider text-[#8B95A3]">
+                        <th className="py-3.5 px-3 w-[45px] font-semibold text-center" title="Karşılaştır">
+                          <Scale size={14} className="mx-auto text-[#8B95A3]" />
+                        </th>
                         <th className="py-3.5 px-4 w-[160px] font-semibold text-center">Görsel</th>
                         <th className="py-3.5 px-4 font-semibold">İlan Başlığı</th>
                         <th className="py-3.5 px-3 w-[100px] font-semibold text-center">m²</th>
@@ -353,13 +359,42 @@ export default function HouseListPage() {
                       {houses.map((house) => {
                         const coverImg = getHouseCoverImage(house);
                         const locationText = [house.city, house.district].filter(Boolean);
+                        const isSelected = isInCompare(house.id);
 
                         return (
                           <tr
                             key={house.id}
                             onClick={() => navigate(`/houses/${house.id}`)}
-                            className="group cursor-pointer transition-colors duration-150 hover:bg-[#1c293a]/70"
+                            className={`group cursor-pointer transition-colors duration-150 ${isSelected
+                                ? "bg-[#E8A33D]/10"
+                                : "hover:bg-[#1c293a]/70"
+                              }`}
                           >
+                            {/* Karşılaştır Seçim Kutusu */}
+                            <td
+                              className="py-3.5 px-3 text-center align-middle"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCompare(
+                                  {
+                                    id: house.id,
+                                    title: house.title,
+                                    image: coverImg,
+                                    price: house.price,
+                                  },
+                                  "house"
+                                );
+                              }}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => { }}
+                                className="h-4 w-4 rounded border-[#2B3747] bg-[#0F1720] accent-[#E8A33D] cursor-pointer"
+                                title="Karşılaştırmaya Ekle / Çıkar"
+                              />
+                            </td>
+
                             {/* Görsel */}
                             <td className="p-3 align-middle text-center">
                               <Link
