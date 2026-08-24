@@ -138,3 +138,23 @@ class ListingImage(models.Model):
         upload_to="listings/images/%Y/%m/%d/", null=True, blank=True)
     is_cover = models.BooleanField(default=False)  # is it cover picture
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class Notification(models.Model):
+    listing = models.ForeignKey(
+        Listing, on_delete=models.CASCADE, related_name="notifications")
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
+    message = models.TextField()
+    old_price = models.DecimalField(
+        max_digits=12, decimal_places=2, null=False)
+    new_price = models.DecimalField(
+        max_digits=12, decimal_places=2, null=False)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.user} - {self.listing.title}"

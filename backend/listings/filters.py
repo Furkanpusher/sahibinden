@@ -12,10 +12,11 @@ class CarFilter(filters.FilterSet):
     price_min = filters.NumberFilter(field_name="price", lookup_expr="gte")
     price_max = filters.NumberFilter(field_name="price", lookup_expr="lte")
 
-    def filter_ids(self, queryset, name, value):
+    def filter_ids(self, queryset, name, value):  # api/cars/?ids=5,12,18
         if not value:
             return queryset
-        id_list = [v.strip() for v in str(value).split(",") if v.strip().isdigit()]
+        id_list = [v.strip()
+                   for v in str(value).split(",") if v.strip().isdigit()]
         if id_list:
             return queryset.filter(id__in=id_list)
         return queryset
@@ -69,7 +70,8 @@ class HouseFilter(filters.FilterSet):
     def filter_ids(self, queryset, name, value):
         if not value:
             return queryset
-        id_list = [v.strip() for v in str(value).split(",") if v.strip().isdigit()]
+        id_list = [v.strip()
+                   for v in str(value).split(",") if v.strip().isdigit()]
         if id_list:
             return queryset.filter(id__in=id_list)
         return queryset
