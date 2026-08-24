@@ -27,6 +27,8 @@ reduce endpoints(from top level to bottom level group your endpoints) DONE
 accces token süresi dolunca bir aksiyon alınca oturum süresi dolmuştur de logout edip logine yönlendir DONE
 show the listing owner info in the detail page IN PROGRESS
 add a profile page, so user can modify his/her information
+make itl ook like sahibinden homepage
+transmission_type is not defined 
 
 
 Profile Picture Fallback (Approach 2):

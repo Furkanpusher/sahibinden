@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   SlidersHorizontal,
@@ -37,6 +37,7 @@ const getHouseCoverImage = (house) => {
 };
 
 export default function HouseListPage() {
+  const navigate = useNavigate();
   const [houses, setHouses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -150,6 +151,26 @@ export default function HouseListPage() {
   const formatTitle = (title) => {
     if (!title) return "";
     return title.length > 120 ? `${title.substring(0, 120)}...` : title;
+  };
+
+  const formatPrice = (price) => {
+    if (price === null || price === undefined || price === "") return "-";
+    return `${new Intl.NumberFormat("tr-TR").format(price)} TL`;
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return "-";
+    try {
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) return dateStr;
+      return date.toLocaleDateString("tr-TR", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
   };
 
   return (
@@ -312,33 +333,97 @@ export default function HouseListPage() {
               </div>
             )}
 
-            {/* House Grid */}
+            {/* Sahibinden Style House Table */}
             {!loading && !error && houses.length > 0 && (
               <>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-8">
-                  {houses.map((house) => (
-                    <Link to={`/houses/${house.id}`} key={house.id} className="group min-w-0">
-                      <div className="relative mb-2 aspect-[4/3] w-full overflow-hidden rounded-lg border border-[#232E3D] bg-[#161F2B] transition-all duration-300 group-hover:border-[#4A5568] group-hover:shadow-lg group-hover:shadow-black/10">
-                        {/* 📸 Çözümlenen Görsel */}
-                        <img
-                          src={getHouseCoverImage(house)}
-                          alt={house.title}
-                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                        />
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-                      </div>
+                <div className="overflow-x-auto rounded-xl border border-[#232E3D] bg-[#161F2B]/70 shadow-lg">
+                  <table className="w-full min-w-[780px] border-collapse text-left text-sm">
+                    <thead>
+                      <tr className="border-b border-[#232E3D] bg-[#1a2533] text-xs uppercase tracking-wider text-[#8B95A3]">
+                        <th className="py-3.5 px-4 w-[160px] font-semibold text-center">Görsel</th>
+                        <th className="py-3.5 px-4 font-semibold">İlan Başlığı</th>
+                        <th className="py-3.5 px-3 w-[100px] font-semibold text-center">m²</th>
+                        <th className="py-3.5 px-3 w-[120px] font-semibold text-center">Oda Sayısı</th>
+                        <th className="py-3.5 px-4 w-[160px] font-semibold text-right">Fiyat</th>
+                        <th className="py-3.5 px-4 w-[140px] font-semibold text-center">İlan Tarihi</th>
+                        <th className="py-3.5 px-4 w-[140px] font-semibold text-center">İl / İlçe</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#232E3D]/60 text-[#EDEFF2]">
+                      {houses.map((house) => {
+                        const coverImg = getHouseCoverImage(house);
+                        const locationText = [house.city, house.district].filter(Boolean);
 
-                      <h2 className="px-1 text-xs font-medium leading-5 text-[#8B95A3] transition-colors group-hover:text-[#E8A33D]" title={house.title}>
-                        {formatTitle(house.title)}
-                      </h2>
+                        return (
+                          <tr
+                            key={house.id}
+                            onClick={() => navigate(`/houses/${house.id}`)}
+                            className="group cursor-pointer transition-colors duration-150 hover:bg-[#1c293a]/70"
+                          >
+                            {/* Görsel */}
+                            <td className="p-3 align-middle text-center">
+                              <Link
+                                to={`/houses/${house.id}`}
+                                className="block relative aspect-[4/3] w-36 mx-auto overflow-hidden rounded-lg border border-[#232E3D] bg-[#0F1720] transition-transform duration-200 group-hover:scale-105"
+                              >
+                                <img
+                                  src={coverImg}
+                                  alt={house.title}
+                                  className="h-full w-full object-cover"
+                                  loading="lazy"
+                                />
+                              </Link>
+                            </td>
 
-                      {(house.city || house.district) && (
-                        <p className="px-1 mt-0.5 text-[11px] text-[#667384]">
-                          {[house.city, house.district].filter(Boolean).join(", ")}
-                        </p>
-                      )}
-                    </Link>
-                  ))}
+                            {/* İlan Başlığı */}
+                            <td className="py-3.5 px-4 align-middle">
+                              <Link
+                                to={`/houses/${house.id}`}
+                                className="font-semibold text-sm sm:text-[15px] text-[#EDEFF2] transition-colors group-hover:text-[#E8A33D] line-clamp-2 leading-relaxed"
+                                title={house.title}
+                              >
+                                {formatTitle(house.title)}
+                              </Link>
+                            </td>
+
+                            {/* m² */}
+                            <td className="py-3.5 px-3 align-middle text-center font-medium text-sm text-[#C8D1DC]">
+                              {house.meter_squared ? `${house.meter_squared} m²` : "-"}
+                            </td>
+
+                            {/* Oda Sayısı */}
+                            <td className="py-3.5 px-3 align-middle text-center text-sm font-medium text-[#C8D1DC]">
+                              {house.number_of_rooms || "-"}
+                            </td>
+
+                            {/* Fiyat */}
+                            <td className="py-3.5 px-4 align-middle text-right font-bold text-[#E8A33D] text-base sm:text-[17px] whitespace-nowrap">
+                              {formatPrice(house.price)}
+                            </td>
+
+                            {/* İlan Tarihi */}
+                            <td className="py-3.5 px-4 align-middle text-center text-xs sm:text-[13px] text-[#8B95A3] whitespace-nowrap">
+                              {formatDate(house.listing_date)}
+                            </td>
+
+                            {/* İl / İlçe */}
+                            <td className="py-3.5 px-4 align-middle text-center text-xs sm:text-[13px] text-[#8B95A3]">
+                              {locationText.length > 0 ? (
+                                <div className="flex flex-col items-center leading-snug">
+                                  <span className="font-medium text-[#EDEFF2]">{locationText[0]}</span>
+                                  {locationText[1] && (
+                                    <span className="text-[#8B95A3]">{locationText[1]}</span>
+                                  )}
+                                </div>
+                              ) : (
+                                "-"
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
 
                 <Pagination

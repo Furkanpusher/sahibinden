@@ -92,19 +92,6 @@ class CarDetailView(APIView):
         serializer = CarListingSerializer(self.car)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def post(self, request):
-        serializer = CarListingSerializer(data=request.data)
-        if serializer.is_valid():
-            car = create_listing(
-                CarListing,
-                user=request.user,
-                data=serializer.validated_data
-            )
-            # flush the cache
-            flush_listing_cache(CAR_CACHE_PREFIX)
-            return Response(CarListingSerializer(car).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     def put(self, request, pk):  # list updating
         self.check_object_permissions(request, self.car)  # is he the owner?
         updated_car, errors = update_listing(

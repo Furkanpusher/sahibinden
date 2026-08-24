@@ -11,9 +11,14 @@ HOUSE_CACHE_PREFIX = "house_listings_page"
 
 
 def get_cached_listing_page(prefix, request):
-    # if the request has no filters, and is page 1 or 2, return cached data
-    page_number = request.query_params.get("page", "1")
-    has_custom_filters = any(key != "page" for key in request.query_params)
+    # if the request has no active filters, and is page 1 or 2, return cached data
+    page_number = str(request.query_params.get("page", "1"))
+
+    # Check if there are real, non-empty filter parameters other than page & page_size
+    has_custom_filters = any(
+        key not in {"page", "page_size"} and str(value).strip() != ""
+        for key, value in request.query_params.items()
+    )
     is_cacheable = (not has_custom_filters) and (
         page_number in CACHEABLE_PAGES)
 

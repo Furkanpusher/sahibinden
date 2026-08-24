@@ -8,7 +8,6 @@ class CarFilter(filters.FilterSet):
     city = filters.CharFilter(field_name="city", lookup_expr="iexact")
     district = filters.CharFilter(field_name="district", lookup_expr="iexact")
     transmission_type = filters.CharFilter(method="filter_transmission")
-    # Support both price_min / price_max and min_price / max_price
     price_min = filters.NumberFilter(field_name="price", lookup_expr="gte")
     price_max = filters.NumberFilter(field_name="price", lookup_expr="lte")
 
