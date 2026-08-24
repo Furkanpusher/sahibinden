@@ -103,11 +103,14 @@ class HouseListing(Listing):
 
 # many to many field
 class Favorite(models.Model):
-
     listing = models.ForeignKey(
-        Listing, on_delete=models.CASCADE, related_name="favorited_by")
+        Listing, on_delete=models.CASCADE,
+        related_name="favorited_by")
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE, related_name="favorites")
+                             on_delete=models.CASCADE,
+                             related_name="favorites")
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:  # metaconfig for our model
@@ -120,9 +123,13 @@ class Favorite(models.Model):
 
 class Report(models.Model):
     listing = models.ForeignKey(
-        Listing, on_delete=models.CASCADE, related_name="reports")
+        Listing, on_delete=models.CASCADE,
+        related_name="reports")
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE, related_name="reports")
+                             on_delete=models.CASCADE,
+                             related_name="reports")
+
     report_date = models.DateTimeField(auto_now_add=True)
     description = models.TextField()
 
@@ -133,8 +140,10 @@ class Report(models.Model):
 
 class ListingImage(models.Model):
     listing = models.ForeignKey(
-        Listing, on_delete=models.CASCADE, related_name="images")
-    image = models.ImageField(
+        Listing, on_delete=models.CASCADE,
+        related_name="images")
+
+    mage = models.ImageField(
         upload_to="listings/images/%Y/%m/%d/", null=True, blank=True)
     is_cover = models.BooleanField(default=False)  # is it cover picture
     created_at = models.DateTimeField(auto_now_add=True)
@@ -142,9 +151,15 @@ class ListingImage(models.Model):
 
 class Notification(models.Model):
     listing = models.ForeignKey(
-        Listing, on_delete=models.CASCADE, related_name="notifications")
+        Listing,
+        on_delete=models.CASCADE,
+        related_name="notifications")
+
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="notifications")
+
     message = models.TextField()
     old_price = models.DecimalField(
         max_digits=12, decimal_places=2, null=False)

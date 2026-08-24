@@ -1,7 +1,8 @@
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
-from .models import Listing, Favorite, Report, ListingImage
+from .models import Listing, Favorite, Report, ListingImage, Notification
 from django.core.cache import cache
+from listings.tasks import price_update_notification
 
 
 """ BASIC GET METHODS """
@@ -49,8 +50,15 @@ def delete_listing(user, pk):
 def update_listing(instance, serializer_class, data, partial=True):
     # Update a listing with partial update support
     serializer = serializer_class(instance, data=data, partial=partial)
-    if serializer.is_valid():
-        updated_instance = serializer.save()
+    if serializer.is_valid():  # first it has to be vaild
+        old_price = instance.price
+        updated_instance = serializer.save()  # update the listing
+
+        price_update_notification.delay(  # if the price is lower send notification
+            old_price,
+            updated_instance.price,
+            instance.pk
+        )
         return updated_instance, None
     return None, serializer.errors
 

@@ -1,15 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from listings.serializers import FavoriteSerializer, ReportSerializer, ListingImageSerializer
+from listings.serializers import FavoriteSerializer, ReportSerializer, ListingImageSerializer, NotificationSerializer
 from ..services import (toggle_favorite, get_user_favorites,
                         report_listing, get_user_reports,
                         add_images_to_listing,
                         )
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
-from listings.models import Listing
+from listings.models import Listing, Notification
 
 
 # FAVORİTE VİEWS
@@ -75,3 +75,20 @@ class ListingImageUploadView(APIView):
             return Response({"detail": "Hiçbir fotoğraf seçilmedi."}, status=status.HTTP_400_BAD_REQUEST)
         images = add_images_to_listing(listing, files)
         return Response(ListingImageSerializer(images, many=True).data, status=status.HTTP_201_CREATED)
+
+
+class NotificationView(APIView):
+    # only user can see his own notifications
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        notifications = Notification.objects.filter(
+            user=request.user).select_related('listing')
+        serializer = NotificationSerializer(notifications, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        # mark notification as read
+        notification = Notification.objects.filter(user=request.user)
+        notification.update(is_read=True)
+        return Response({"detail": "Tüm bildirimler okundu olarak işaretlendi."}, status=status.HTTP_200_OK)

@@ -1,5 +1,5 @@
 # Listing serializers halleder
-from .models import Listing, CarListing, HouseListing, Favorite, Report, ListingImage
+from .models import Listing, CarListing, HouseListing, Favorite, Report, ListingImage, Notification
 from rest_framework import serializers
 
 
@@ -56,7 +56,8 @@ class CarListingSerializer(serializers.ModelSerializer):
         vites = data.get("transmission_type")
         if isinstance(vites, str) and vites.strip():
             vites_norm = vites.strip().lower()
-            data["transmission_type"] = self.TRANSMISSION_MAP.get(vites_norm, vites)
+            data["transmission_type"] = self.TRANSMISSION_MAP.get(
+                vites_norm, vites)
 
         return super().to_internal_value(data)
 
@@ -93,3 +94,12 @@ class ReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = Report
         fields = ['id', 'listing', 'description', 'report_date', 'user']
+
+
+class NotificationSerializer(serializers.ModelSerializer):
+    listing = ListingSerializer(read_only=True)
+
+    class Meta:
+        model = Notification
+        fields = ['id', 'listing', 'user', 'message',
+                  'old_price', 'new_price', 'is_read', 'created_at']
