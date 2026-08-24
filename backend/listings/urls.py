@@ -1,11 +1,13 @@
+from backend.listings.views.common import NotificationView
 from django.urls import path
 from .views import (
     CarListingView, HouseListView,
     CarDetailView, HouseDetailView,
     FavoriteToggleView, UserFavoritesListView,
     ReportListingView, UserReportsListView,
-    StaffReportListView, StaffDeleteReportView, StaffDeleteListingView,
-    ListingImageUploadView
+    StaffReportListView, StaffDeleteReportView,
+    StaffDeleteListingView, ListingImageUploadView,
+    NotificationView
 )
 
 
@@ -36,5 +38,7 @@ urlpatterns = [
     path("staff/reports/<int:pk>/", StaffDeleteReportView.as_view(),
          name="staff-delete-report"),
     path("staff/listings/<int:pk>/", StaffDeleteListingView.as_view(),
-         name="staff-delete-listing")
+         name="staff-delete-listing"),
+
+    path("notifications/", NotificationView.as_view(), name="notifications")
 ]
