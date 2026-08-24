@@ -88,7 +88,18 @@ class NotificationView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request):
-        # mark notification as read
-        notification = Notification.objects.filter(user=request.user)
-        notification.update(is_read=True)
-        return Response({"detail": "Tüm bildirimler okundu olarak işaretlendi."}, status=status.HTTP_200_OK)
+        # mark notification as read, supports one or all
+        notification_id = request.data.get("notification_id")
+
+        if notification_id:
+            # if only one notification is sent to be read
+            updated = Notification.objects.filter(id=notification_id,
+                                                  user=request.user).update(is_read=True)
+            if updated == 0:
+                return Response({"detail": "Bildirim bulunamadı."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"detail": "Bildirim okundu olarak işaretlendi."}, status=status.HTTP_200_OK)
+
+        else:
+            # mark all as read
+            Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+            return Response({"detail": "Tüm bildirimler okundu olarak işaretlendi."}, status=status.HTTP_200_OK)

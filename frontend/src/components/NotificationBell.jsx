@@ -50,9 +50,21 @@ export default function NotificationBell() {
     }
   };
 
-  // Bildirime tıklandığında ilana git
-  const handleClickNotification = (notif) => {
+  // Bildirime tıklandığında sadece bu bildirimi okundu yap ve ilana git
+  const handleClickNotification = async (notif) => {
     setIsOpen(false);
+
+    if (!notif.is_read) {
+      try {
+        await markNotificationsAsRead(notif.id);
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === notif.id ? { ...n, is_read: true } : n))
+        );
+      } catch (err) {
+        console.error("Bildirim okundu yapılamadı:", err);
+      }
+    }
+
     if (!notif.listing) return;
     const path = notif.listing.listing_type === "house"
       ? `/houses/${notif.listing.id}`
@@ -60,12 +72,20 @@ export default function NotificationBell() {
     navigate(path);
   };
 
+  const handleToggleOpen = () => {
+    const nextState = !isOpen;
+    setIsOpen(nextState);
+    if (nextState) {
+      fetchNotifs();
+    }
+  };
+
   return (
     <div className="relative inline-block text-left" ref={dropdownRef}>
       {/* Çan Butonu */}
       <button
         type="button"
-        onClick={() => setIsOpen((prev) => !prev)}
+        onClick={handleToggleOpen}
         className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-[#232E3D] bg-[#161F2B] text-[#EDEFF2] hover:border-[#E8A33D]/50 hover:bg-[#1C2733] transition-all"
         title="Bildirimler"
       >
@@ -105,24 +125,33 @@ export default function NotificationBell() {
                 <div
                   key={n.id}
                   onClick={() => handleClickNotification(n)}
-                  className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-colors ${n.is_read ? "opacity-70 hover:bg-[#1C2733]" : "bg-[#1C2733]/60 hover:bg-[#1C2733]"
-                    }`}
+                  className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 ${
+                    n.is_read
+                      ? "opacity-40 bg-transparent hover:opacity-80 hover:bg-[#1C2733]/40"
+                      : "opacity-100 bg-[#1C2733] border border-[#E8A33D]/25 shadow-sm hover:bg-[#232E3D]"
+                  }`}
                 >
-                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
+                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                    n.is_read ? "bg-[#232E3D]/50 text-[#8B95A3]" : "bg-emerald-500/15 text-emerald-400"
+                  }`}>
                     <TrendingDown size={16} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-[#EDEFF2] truncate">
+                    <p className={`text-xs truncate ${n.is_read ? "font-normal text-[#8B95A3]" : "font-semibold text-[#EDEFF2]"}`}>
                       {n.listing?.title || "İlan"}
                     </p>
-                    <p className="text-xs text-[#8B95A3] mt-0.5">{n.message}</p>
+                    <p className={`text-xs mt-0.5 ${n.is_read ? "text-[#6B7583]" : "text-[#A1AAB7]"}`}>{n.message}</p>
                     <div className="mt-1 flex items-center gap-2 text-[11px]">
-                      <span className="text-red-400 line-through">₺{Number(n.old_price).toLocaleString("tr-TR")}</span>
-                      <span className="font-semibold text-emerald-400">₺{Number(n.new_price).toLocaleString("tr-TR")}</span>
+                      <span className={`line-through ${n.is_read ? "text-[#6B7583]" : "text-red-400/80"}`}>
+                        ₺{Number(n.old_price).toLocaleString("tr-TR")}
+                      </span>
+                      <span className={`font-semibold ${n.is_read ? "text-[#8B95A3]" : "text-emerald-400"}`}>
+                        ₺{Number(n.new_price).toLocaleString("tr-TR")}
+                      </span>
                     </div>
                   </div>
                   {!n.is_read && (
-                    <span className="h-2 w-2 rounded-full bg-[#E8A33D] mt-1 shrink-0" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-[#E8A33D] shadow-sm shadow-[#E8A33D] mt-1 shrink-0 animate-pulse" />
                   )}
                 </div>
               ))

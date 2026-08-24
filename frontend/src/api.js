@@ -175,10 +175,14 @@ export async function getNotifications() {
   }
   return res.json();
 }
-// for marking the notifications as read
-export async function markNotificationsAsRead() {
+// for marking notifications as read (supports single ID or all)
+export async function markNotificationsAsRead(notificationId = null) {
   const res = await authFetch(`${API_BASE}/notifications/`, {
     method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(notificationId ? { notification_id: notificationId } : {}),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: "Bildirimler güncellenemedi." }));
@@ -186,3 +190,4 @@ export async function markNotificationsAsRead() {
   }
   return res.json();
 }
+
