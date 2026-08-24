@@ -165,4 +165,24 @@ export async function authFetch(url, options = {}) {
 }
 
 
+// NOTIFICATION FUNCTIONS
 
+export async function getNotifications() {
+  const res = await authFetch(`${API_BASE}/notifications/`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Bildirimler alınamadı." }));
+    throw new Error(formatApiError(err));
+  }
+  return res.json();
+}
+// for marking the notifications as read
+export async function markNotificationsAsRead() {
+  const res = await authFetch(`${API_BASE}/notifications/`, {
+    method: "PATCH",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Bildirimler güncellenemedi." }));
+    throw new Error(formatApiError(err));
+  }
+  return res.json();
+}

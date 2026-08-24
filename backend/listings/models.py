@@ -143,7 +143,7 @@ class ListingImage(models.Model):
         Listing, on_delete=models.CASCADE,
         related_name="images")
 
-    mage = models.ImageField(
+    image = models.ImageField(
         upload_to="listings/images/%Y/%m/%d/", null=True, blank=True)
     is_cover = models.BooleanField(default=False)  # is it cover picture
     created_at = models.DateTimeField(auto_now_add=True)

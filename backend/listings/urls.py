@@ -1,4 +1,3 @@
-from backend.listings.views.common import NotificationView
 from django.urls import path
 from .views import (
     CarListingView, HouseListView,

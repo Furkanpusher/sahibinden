@@ -10,6 +10,8 @@ def price_update_notification(old_price, new_price, listing_pk):
         user_ids = Favorite.objects.filter(
             listing_id=listing_pk).values_list("user_id", flat=True)
 
+        print(
+            f"[NOTIFICATION] Listing #{listing_pk} price dropped ({old_price} -> {new_price}). {len(user_ids)} users found!")
         if not user_ids:
             return
 
@@ -25,3 +27,5 @@ def price_update_notification(old_price, new_price, listing_pk):
             )
             notifications.append(obj)
         Notification.objects.bulk_create(notifications)  # only 1 sql query
+        print(
+            f"✅ [CELERY] {len(notifications)} people have received the notification!")
