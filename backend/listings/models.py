@@ -173,3 +173,42 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.listing.title}"
+
+
+class Alarm(models.Model):
+
+    ALARM_TYPES = [
+        ("new_listing", "Yeni İlan"),
+        ("price_drop", "Fiyat Düşüşü"),
+        ("back_in_stock", "Stok Güncellemesi"),
+        ("view_count", "Görüntülenme Sayisi"),
+        ("favorite", "Favori Güncellemesi"),
+    ]
+
+    # needed for listing based alarms
+    listing = models.ForeignKey(Listing,  # null=True, blank=True for listing-independent alarms
+                                on_delete=models.CASCADE,
+                                related_name="alarms",
+                                null=True,
+                                blank=True)
+    # alarms can only be created by users
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE,
+                             related_name="alarms")
+
+    alarm_type = models.CharField(max_length=50, choices=ALARM_TYPES)
+    params = models.JSONField(default=dict)
+    # for canceling or starting the alarm
+    is_active = models.BooleanField(default=True)
+    last_checked = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+    # scan_alarms(alarm_type, user):
+    # look to db for matching alarms
+    # return matching_listings
+
+    # alarm_type={"PriceDropAlarm":"params"}
+
+    # PriceDropAlarm(params)

@@ -125,15 +125,13 @@ export default function NotificationBell() {
                 <div
                   key={n.id}
                   onClick={() => handleClickNotification(n)}
-                  className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 ${
-                    n.is_read
+                  className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all duration-200 ${n.is_read
                       ? "opacity-40 bg-transparent hover:opacity-80 hover:bg-[#1C2733]/40"
                       : "opacity-100 bg-[#1C2733] border border-[#E8A33D]/25 shadow-sm hover:bg-[#232E3D]"
-                  }`}
+                    }`}
                 >
-                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
-                    n.is_read ? "bg-[#232E3D]/50 text-[#8B95A3]" : "bg-emerald-500/15 text-emerald-400"
-                  }`}>
+                  <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${n.is_read ? "bg-[#232E3D]/50 text-[#8B95A3]" : "bg-emerald-500/15 text-emerald-400"
+                    }`}>
                     <TrendingDown size={16} />
                   </div>
                   <div className="flex-1 min-w-0">

@@ -1,5 +1,5 @@
 # Listing serializers halleder
-from .models import Listing, CarListing, HouseListing, Favorite, Report, ListingImage, Notification
+from .models import Listing, CarListing, HouseListing, Favorite, Report, ListingImage, Notification, Alarm
 from rest_framework import serializers
 
 
@@ -103,3 +103,24 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = ['id', 'listing', 'user', 'message',
                   'old_price', 'new_price', 'is_read', 'created_at']
+
+
+class AlarmSerializer(serializers.ModelSerializer):
+
+    # if it's GET we'll use this and return the whole list object
+    listing = ListingSerializer(read_only=True)
+
+    # if it's POST/PUT we'll use this and accept listing_id in POST/PUT
+    listing_id = serializers.PrimaryKeyRelatedField(
+        queryset=Listing.objects.all(),
+        source='listing',
+        write_only=True,
+        allow_null=True,  # (null allowed for not existing listings yet)
+        required=False    # not require for non existed listing alarms
+    )
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = Alarm
+        fields = ['id', 'listing', 'listing_id', 'user',
+                  'alarm_type', 'params', 'is_active', 'created_at']
