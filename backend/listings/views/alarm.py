@@ -1,9 +1,10 @@
 from listings.models import Alarm
 from listings.serializers import AlarmSerializer
-from rest_framework import APIView
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.exceptions import ValidationError
 from listings.services import create_alarm
 
 
@@ -25,18 +26,10 @@ class AlarmView(APIView):
         listing_id = request.data.get('listing_id')
         user = request.user
 
-        alarm = create_alarm(alarm_type, params, listing_id, user)
+        try:
+            alarm = create_alarm(alarm_type, params, listing_id, user)
+        except ValidationError as e:
+            return Response({'error': e.message}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not alarm:
-            return Response({'error': 'Alarm creation failed'}, status=status.HTTP_400_BAD_REQUEST)
-
-
-# but how will I distinguish the listing based alarms from non listing based alarms?
-
-        # there can be different type of alarms
-        # if it's not a listing based alarm like notify me when this comes,
-        #  we won't have listing, or listing id
-
-        # if it's a listing based alarm like
-        # notify me when this listings price drops we need the listing_id
-        # for post request
+        serializer = AlarmSerializer(alarm)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
