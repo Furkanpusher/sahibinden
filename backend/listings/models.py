@@ -178,11 +178,10 @@ class Notification(models.Model):
 class Alarm(models.Model):
 
     ALARM_TYPES = [
-        ("new_listing", "Yeni İlan"),
-        ("price_drop", "Fiyat Düşüşü"),
-        ("back_in_stock", "Stok Güncellemesi"),
-        ("view_count", "Görüntülenme Sayisi"),
-        ("favorite", "Favori Güncellemesi"),
+        ("new_listing_check", "Yeni ilan kontrolü"),
+        ("price_drop", "Fiyat düşüşü"),
+        ("favorite_updated", "Favori güncellendi"),
+        ("favorite_removed", "Favori kaldirildi"),
     ]
 
     # needed for listing based alarms

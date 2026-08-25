@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
-from .models import Listing, Favorite, Report, ListingImage, Notification
+from .models import Listing, Favorite, Report, ListingImage, Notification, Alarm
 from django.core.cache import cache
 from listings.tasks import price_update_notification
 
@@ -125,3 +125,53 @@ def add_images_to_listing(listing, image_files, is_cover=False):
         )
         created_images.append(img_obj)
     return created_images
+
+
+""" ALARM OPERATIONS """
+
+# need this to distinguish between listing required
+# and non listing required alarms
+ALARM_TYPES = Alarm.ALARM_TYPES
+LISTING_REQUIRED_ALARM_TYPES = {"price_drop",
+                                "favorite_updated", "favorite_removed"}
+NON_LISTING_REQUIRED_ALARM_TYPES = {"new_listing_check"}
+
+
+def create_alarm(alarm_type, params, listing_id, user):
+
+    # LISTING_REQUIRED_ALARM_TYPES
+    if alarm_type in LISTING_REQUIRED_ALARM_TYPES:
+        if not listing_id:
+            raise ValidationError(
+                "For this alarm type, the listing must be specified.")
+        listing = get_object_or_404(Listing, pk=listing_id)
+        if listing.listing_owner == user:
+            raise ValidationError(
+                "You cannot create an alarm for your own listing.")
+        # can pass params it doesn't matter, won't use it anyway
+
+        created_alarm = Alarm.objects.create(
+            alarm_type=alarm_type,
+            listing=listing,
+            user=user,
+            params={},
+            is_active=True,
+        )
+        return created_alarm
+
+    # NON_LISTING_REQUIRED_ALARM_TYPES
+    if alarm_type in NON_LISTING_REQUIRED_ALARM_TYPES:
+        # will use params in non_listing_types for now
+        # don't care about listing_id
+        if not params:
+            raise ValidationError("Params are required for this alarm type.")
+
+        created_alarm = Alarm.objects.create(
+            alarm_type=alarm_type,
+            user=user,
+            params=params,
+            is_active=True,
+        )
+        return created_alarm
+
+    raise ValidationError("Invalid alarm type")
