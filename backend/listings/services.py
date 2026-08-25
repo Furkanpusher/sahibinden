@@ -1,6 +1,6 @@
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
-from .models import Listing, Favorite, Report, ListingImage, Notification, Alarm
+from .models import Listing, Favorite, Report, ListingImage, Alarm
 from django.core.cache import cache
 from listings.tasks import price_update_notification
 
@@ -131,16 +131,19 @@ def add_images_to_listing(listing, image_files, is_cover=False):
 
 # need this to distinguish between listing required
 # and non listing required alarms
-ALARM_TYPES = Alarm.ALARM_TYPES
-LISTING_REQUIRED_ALARM_TYPES = {"price_drop",
-                                "favorite_updated", "favorite_removed"}
-NON_LISTING_REQUIRED_ALARM_TYPES = {"new_listing_check"}
+
+MAX_ALARMS_PER_USER = 5
 
 
 def create_alarm(alarm_type, params, listing_id, user):
 
-    # LISTING_REQUIRED_ALARM_TYPES
-    if alarm_type in LISTING_REQUIRED_ALARM_TYPES:
+    # maximum 5 active alarms allowed for each user
+    if not can_user_create_new_alarm(user):
+        raise ValidationError(
+            "You can have maximum 5 active alarms. Please delete or deactivate an existing alarm before creating a new one.")
+
+    # LISTING_REQUIRED
+    if alarm_type in Alarm.LISTING_REQUIRED:
         if not listing_id:
             raise ValidationError(
                 "For this alarm type, the listing must be specified.")
@@ -159,8 +162,8 @@ def create_alarm(alarm_type, params, listing_id, user):
         )
         return created_alarm
 
-    # NON_LISTING_REQUIRED_ALARM_TYPES
-    if alarm_type in NON_LISTING_REQUIRED_ALARM_TYPES:
+    # NON_LISTING_REQUIRED
+    if alarm_type in Alarm.NON_LISTING_REQUIRED:
         # will use params in non_listing_types for now
         # don't care about listing_id
         if not params:
@@ -175,3 +178,37 @@ def create_alarm(alarm_type, params, listing_id, user):
         return created_alarm
 
     raise ValidationError("Invalid alarm type")
+
+
+def delete_alarm(user, pk):
+    alarm = get_object_or_404(Alarm, pk=pk)
+    if alarm.user != user:
+        raise PermissionDenied("You can only delete your own alarm.")
+    alarm.delete()
+    return True
+
+
+def toggle_alarm(user, pk):
+    # user can have maximum 5 active alarms
+    # if wants to create more alarms, he has to deactivate previous alarms
+    alarm = get_object_or_404(Alarm, pk=pk)
+    if alarm.user != user:
+        raise PermissionDenied("You can only deactivate your own alarm.")
+
+    # if alarm is inactive and user CANNOT add more alarms (already has 5 active alarms)
+    if not alarm.is_active and not can_user_create_new_alarm(user):
+        raise ValidationError(
+            "You can have maximum 5 active alarms. Please delete or deactivate an existing alarm before creating a new one.")
+
+    alarm.is_active = not alarm.is_active  # toggle
+    alarm.save()
+    return alarm.is_active  # return new state so view can respond accordingly
+
+
+def can_user_create_new_alarm(user):
+    # returns True if user can create more alarms, False otherwise
+    active_alarms_count = Alarm.objects.filter(
+        user=user, is_active=True).count()
+    if active_alarms_count >= MAX_ALARMS_PER_USER:
+        return False
+    return True

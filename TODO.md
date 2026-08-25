@@ -42,17 +42,19 @@ AlarmChecker (base)
 
 
 
-✅ Tamamlananlar
-Alarm modeli → tüm field'lar, choices, migration uygulandı
-AlarmSerializer → GET için nested listing, POST/PUT için listing_id, params, is_active
+Finish the CRUD first, then Celery. Here's why:
 
-📋 Kalanlar
-Backend:
- View → AlarmViewSet (list, create, update, destroy) + perform_create'te user=request.user
- URL → api/alarms/ endpoint'e ekle
- tasks.py → AlarmChecker base + NewListingAlarm, PriceDropAlarm, BackInStockAlarm, ViewCountAlarm, FavoriteAlarm checker'ları
- Celery Beat → 5dk'da bir track_alarms() görevi
-Frontend:
+delete_alarm — simplest thing you'll write today. Just ownership check + delete. 5 minutes.
+
+update_alarm — only meaningful field to update is is_active (toggle on/off). Maybe params for new_listing_check. Keep it narrow.
+
+Register the URL — without this nothing is testable end-to-end.
+
+Test via Postman/Bruno — hit all 3 endpoints with valid + invalid payloads before touching Celery. If create/delete/update all work cleanly, you have a solid foundation.
+
+Then Celery — AlarmChecker base → individual checkers → Celery Beat schedule. This is the meaty part and you want the data layer rock solid before building on top of it.
+
+
 
  Alarm kurma UI (kullanıcı alarm tipi + parametrelerini seçer)
  Alarmlarım sayfası (aktif alarmları listele, sil, pasifleştir)

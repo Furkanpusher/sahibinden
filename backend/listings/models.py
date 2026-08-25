@@ -184,6 +184,10 @@ class Alarm(models.Model):
         ("favorite_removed", "Favori kaldirildi"),
     ]
 
+    # to know if alarm needs a listing
+    LISTING_REQUIRED = {"price_drop", "favorite_updated", "favorite_removed"}
+    NON_LISTING_REQUIRED = {"new_listing_check"}
+
     # needed for listing based alarms
     listing = models.ForeignKey(Listing,  # null=True, blank=True for listing-independent alarms
                                 on_delete=models.CASCADE,
@@ -197,6 +201,7 @@ class Alarm(models.Model):
 
     alarm_type = models.CharField(max_length=50, choices=ALARM_TYPES)
     params = models.JSONField(default=dict)
+
     # for canceling or starting the alarm
     is_active = models.BooleanField(default=True)
     last_checked = models.DateTimeField(null=True, blank=True)
