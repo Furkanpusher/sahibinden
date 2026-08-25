@@ -153,7 +153,9 @@ class Notification(models.Model):
     listing = models.ForeignKey(
         Listing,
         on_delete=models.CASCADE,
-        related_name="notifications")
+        related_name="notifications",
+        null=True,
+        blank=True)
 
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -161,10 +163,6 @@ class Notification(models.Model):
         related_name="notifications")
 
     message = models.TextField()
-    old_price = models.DecimalField(
-        max_digits=12, decimal_places=2, null=False)
-    new_price = models.DecimalField(
-        max_digits=12, decimal_places=2, null=False)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -172,20 +170,20 @@ class Notification(models.Model):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.user} - {self.listing.title}"
+        return f"{self.user} - {self.message[:30]}"
 
 
 class Alarm(models.Model):
 
     ALARM_TYPES = [
         ("new_listing_check", "Yeni ilan kontrolü"),
-        ("price_drop", "Fiyat düşüşü"),
+        ("price_change", "Fiyat değişimi"),
         ("favorite_updated", "Favori güncellendi"),
         ("favorite_removed", "Favori kaldirildi"),
     ]
 
     # to know if alarm needs a listing
-    LISTING_REQUIRED = {"price_drop", "favorite_updated", "favorite_removed"}
+    LISTING_REQUIRED = {"price_change", "favorite_updated", "favorite_removed"}
     NON_LISTING_REQUIRED = {"new_listing_check"}
 
     # needed for listing based alarms

@@ -42,11 +42,12 @@ AlarmChecker (base)
 
 
 
-Finish the CRUD first, then Celery. Here's why:
 
-delete_alarm — simplest thing you'll write today. Just ownership check + delete. 5 minutes.
 
-update_alarm — only meaningful field to update is is_active (toggle on/off). Maybe params for new_listing_check. Keep it narrow.
+# favorite_removed alarm
+# etc. remaining alarms
+
+
 
 Register the URL — without this nothing is testable end-to-end.
 

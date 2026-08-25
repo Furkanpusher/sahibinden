@@ -1,31 +1,15 @@
-from listings.models import Favorite, Notification
-# pyrefly: ignore [missing-import]
 from celery import shared_task
+from listings.alarm_services import (
+    process_price_change_notifications,
+    process_favorite_updated_notifications,
+)
 
 
 @shared_task
 def price_update_notification(old_price, new_price, listing_pk):
-    if old_price and new_price and old_price > new_price:
-        # find users who have that listing favorited
-        user_ids = Favorite.objects.filter(
-            listing_id=listing_pk).values_list("user_id", flat=True)
+    process_price_change_notifications(old_price, new_price, listing_pk)
 
-        print(
-            f"[NOTIFICATION] Listing #{listing_pk} price dropped ({old_price} -> {new_price}). {len(user_ids)} users found!")
-        if not user_ids:
-            return
 
-        # create notifications in bulk
-        notifications = []
-        for user_id in user_ids:
-            obj = Notification(
-                user_id=user_id,
-                listing_id=listing_pk,
-                message=f"Fiyat düştü: {old_price} -> {new_price}",
-                old_price=old_price,
-                new_price=new_price
-            )
-            notifications.append(obj)
-        Notification.objects.bulk_create(notifications)  # only 1 sql query
-        print(
-            f"✅ [CELERY] {len(notifications)} people have received the notification!")
+@shared_task
+def listing_updated_notification(listing_pk):
+    process_favorite_updated_notifications(listing_pk)

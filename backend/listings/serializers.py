@@ -101,8 +101,7 @@ class NotificationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Notification
-        fields = ['id', 'listing', 'user', 'message',
-                  'old_price', 'new_price', 'is_read', 'created_at']
+        fields = ['id', 'listing', 'user', 'message', 'is_read', 'created_at']
 
 
 class AlarmSerializer(serializers.ModelSerializer):
