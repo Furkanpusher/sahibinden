@@ -9,6 +9,7 @@ from ..services import (toggle_favorite, get_user_favorites,
                         )
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
+from django.core.exceptions import PermissionDenied
 from listings.models import Listing, Notification
 
 
@@ -69,7 +70,7 @@ class ListingImageUploadView(APIView):
         listing = get_object_or_404(Listing, pk=pk)
         # only listing owner can upload the images
         if listing.listing_owner != request.user:
-            return Response({"detail": "Yalnızca kendi ilanınıza fotoğraf ekleyebilirsiniz."}, status=status.HTTP_403_FORBIDDEN)
+            raise PermissionDenied("Yalnızca kendi ilanınıza fotoğraf ekleyebilirsiniz.")
         files = request.FILES.getlist('images')
         if not files:
             return Response({"detail": "Hiçbir fotoğraf seçilmedi."}, status=status.HTTP_400_BAD_REQUEST)

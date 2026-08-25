@@ -1,4 +1,3 @@
-from listings import serializers
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -26,10 +25,6 @@ class CarPagination(PageNumberPagination):
     page_query_param = 'page'
     max_page_size = 50
 
-
-CACHE_TIMEOUT = 60 * 60  # 1 hour
-CACHEABLE_PAGES = {"1", "2"}
-CACHE_KEY_PREFIX = "car_listings_page"
 
 
 class CarListingView(APIView):
