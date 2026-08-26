@@ -192,9 +192,9 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
 CELERY_BEAT_SCHEDULE = {
-    "check-new-listing-alarms-every-5-min": {
+    "check-new-listing-alarms-every-1-min": {
         "task": "listings.tasks.check_new_listing_alarms",
-        "schedule": 300.0,  # every 5 minutes (300 seconds)
+        "schedule": 60.0,  # every 1 minute (60 seconds)
     },
 }
 

@@ -18,7 +18,12 @@ import { createAlarm, formatApiError, fetchListings } from "../api";
 import { getCarBrands } from "../data/helper";
 
 const ROOM_OPTIONS = ["1+0", "1+1", "2+1", "3+1", "4+1", "5+1", "Dupleks"];
-const TRANSMISSIONS = ["Düz", "Otomatik", "Yarı Otomatik"];
+const TRANSMISSIONS = [
+  { label: "Manuel", value: "manuel" },
+  { label: "Otomatik", value: "otomatik" },
+  { label: "Yarı Otomatik", value: "yarı otomatik" },
+];
+
 const FLOOR_OPTIONS = [
   "Bahçe Katı",
   "Giriş Katı",
@@ -274,18 +279,16 @@ export default function CreateAlarmModal({
               <button
                 type="button"
                 onClick={() => setAlarmType("new_listing_check")}
-                className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
-                  alarmType === "new_listing_check"
+                className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${alarmType === "new_listing_check"
                     ? "border-[#10B981] bg-[#10B981]/10 text-[#EDEFF2] shadow-sm shadow-[#10B981]/20"
                     : "border-[#232E3D] bg-[#121A24] text-[#8B95A3] hover:border-[#232E3D]/80 hover:bg-[#1C2733]"
-                }`}
+                  }`}
               >
                 <div
-                  className={`flex h-7 w-7 items-center justify-center rounded-lg mb-2 ${
-                    alarmType === "new_listing_check"
+                  className={`flex h-7 w-7 items-center justify-center rounded-lg mb-2 ${alarmType === "new_listing_check"
                       ? "bg-[#10B981] text-[#0F1720]"
                       : "bg-[#232E3D] text-[#8B95A3]"
-                  }`}
+                    }`}
                 >
                   <Search size={15} />
                 </div>
@@ -301,18 +304,16 @@ export default function CreateAlarmModal({
               <button
                 type="button"
                 onClick={() => setAlarmType("price_change")}
-                className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
-                  alarmType === "price_change"
+                className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${alarmType === "price_change"
                     ? "border-[#E8A33D] bg-[#E8A33D]/10 text-[#EDEFF2] shadow-sm shadow-[#E8A33D]/20"
                     : "border-[#232E3D] bg-[#121A24] text-[#8B95A3] hover:border-[#232E3D]/80 hover:bg-[#1C2733]"
-                }`}
+                  }`}
               >
                 <div
-                  className={`flex h-7 w-7 items-center justify-center rounded-lg mb-2 ${
-                    alarmType === "price_change"
+                  className={`flex h-7 w-7 items-center justify-center rounded-lg mb-2 ${alarmType === "price_change"
                       ? "bg-[#E8A33D] text-[#0F1720]"
                       : "bg-[#232E3D] text-[#8B95A3]"
-                  }`}
+                    }`}
                 >
                   <Tag size={15} />
                 </div>
@@ -328,18 +329,16 @@ export default function CreateAlarmModal({
               <button
                 type="button"
                 onClick={() => setAlarmType("favorite_updated")}
-                className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${
-                  alarmType === "favorite_updated"
+                className={`flex flex-col items-start p-3 rounded-xl border text-left transition-all ${alarmType === "favorite_updated"
                     ? "border-[#3B82F6] bg-[#3B82F6]/10 text-[#EDEFF2] shadow-sm shadow-[#3B82F6]/20"
                     : "border-[#232E3D] bg-[#121A24] text-[#8B95A3] hover:border-[#232E3D]/80 hover:bg-[#1C2733]"
-                }`}
+                  }`}
               >
                 <div
-                  className={`flex h-7 w-7 items-center justify-center rounded-lg mb-2 ${
-                    alarmType === "favorite_updated"
+                  className={`flex h-7 w-7 items-center justify-center rounded-lg mb-2 ${alarmType === "favorite_updated"
                       ? "bg-[#3B82F6] text-[#0F1720]"
                       : "bg-[#232E3D] text-[#8B95A3]"
-                  }`}
+                    }`}
                 >
                   <FileEdit size={15} />
                 </div>
@@ -367,11 +366,10 @@ export default function CreateAlarmModal({
                   <button
                     type="button"
                     onClick={() => setCategory("car")}
-                    className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
-                      category === "car"
+                    className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-colors ${category === "car"
                         ? "bg-[#E8A33D] text-[#0F1720]"
                         : "text-[#8B95A3] hover:text-[#EDEFF2]"
-                    }`}
+                      }`}
                   >
                     <Car size={13} />
                     Otomobil
@@ -379,11 +377,10 @@ export default function CreateAlarmModal({
                   <button
                     type="button"
                     onClick={() => setCategory("house")}
-                    className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
-                      category === "house"
+                    className={`flex items-center gap-1.5 rounded-md px-3 py-1 text-xs font-semibold transition-colors ${category === "house"
                         ? "bg-[#E8A33D] text-[#0F1720]"
                         : "text-[#8B95A3] hover:text-[#EDEFF2]"
-                    }`}
+                      }`}
                   >
                     <Home size={13} />
                     Konut
@@ -464,11 +461,12 @@ export default function CreateAlarmModal({
                       >
                         <option value="">Tümü</option>
                         {TRANSMISSIONS.map((t) => (
-                          <option key={t} value={t}>
-                            {t}
+                          <option key={t.value} value={t.value}>
+                            {t.label}
                           </option>
                         ))}
                       </select>
+
                     </div>
 
                     <div>
@@ -505,11 +503,10 @@ export default function CreateAlarmModal({
                             onClick={() =>
                               handleToggleArrayItem("number_of_rooms", room)
                             }
-                            className={`rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors ${
-                              isSelected
+                            className={`rounded-lg px-2.5 py-1 text-xs font-medium border transition-colors ${isSelected
                                 ? "border-[#E8A33D] bg-[#E8A33D]/15 text-[#E8A33D]"
                                 : "border-[#232E3D] bg-[#161F2B] text-[#8B95A3] hover:text-[#EDEFF2]"
-                            }`}
+                              }`}
                           >
                             {room}
                           </button>

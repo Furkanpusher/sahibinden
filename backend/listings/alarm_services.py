@@ -11,8 +11,6 @@ from listings.models import (
 
 
 def process_price_change_notifications(old_price, new_price, listing_pk):
-    # alarm which triggers when the price change happens
-    # price_change alarm
     if old_price is None or new_price is None or Decimal(str(old_price)) == Decimal(str(new_price)):
         return
 
@@ -20,26 +18,24 @@ def process_price_change_notifications(old_price, new_price, listing_pk):
     new_price_dec = Decimal(str(new_price))
     is_price_drop = new_price_dec < old_price_dec
 
-    # 1. get favorited users
     target_user_ids = set(
         Favorite.objects.filter(listing_id=listing_pk).values_list(
             "user_id", flat=True)
     )
 
-    # 2. get price_change alarm users
-    alarm_user_ids = Alarm.objects.filter(
-        listing_id=listing_pk,
-        alarm_type="price_change",
-        is_active=True
-    ).values_list("user_id", flat=True)
-    target_user_ids.update(alarm_user_ids)
+    price_alarms = {
+        a.user_id: a
+        for a in Alarm.objects.filter(
+            listing_id=listing_pk,
+            alarm_type="price_change",
+            is_active=True
+        )
+    }
+    target_user_ids.update(price_alarms.keys())
 
-    if not target_user_ids:  # no users to notify
-        print(
-            f"[ALARM] İlan #{listing_pk} için fiyat değişti ({old_price} -> {new_price}) fakat bilgilendirilecek kullanıcı bulunamadı.")
+    if not target_user_ids:
         return
 
-    # notification messages
     if is_price_drop:
         message = f"Fiyat düştü: {old_price} -> {new_price}"
         log_type = "FİYAT DÜŞÜŞÜ"
@@ -52,10 +48,10 @@ def process_price_change_notifications(old_price, new_price, listing_pk):
         f"{len(target_user_ids)} kullanıcı bulundu!"
     )
 
-    # bulk create the notifications
     notifications = [
         Notification(
             user_id=user_id,
+            alarm=price_alarms.get(user_id),
             listing_id=listing_pk,
             message=message,
         )
@@ -67,19 +63,20 @@ def process_price_change_notifications(old_price, new_price, listing_pk):
 
 
 def process_favorite_updated_notifications(listing_pk):
-    # if any part of the listing changes other than price, send notification
-    # favorite_updated alarm
     target_user_ids = set(
         Favorite.objects.filter(listing_id=listing_pk).values_list(
             "user_id", flat=True)
     )
 
-    alarm_user_ids = Alarm.objects.filter(
-        listing_id=listing_pk,
-        alarm_type="favorite_updated",
-        is_active=True
-    ).values_list("user_id", flat=True)
-    target_user_ids.update(alarm_user_ids)
+    fav_alarms = {
+        a.user_id: a
+        for a in Alarm.objects.filter(
+            listing_id=listing_pk,
+            alarm_type="favorite_updated",
+            is_active=True
+        )
+    }
+    target_user_ids.update(fav_alarms.keys())
 
     if not target_user_ids:
         return
@@ -90,10 +87,10 @@ def process_favorite_updated_notifications(listing_pk):
 
     message = f"Favori ilanınız güncellendi: {listing.title}"
 
-    # bulk notification creation
     notifications = [
         Notification(
             user_id=user_id,
+            alarm=fav_alarms.get(user_id),
             listing_id=listing_pk,
             message=message,
         )
@@ -138,6 +135,7 @@ def process_criteria_matching_listing_notifications(alarm):
     config = CATEGORY_CONFIG.get(category)
     if not config:
         return 0
+
     model_class = config["model"]
     category_lookups = config["lookups"]
 
@@ -146,20 +144,30 @@ def process_criteria_matching_listing_notifications(alarm):
     for key, lookup in category_lookups.items():
         if key in params and params[key]:
             val = params[key]
-            # additional check for __in query
-            if lookup.endswith("__in") and not isinstance(val, list):
-                filters[lookup] = [val]
+            if lookup.endswith("__in"):
+                raw_list = val if isinstance(val, list) else [val]
+                expanded = set()
+                for item in raw_list:
+                    if isinstance(item, str):
+                        expanded.add(item)
+                        expanded.add(item.lower())
+                        expanded.add(item.capitalize())
+                        expanded.add(item.upper())
+                        if item.lower() in ("manuel", "düz"):
+                            expanded.update(["manuel", "Manuel", "Düz", "düz"])
+                    else:
+                        expanded.add(item)
+                filters[lookup] = list(expanded)
             else:
                 filters[lookup] = val
 
-    # previously notified users for the same alarm
+    # Yalnızca bu alarma ait daha önce bildirilmiş ilanları hariç tut
     already_notified_ids = Notification.objects.filter(
-        user=alarm.user,
         alarm=alarm,
         listing_id__isnull=False,
     ).values_list("listing_id", flat=True)
 
-    # Kriterleri sağlayan, kendi ilanı olmayan ve henüz bildirilmemiş olanları getir (Mevcut, güncel ve yeni tüm ilanlar)
+    # Kriterleri sağlayan, kendi ilanı olmayan ve henüz bildirilmemiş olanları getir
     matched = list(
         model_class.objects.filter(**filters)
         .exclude(listing_owner=alarm.user)
@@ -167,11 +175,12 @@ def process_criteria_matching_listing_notifications(alarm):
         .only("id", "title")
     )
 
-    # send notifications for each matching listing
+    # Bildirimleri oluştur
     if matched:
         notifications = [
             Notification(
                 user=alarm.user,
+                alarm=alarm,
                 listing_id=item.id,
                 message=f"Kriterlerinize uygun ilan bulundu: {item.title}",
             )
@@ -179,7 +188,6 @@ def process_criteria_matching_listing_notifications(alarm):
         ]
         Notification.objects.bulk_create(notifications)
 
-    # update timestamp
     alarm.last_checked = timezone.now()
     alarm.save(update_fields=["last_checked"])
     return len(matched)

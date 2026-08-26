@@ -104,3 +104,16 @@ class NotificationView(APIView):
             # mark all as read
             Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
             return Response({"detail": "Tüm bildirimler okundu olarak işaretlendi."}, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        notification_id = request.data.get("notification_id")
+        if not notification_id:
+            return Response({"detail": "notification_id gereklidir."}, status=status.HTTP_400_BAD_REQUEST)
+
+        notification = Notification.objects.filter(id=notification_id, user=request.user).first()
+        if not notification:
+            return Response({"detail": "Bildirim bulunamadı."}, status=status.HTTP_404_NOT_FOUND)
+
+        notification.delete()
+        return Response({"detail": "Bildirim silindi."}, status=status.HTTP_200_OK)
+

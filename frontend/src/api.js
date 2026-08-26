@@ -191,6 +191,22 @@ export async function markNotificationsAsRead(notificationId = null) {
   return res.json();
 }
 
+export async function deleteNotification(notificationId) {
+  const res = await authFetch(`${API_BASE}/notifications/`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ notification_id: notificationId }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Bildirim silinemedi." }));
+    throw new Error(formatApiError(err));
+  }
+  return res.json();
+}
+
+
 
 // ALARM FUNCTIONS
 

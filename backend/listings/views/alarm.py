@@ -39,4 +39,5 @@ class AlarmView(APIView):
         pk = request.data.get('pk')
         is_now_active = toggle_alarm(request.user, pk)
         msg = 'Alarm activated successfully' if is_now_active else 'Alarm deactivated successfully'
-        return Response({'message': msg}, status=status.HTTP_200_OK)
+        return Response({'message': msg, 'is_active': is_now_active}, status=status.HTTP_200_OK)
+

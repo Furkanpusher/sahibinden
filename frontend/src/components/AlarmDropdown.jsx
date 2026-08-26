@@ -33,17 +33,18 @@ const formatTimeAgo = (dateStr) => {
   return `${diffDays} gün önce`;
 };
 
-// 5 dakikalık periyot için bir sonraki taramaya kalan süreyi hesapla
+// 1 dakikalık (60 sn) periyot için bir sonraki taramaya kalan süreyi hesapla
 const getNextScanRemaining = (alarm, now) => {
   const baseTimeStr = alarm.last_checked || alarm.created_at;
-  if (!baseTimeStr) return "5:00";
+  if (!baseTimeStr) return "1:00";
   const baseDate = new Date(baseTimeStr).getTime();
   const elapsedSec = Math.max(0, Math.floor((now - baseDate) / 1000));
-  const remainingSec = 300 - (elapsedSec % 300);
+  const remainingSec = 60 - (elapsedSec % 60);
   const minutes = Math.floor(remainingSec / 60);
   const seconds = remainingSec % 60;
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 };
+
 
 export default function AlarmDropdown() {
   const [alarms, setAlarms] = useState([]);
@@ -107,8 +108,11 @@ export default function AlarmDropdown() {
     e.stopPropagation();
     try {
       setTogglingId(alarm.id);
-      await toggleAlarm(alarm.id);
-      const isNowActive = !alarm.is_active;
+      const res = await toggleAlarm(alarm.id);
+      const isNowActive =
+        res && typeof res.is_active === "boolean"
+          ? res.is_active
+          : !alarm.is_active;
 
       setAlarms((prev) =>
         prev.map((a) => (a.id === alarm.id ? { ...a, is_active: isNowActive } : a))
@@ -125,6 +129,7 @@ export default function AlarmDropdown() {
       setTogglingId(null);
     }
   };
+
 
   // Alarm Silme
   const handleDelete = async (e, alarmId) => {
@@ -404,8 +409,9 @@ export default function AlarmDropdown() {
                             title="Bir sonraki otomatik taramaya kalan süre"
                           >
                             <span className="h-1.5 w-1.5 rounded-full bg-[#10B981] animate-pulse" />
-                            <span>{getNextScanRemaining(alarm, currentTime)} / 5:00</span>
+                            <span>{getNextScanRemaining(alarm, currentTime)} / 1:00</span>
                           </div>
+
                         </>
                       ) : (
                         <>
