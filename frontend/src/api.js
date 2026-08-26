@@ -191,3 +191,60 @@ export async function markNotificationsAsRead(notificationId = null) {
   return res.json();
 }
 
+
+// ALARM FUNCTIONS
+
+export async function getAlarms() {
+  const res = await authFetch(`${API_BASE}/alarms/`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Alarmlar alınamadı." }));
+    throw new Error(formatApiError(err));
+  }
+  return res.json();
+}
+
+export async function createAlarm(data) {
+  const res = await authFetch(`${API_BASE}/alarms/`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Alarm oluşturulamadı." }));
+    throw new Error(formatApiError(err));
+  }
+  return res.json();
+}
+
+export async function toggleAlarm(pk) {
+  const res = await authFetch(`${API_BASE}/alarms/`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pk }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Alarm durumu güncellenemedi." }));
+    throw new Error(formatApiError(err));
+  }
+  return res.json();
+}
+
+export async function deleteAlarm(pk) {
+  const res = await authFetch(`${API_BASE}/alarms/`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ pk }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Alarm silinemedi." }));
+    throw new Error(formatApiError(err));
+  }
+  return res.json();
+}
+

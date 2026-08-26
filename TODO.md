@@ -59,7 +59,8 @@ Then Celery — AlarmChecker base → individual checkers → Celery Beat schedu
 
 
 
-
+# images should be base64 ?
+# photo uploading -- base 64
 
 
 

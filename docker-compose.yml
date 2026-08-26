@@ -50,7 +50,7 @@ services:
       dockerfile: Dockerfile
     container_name: sahibinden_celery
     restart: unless-stopped
-    command: celery -A proje worker -l info
+    command: celery -A proje worker -B -l info # celery Beat için -B
     volumes:
       - ./backend:/app
       - ./backend/media:/app/media

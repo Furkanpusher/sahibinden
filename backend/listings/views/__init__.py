@@ -8,3 +8,4 @@ from .common import (FavoriteToggleView, UserFavoritesListView,
                      ListingImageUploadView, NotificationView)
 
 from .staff import StaffReportListView, StaffDeleteReportView, StaffDeleteListingView
+from .alarm import AlarmView

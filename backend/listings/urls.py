@@ -6,7 +6,7 @@ from .views import (
     ReportListingView, UserReportsListView,
     StaffReportListView, StaffDeleteReportView,
     StaffDeleteListingView, ListingImageUploadView,
-    NotificationView
+    NotificationView, AlarmView
 )
 
 
@@ -39,5 +39,9 @@ urlpatterns = [
     path("staff/listings/<int:pk>/", StaffDeleteListingView.as_view(),
          name="staff-delete-listing"),
 
-    path("notifications/", NotificationView.as_view(), name="notifications")
+    # Notifications
+    path("notifications/", NotificationView.as_view(), name="notifications"),
+
+    # Alarms
+    path("alarms/", AlarmView.as_view(), name="alarms"),
 ]

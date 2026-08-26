@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X, Scale } fro
 import { toast } from "sonner";
 import { fetchListings, formatApiError, authFetch } from "../../api";
 import { useCompare } from "../../context/CompareContext";
+import ListingAlarmActions from "../../components/ListingAlarmActions";
 
 const defaultImages = [
   "/house-1.jpg", "/house-2.jpg", "/house-3.jpg", "/house-4.jpg", "/house-5.jpg",
@@ -328,6 +329,13 @@ export default function HouseDetailPage() {
                   <span>{isInCompare(house.id) ? "Karşılaştırmada" : "Karşılaştır"}</span>
                 </button>
               </div>
+
+              {/* 🔔 Fiyat Altı Alarm Kur Butonu */}
+              {!isOwner && (
+                <div className="mt-4 pt-4 border-t border-[#232E3D]">
+                  <ListingAlarmActions listingId={house.id} isOwner={isOwner} />
+                </div>
+              )}
             </div>
           </div>
 

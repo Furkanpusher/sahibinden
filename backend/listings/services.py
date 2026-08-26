@@ -1,5 +1,6 @@
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from .models import Listing, Favorite, Report, ListingImage, Alarm
 from django.core.cache import cache
 from listings.tasks import price_update_notification, listing_updated_notification
@@ -177,6 +178,7 @@ def create_alarm(alarm_type, params, listing_id, user):
             user=user,
             params=params,
             is_active=True,
+            last_checked=timezone.now(),
         )
         return created_alarm
 

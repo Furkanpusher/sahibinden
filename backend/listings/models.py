@@ -162,6 +162,14 @@ class Notification(models.Model):
         on_delete=models.CASCADE,
         related_name="notifications")
 
+    alarm = models.ForeignKey(
+        "Alarm",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="notifications"
+    )
+
     message = models.TextField()
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -171,6 +179,7 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.user} - {self.message[:30]}"
+
 
 
 class Alarm(models.Model):

@@ -10,6 +10,7 @@ import {
   LogIn
 } from "lucide-react";
 import NotificationBell from "./NotificationBell";
+import AlarmDropdown from "./AlarmDropdown";
 
 export default function UserMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,14 +39,14 @@ export default function UserMenu() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Çıkış Yap Fonksiyonu
+  // logout
   const handleLogout = () => {
     localStorage.clear();
     setIsOpen(false);
     navigate("/login");
   };
 
-  // 1. Giriş Yapılmamışsa "Giriş Yap" Butonu Göster
+  // if not login show the login  page
   if (!token) {
     return (
       <Link
@@ -58,9 +59,10 @@ export default function UserMenu() {
     );
   }
 
-  // 2. Giriş Yapılmışsa Avatar + Kullanıcı Adı + Dropdown Göster
+  // if login show avatar, username
   return (
     <div className="flex items-center gap-2.5">
+      <AlarmDropdown />
       <NotificationBell />
       <div className="relative inline-block text-left" ref={dropdownRef}>
         <button

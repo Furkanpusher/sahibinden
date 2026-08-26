@@ -139,19 +139,37 @@ export default function NotificationBell() {
                       {n.listing?.title || "İlan"}
                     </p>
                     <p className={`text-xs mt-0.5 ${n.is_read ? "text-[#6B7583]" : "text-[#A1AAB7]"}`}>{n.message}</p>
-                    <div className="mt-1 flex items-center gap-2 text-[11px]">
-                      <span className={`line-through ${n.is_read ? "text-[#6B7583]" : "text-red-400/80"}`}>
-                        ₺{Number(n.old_price).toLocaleString("tr-TR")}
-                      </span>
-                      <span className={`font-semibold ${n.is_read ? "text-[#8B95A3]" : "text-emerald-400"}`}>
-                        ₺{Number(n.new_price).toLocaleString("tr-TR")}
-                      </span>
-                    </div>
+                    {(() => {
+                      let oldP = n.old_price;
+                      let newP = n.new_price;
+                      if ((oldP == null || newP == null) && n.message) {
+                        const match = n.message.match(/(\d+(?:\.\d+)?)\s*->\s*(\d+(?:\.\d+)?)/);
+                        if (match) {
+                          oldP = match[1];
+                          newP = match[2];
+                        }
+                      }
+                      if (oldP != null && newP != null && !isNaN(Number(oldP)) && !isNaN(Number(newP))) {
+                        return (
+                          <div className="mt-1 flex items-center gap-2 text-[11px]">
+                            <span className={`line-through ${n.is_read ? "text-[#6B7583]" : "text-red-400/80"}`}>
+                              ₺{Number(oldP).toLocaleString("tr-TR")}
+                            </span>
+                            <span className="text-[#8B95A3]">→</span>
+                            <span className={`font-semibold ${n.is_read ? "text-[#8B95A3]" : "text-emerald-400"}`}>
+                              ₺{Number(newP).toLocaleString("tr-TR")}
+                            </span>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
                   {!n.is_read && (
                     <span className="h-2.5 w-2.5 rounded-full bg-[#E8A33D] shadow-sm shadow-[#E8A33D] mt-1 shrink-0 animate-pulse" />
                   )}
                 </div>
+
               ))
             )}
           </div>

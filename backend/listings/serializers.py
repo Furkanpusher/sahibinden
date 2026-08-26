@@ -122,4 +122,4 @@ class AlarmSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alarm
         fields = ['id', 'listing', 'listing_id', 'user',
-                  'alarm_type', 'params', 'is_active', 'created_at']
+                  'alarm_type', 'params', 'is_active', 'last_checked', 'created_at']

@@ -4,6 +4,7 @@ import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X, ChevronLeft
 import { toast } from "sonner";
 import { fetchListings, formatApiError, authFetch } from "../../api";
 import { useCompare } from "../../context/CompareContext";
+import ListingAlarmActions from "../../components/ListingAlarmActions";
 
 const defaultImages = [
   "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
@@ -324,6 +325,13 @@ export default function CarDetailPage() {
                   <span>{isInCompare(car.id) ? "Karşılaştırmada" : "Karşılaştır"}</span>
                 </button>
               </div>
+
+              {/* 🔔 Fiyat Altı Alarm Kur Butonu */}
+              {!isOwner && (
+                <div className="mt-4 pt-4 border-t border-[#232E3D]">
+                  <ListingAlarmActions listingId={car.id} isOwner={isOwner} />
+                </div>
+              )}
             </div>
           </div>
 

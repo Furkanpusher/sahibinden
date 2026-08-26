@@ -13,6 +13,7 @@ import { fetchListings } from "../../api";
 import { FilterInput, FilterSelect } from "../../components/ListingUI";
 import UserMenu from "../../components/UserMenu";
 import Pagination from "../../components/Pagination";
+import CreateSearchAlarmButton from "../../components/CreateSearchAlarmButton";
 import { getCities, getDistricts, getCarBrands, getCarModels } from "../../data/helper";
 import { useCompare } from "../../context/CompareContext";
 
@@ -217,6 +218,11 @@ export default function CarListPage() {
             </div>
 
             <div className="flex items-center gap-3">
+              <CreateSearchAlarmButton
+                category="car"
+                appliedFilters={appliedFilters}
+              />
+
               <Link
                 to="/araba-ilan-olustur"
                 className="rounded-lg bg-[#E8A33D] px-4 py-2 text-sm font-semibold text-[#0F1720] hover:bg-[#F0B058] transition-colors"

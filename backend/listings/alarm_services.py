@@ -141,31 +141,39 @@ def process_criteria_matching_listing_notifications(alarm):
     model_class = config["model"]
     category_lookups = config["lookups"]
 
-    filters = {  # base filter for created or new updated listings
-        "listing_update__gt": alarm.last_checked or alarm.created_at,
-    }
-    # add param filters based on the category mappings
+    # Kriter filtrelerini oluştur
+    filters = {}
     for key, lookup in category_lookups.items():
         if key in params and params[key]:
             val = params[key]
-            filters[lookup] = [val] if (lookup.endswith(
-                "__in") and not isinstance(val, list)) else val
+            # additional check for __in query
+            if lookup.endswith("__in") and not isinstance(val, list):
+                filters[lookup] = [val]
+            else:
+                filters[lookup] = val
 
-    # get all the model objects that satisfied all criteria
+    # previously notified users for the same alarm
+    already_notified_ids = Notification.objects.filter(
+        user=alarm.user,
+        alarm=alarm,
+        listing_id__isnull=False,
+    ).values_list("listing_id", flat=True)
+
+    # Kriterleri sağlayan, kendi ilanı olmayan ve henüz bildirilmemiş olanları getir (Mevcut, güncel ve yeni tüm ilanlar)
     matched = list(
         model_class.objects.filter(**filters)
-        # exclude the listing owner from notification receivers
         .exclude(listing_owner=alarm.user)
+        .exclude(id__in=already_notified_ids)
         .only("id", "title")
     )
 
-    # send notifications
+    # send notifications for each matching listing
     if matched:
         notifications = [
             Notification(
                 user=alarm.user,
                 listing_id=item.id,
-                message=f"Kriterlerinize uygun yeni ilan: {item.title}",
+                message=f"Kriterlerinize uygun ilan bulundu: {item.title}",
             )
             for item in matched
         ]
