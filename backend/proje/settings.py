@@ -190,3 +190,11 @@ CELERY_RESULT_BACKEND = os.environ.get("REDIS_URL", "redis://127.0.0.1:6379/1")
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+CELERY_BEAT_SCHEDULE = {
+    "check-new-listing-alarms-every-5-min": {
+        "task": "listings.tasks.check_new_listing_alarms",
+        "schedule": 300.0,  # every 5 minutes (300 seconds)
+    },
+}
+

@@ -57,9 +57,6 @@ Then Celery — AlarmChecker base → individual checkers → Celery Beat schedu
 
 
 
- Alarm kurma UI (kullanıcı alarm tipi + parametrelerini seçer)
- Alarmlarım sayfası (aktif alarmları listele, sil, pasifleştir)
-Nereden devam edelim? Ben View + URL öneririm, 10 dakika iş, sonra direkt test edebilirsin.
 
 
 

@@ -54,10 +54,10 @@ def update_listing(instance, serializer_class, data, partial=True):
         old_price = instance.price
         updated_instance = serializer.save()  # update the listing
         if old_price != updated_instance.price:
-            price_update_notification.delay(
+            price_update_notification.delay( # just price change
                 old_price, updated_instance.price, instance.pk)
         else:
-            listing_updated_notification.delay(instance.pk)
+            listing_updated_notification.delay(instance.pk) # other any update except price
         return updated_instance, None
     return None, serializer.errors
 

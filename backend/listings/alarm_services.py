@@ -1,5 +1,13 @@
 from decimal import Decimal
-from listings.models import Favorite, Alarm, Notification, Listing
+from django.utils import timezone
+from listings.models import (
+    Favorite,
+    Alarm,
+    Notification,
+    Listing,
+    CarListing,
+    HouseListing,
+)
 
 
 def process_price_change_notifications(old_price, new_price, listing_pk):
@@ -95,3 +103,75 @@ def process_favorite_updated_notifications(listing_pk):
     Notification.objects.bulk_create(notifications)
     print(
         f"[ALARM] İlan #{listing_pk} güncellendi, {len(notifications)} kişiye bildirim iletildi.")
+
+
+# Maps simple frontend param names directly to Django query lookups
+CATEGORY_CONFIG = {
+    "car": {
+        "model": CarListing,
+        "lookups": {
+            "min_price": "price__gte",
+            "max_price": "price__lte",
+            "brands": "brand__in",
+            "transmission_types": "transmission_type__in",
+            "max_km": "km__lte",
+        },
+    },
+    "house": {
+        "model": HouseListing,
+        "lookups": {
+            "min_price": "price__gte",
+            "max_price": "price__lte",
+            "number_of_rooms": "number_of_rooms__in",
+            "min_meter_squared": "meter_squared__gte",
+            "floor": "floor__in",
+        },
+    },
+}
+
+
+def process_criteria_matching_listing_notifications(alarm):
+    if alarm.alarm_type != "new_listing_check" or not alarm.is_active:
+        return 0
+    params = alarm.params or {}
+    category = params.get("category", "car")
+    config = CATEGORY_CONFIG.get(category)
+    if not config:
+        return 0
+    model_class = config["model"]
+    category_lookups = config["lookups"]
+
+    filters = {  # base filter for created or new updated listings
+        "listing_update__gt": alarm.last_checked or alarm.created_at,
+    }
+    # add param filters based on the category mappings
+    for key, lookup in category_lookups.items():
+        if key in params and params[key]:
+            val = params[key]
+            filters[lookup] = [val] if (lookup.endswith(
+                "__in") and not isinstance(val, list)) else val
+
+    # get all the model objects that satisfied all criteria
+    matched = list(
+        model_class.objects.filter(**filters)
+        # exclude the listing owner from notification receivers
+        .exclude(listing_owner=alarm.user)
+        .only("id", "title")
+    )
+
+    # send notifications
+    if matched:
+        notifications = [
+            Notification(
+                user=alarm.user,
+                listing_id=item.id,
+                message=f"Kriterlerinize uygun yeni ilan: {item.title}",
+            )
+            for item in matched
+        ]
+        Notification.objects.bulk_create(notifications)
+
+    # update timestamp
+    alarm.last_checked = timezone.now()
+    alarm.save(update_fields=["last_checked"])
+    return len(matched)
