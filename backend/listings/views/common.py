@@ -70,7 +70,8 @@ class ListingImageUploadView(APIView):
         listing = get_object_or_404(Listing, pk=pk)
         # only listing owner can upload the images
         if listing.listing_owner != request.user:
-            raise PermissionDenied("Yalnızca kendi ilanınıza fotoğraf ekleyebilirsiniz.")
+            raise PermissionDenied(
+                "Yalnızca kendi ilanınıza fotoğraf ekleyebilirsiniz.")
         files = request.FILES.getlist('images')
         if not files:
             return Response({"detail": "Hiçbir fotoğraf seçilmedi."}, status=status.HTTP_400_BAD_REQUEST)
@@ -89,10 +90,10 @@ class NotificationView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def patch(self, request):
-        # mark notification as read, supports one or all
+        # for read, and unread functionality
         notification_id = request.data.get("notification_id")
 
-        if notification_id:
+        if notification_id:  # for single notification
             # if only one notification is sent to be read
             updated = Notification.objects.filter(id=notification_id,
                                                   user=request.user).update(is_read=True)
@@ -100,20 +101,18 @@ class NotificationView(APIView):
                 return Response({"detail": "Bildirim bulunamadı."}, status=status.HTTP_404_NOT_FOUND)
             return Response({"detail": "Bildirim okundu olarak işaretlendi."}, status=status.HTTP_200_OK)
 
-        else:
+        else:  # for all notifications(when pressed to all read)
             # mark all as read
-            Notification.objects.filter(user=request.user, is_read=False).update(is_read=True)
+            Notification.objects.filter(
+                user=request.user, is_read=False).update(is_read=True)
             return Response({"detail": "Tüm bildirimler okundu olarak işaretlendi."}, status=status.HTTP_200_OK)
 
     def delete(self, request):
+        # only user can delete it's own notifications
         notification_id = request.data.get("notification_id")
-        if not notification_id:
-            return Response({"detail": "notification_id gereklidir."}, status=status.HTTP_400_BAD_REQUEST)
-
-        notification = Notification.objects.filter(id=notification_id, user=request.user).first()
+        notification = Notification.objects.filter(
+            id=notification_id, user=request.user).first()
         if not notification:
             return Response({"detail": "Bildirim bulunamadı."}, status=status.HTTP_404_NOT_FOUND)
-
         notification.delete()
         return Response({"detail": "Bildirim silindi."}, status=status.HTTP_200_OK)
-

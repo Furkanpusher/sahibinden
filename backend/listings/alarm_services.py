@@ -127,7 +127,11 @@ CATEGORY_CONFIG = {
 }
 
 
-def process_criteria_matching_listing_notifications(alarm):
+def process_criteria_match_notifications(alarm):
+    """
+    Checks matching listings for a single 'new_listing_check' alarm
+    and creates notifications for the alarm owner.
+    """
     if alarm.alarm_type != "new_listing_check" or not alarm.is_active:
         return 0
     params = alarm.params or {}
@@ -191,3 +195,20 @@ def process_criteria_matching_listing_notifications(alarm):
     alarm.last_checked = timezone.now()
     alarm.save(update_fields=["last_checked"])
     return len(matched)
+
+
+def process_all_new_listing_notifications():
+    """
+    Orchestrates scanning all active 'new_listing_check' alarms.
+    Used directly by the Celery periodic task.
+    """
+    active_alarms = Alarm.objects.filter(
+        alarm_type="new_listing_check",
+        is_active=True
+    ).select_related("user")
+
+    total_notifications = 0
+    for alarm in active_alarms:
+        total_notifications += process_criteria_match_notifications(alarm)
+
+    return f"Processed {active_alarms.count()} alarms, created {total_notifications} notifications."
