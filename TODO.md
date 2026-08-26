@@ -49,11 +49,32 @@ AlarmChecker (base)
 
 
 
-Register the URL — without this nothing is testable end-to-end.
+Refactor our backend service layer by converting `listings/services.py` and `listings/alarm_services.py` into a clean, modular `listings/services/` package.
 
-Test via Postman/Bruno — hit all 3 endpoints with valid + invalid payloads before touching Celery. If create/delete/update all work cleanly, you have a solid foundation.
+### Context & Motivation
+1. **Consistency**: Our `listings/views/` is already a clean package with separate files (`alarm.py`, `car.py`, `house.py`, `base.py`). The services layer should match this structure.
+2. **Separation of Concerns**: Separate listing CRUD, alarm evaluation rules, and notification dispatching so the concepts don't overlap.
+3. **Clean Naming**: Alarms are trigger rules that get evaluated; notifications are messages that get dispatched.
 
-Then Celery — AlarmChecker base → individual checkers → Celery Beat schedule. This is the meaty part and you want the data layer rock solid before building on top of it.
+---
+
+### Implementation Plan
+
+1. **Create `backend/listings/services/` directory** and structure it with:
+   - `__init__.py`: Re-export all service functions so existing imports like `from listings.services import ...` remain backwards-compatible.
+   - `listing_services.py`: Listing CRUD operations, query helpers (`get_all_listings`, `get_listing_by_id`, `filter_listings`, `create_listing`, `update_listing`, `delete_listing`), favorites, and reports.
+   - `alarm_services.py`: Alarm lifecycle (`create_alarm`, `delete_alarm`, `toggle_alarm`) and criteria matching (`evaluate_criteria_alarm`, `evaluate_all_active_criteria_alarms`).
+   - `notification_services.py`: Message generation and dispatching (`dispatch_price_change_notifications`, `dispatch_favorite_update_notifications`, `bulk_create_notifications`).
+
+2. **Clean up old root files**:
+   - Remove the old monolithic `listings/services.py` and `listings/alarm_services.py`.
+
+3. **Update `backend/listings/tasks.py`**:
+   - Ensure task function names and imports reflect the new modular services cleanly.
+
+4. **Verification**:
+   - Run `docker compose exec backend python manage.py check` to verify there are no broken imports or syntax issues.
+
 
 
 
