@@ -181,7 +181,6 @@ class Notification(models.Model):
         return f"{self.user} - {self.message[:30]}"
 
 
-
 class Alarm(models.Model):
 
     ALARM_TYPES = [

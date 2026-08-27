@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
 from listings.models import Listing, Favorite, Report, ListingImage
+from accounts.models import CustomUser, Follow
 from listings.tasks import price_update_notification, listing_updated_notification
 
 
@@ -125,3 +126,19 @@ def add_images_to_listing(listing, image_files, is_cover=False):
         )
         created_images.append(img_obj)
     return created_images
+
+
+""" FOLLOWER """
+
+
+def toggle_follow(follower, seller_id):
+    seller = get_object_or_404(CustomUser, pk=seller_id)
+    if follower == seller:
+        raise PermissionDenied("You cannot follow yourself.")
+    follower_obj, created = Follow.objects.get_or_create(
+        follower=follower, seller=seller)
+    if not created:
+        follower_obj.delete()
+        return False, seller.followers.count()
+    return True, seller.followers.count()
+    # return the count of followers, we can do this because of "related_name" field in Follow model

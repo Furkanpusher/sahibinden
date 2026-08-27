@@ -1,5 +1,6 @@
 # Listing serializers halleder
-from .models import Listing, CarListing, HouseListing, Favorite, Report, ListingImage, Notification, Alarm
+from listings.models import Listing, CarListing, HouseListing, Favorite, Report, ListingImage, Notification, Alarm
+from accounts.models import CustomUser
 from rest_framework import serializers
 from accounts.serializers import UserPublicSerializer
 
@@ -122,3 +123,25 @@ class AlarmSerializer(serializers.ModelSerializer):
         model = Alarm
         fields = ['id', 'listing', 'listing_id', 'user',
                   'alarm_type', 'params', 'is_active', 'last_checked', 'created_at']
+
+
+class FollowedSellerWithListingsSerializer(serializers.ModelSerializer):
+    # because related_name is "ilanlar" in listings model, we use source="ilanlar"
+    listings = ListingSerializer(source="ilanlar", many=True, read_only=True)
+    total_listings_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "profile_picture",
+            "total_listings_count",
+            "listings",  # Satıcının tüm ilanları burada dizi olarak döner
+        ]
+
+    def get_total_listings_count(self, obj):
+        return obj.ilanlar.count()

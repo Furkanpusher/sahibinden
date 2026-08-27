@@ -5,7 +5,8 @@ from .car import CarListingView, CarDetailView
 from .house import HouseListView, HouseDetailView
 from .common import (FavoriteToggleView, UserFavoritesListView,
                      ReportListingView, UserReportsListView,
-                     ListingImageUploadView, NotificationView)
+                     ListingImageUploadView, NotificationView,
+                     FollowToggleView, FollowingListView,)
 
 from .staff import StaffReportListView, StaffDeleteReportView, StaffDeleteListingView
 from .alarm import AlarmView

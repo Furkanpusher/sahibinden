@@ -58,7 +58,7 @@ Add a unique constraint on (follower, seller) so a user cannot follow the same s
 Add validation to prevent a user from following themselves.
 
 
-# IN PROGRESS
+# DONE
 Phase 2: Follow Management APIs
 Follow / Unfollow Endpoint:
 An authenticated endpoint (e.g., POST /api/sellers/{id}/follow/ or toggle action) to follow/unfollow a seller.
@@ -69,7 +69,7 @@ Return a boolean flag (is_following: true/false) when the authenticated user vie
 For the user's dashboard/settings to view and manage all sellers they currently follow.
 
 
-
+# IN PROGRESS
 Phase 3: Seller Showcase / Public Profile API
 Seller Listings Endpoint:
 An endpoint (e.g., GET /api/sellers/{id}/listings/ or filtering GET /api/listings/?owner={id}) that returns all active listings by that seller.

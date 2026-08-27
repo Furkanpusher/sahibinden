@@ -6,7 +6,8 @@ from .views import (
     ReportListingView, UserReportsListView,
     StaffReportListView, StaffDeleteReportView,
     StaffDeleteListingView, ListingImageUploadView,
-    NotificationView, AlarmView
+    NotificationView, AlarmView,
+    FollowToggleView, FollowingListView,
 )
 
 
@@ -44,4 +45,12 @@ urlpatterns = [
 
     # Alarms
     path("alarms/", AlarmView.as_view(), name="alarms"),
+
+    # Follow
+    path("sellers/<int:pk>/follow/",
+         FollowToggleView.as_view(), name="toggle-follow"),
+
+    path("following/", FollowingListView.as_view(), name="user-following"),
+
+
 ]

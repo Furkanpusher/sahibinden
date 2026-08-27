@@ -2,15 +2,19 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from listings.serializers import FavoriteSerializer, ReportSerializer, ListingImageSerializer, NotificationSerializer
+from listings.serializers import (FavoriteSerializer, ReportSerializer,
+                                  ListingImageSerializer, NotificationSerializer,
+                                  FollowedSellerWithListingsSerializer,)
+
 from ..services import (toggle_favorite, get_user_favorites,
                         report_listing, get_user_reports,
-                        add_images_to_listing,
+                        add_images_to_listing, toggle_follow,
                         )
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 from listings.models import Listing, Notification
+from accounts.models import CustomUser
 
 
 # FAVORİTE VİEWS
@@ -116,3 +120,34 @@ class NotificationView(APIView):
             return Response({"detail": "Bildirim bulunamadı."}, status=status.HTTP_404_NOT_FOUND)
         notification.delete()
         return Response({"detail": "Bildirim silindi."}, status=status.HTTP_200_OK)
+
+
+# FOLLOW VIEWS
+class FollowToggleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):  # for following and unfollowing
+        is_following, follower_count = toggle_follow(
+            follower=request.user, seller_id=pk)
+
+        return Response({
+            "is_following": is_following,
+            "follower_count": follower_count,
+            "detail": "Satici takip edildi." if is_following else "Takipten çikarildi."
+        }, status=status.HTTP_200_OK)
+
+
+class FollowingListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        # 1. id's of the followed sellers
+        seller_ids = request.user.following.values_list("seller_id", flat=True)
+        # 2. get sellers and their listings
+        followed_sellers = CustomUser.objects.filter(
+            id__in=seller_ids
+        ).prefetch_related("ilanlar__images")
+
+        serializer = FollowedSellerWithListingsSerializer(
+            followed_sellers, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
