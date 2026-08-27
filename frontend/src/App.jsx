@@ -3,6 +3,7 @@ import { Toaster } from "sonner";
 import { CompareProvider } from "./context/CompareContext.jsx";
 import CompareBar from "./components/CompareBar.jsx";
 import AuthPage from "./pages/auth/Auth.jsx";
+import Profile from "./pages/profile/Profile.jsx";
 import Home from "./pages/homepage/Home.jsx";
 import CarList from "./pages/list/Car.jsx";
 import HouseList from "./pages/list/House.jsx";
@@ -45,6 +46,12 @@ export default function App() {
           <Route path="/favorilerim" element={<UserFavorites />} />
           <Route path="/ilanlarim" element={<UserListings />} />
           <Route path="/raporlarim" element={<UserReports />} />
+
+          {/* Profile route */}
+          <Route path="/profilim" element={<Profile />} />
+
+
+
         </Routes>
         <CompareBar />
       </CompareProvider>

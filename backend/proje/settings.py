@@ -191,10 +191,9 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 
-CELERY_BEAT_SCHEDULE = {
+CELERY_BEAT_SCHEDULE = {  # interval schedule
     "check-new-listing-alarms-every-1-min": {
         "task": "listings.tasks.check_new_listing_alarms",
         "schedule": 60.0,  # every 1 minute (60 seconds)
     },
 }
-
