@@ -69,16 +69,17 @@ Return a boolean flag (is_following: true/false) when the authenticated user vie
 For the user's dashboard/settings to view and manage all sellers they currently follow.
 
 
-# IN PROGRESS
+# DONE
 Phase 3: Seller Showcase / Public Profile API
 Seller Listings Endpoint:
-An endpoint (e.g., GET /api/sellers/{id}/listings/ or filtering GET /api/listings/?owner={id}) that returns all active listings by that seller.
-Support your existing pagination, sorting, and category filters.
+An endpoint (e.g., GET /api/sellers/{id}/ or filtering GET /api/listings/?owner={id}) that returns all active listings by that seller.
+Support existing pagination, sorting, and category filters.
 Seller Profile Summary:
 Include public details: name/store name, join date, total active listings count, and follower count.
 
 
 
+# DONE
 Phase 4: Notification Trigger Logic
 Hook into Listing Creation:
 When a new listing is successfully published (status = active):
@@ -88,13 +89,16 @@ Link each notification directly to the new listing_id.
 
 
 
+# DONE
 Phase 5: Frontend UI / UX
 Listing Detail Page:
 In the seller info card, make the seller's name/avatar a clickable link to their profile page.
 Add a dynamic "Takip Et" (Follow) / "Takip Ediliyor" (Following) button right next to the seller's name.
-Seller Profile Page (/sellers/:id or /users/:id/listings):
+Seller Profile Page (/sellers/:id):
 Header: Seller avatar, username/store name, member since date, total listings count, and Follow button.
 Content Grid: Display all car/house listings owned by this seller.
+User Following Page (/takip-ettiklerim):
+Manage all followed sellers with listing previews and unfollow actions.
 Notification Integration:
 When a follower clicks a "New listing from followed seller" notification, route them directly to the new listing detail page.
 

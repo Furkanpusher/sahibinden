@@ -9,26 +9,12 @@ import {
   Trash2,
   RotateCcw,
 } from "lucide-react";
-import { fetchListings } from "../../api";
+import { fetchListings, getListingCoverImage } from "../../api";
 import { useCompare } from "../../context/CompareContext";
 import UserMenu from "../../components/UserMenu";
 
-const defaultImages = [
-  "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
-  "/car-6.jpg", "/car-7.jpg", "/car-8.jpg", "/car-9.jpg", "/car-10.jpg",
-];
-
-const BACKEND_BASE = "http://127.0.0.1:8001";
-
-const getCoverImage = (item) => {
-  const coverFromGallery = item.images?.find((img) => img.is_cover)?.image || item.images?.[0]?.image;
-  const rawUrl = coverFromGallery || item.image || item.imageUrl;
-
-  if (rawUrl) {
-    if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) return rawUrl;
-    return `${BACKEND_BASE}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`;
-  }
-  return defaultImages[item.id % defaultImages.length];
+const getCoverImage = (item, type) => {
+  return getListingCoverImage(item, type);
 };
 
 const formatPrice = (price) => {

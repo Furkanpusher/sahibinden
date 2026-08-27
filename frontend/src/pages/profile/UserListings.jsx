@@ -12,16 +12,9 @@ import {
   ArrowUpRight,
   Plus
 } from "lucide-react";
-import { fetchListings } from "../../api";
+import { fetchListings, getListingCoverImage } from "../../api";
 import UserMenu from "../../components/UserMenu";
-const carImages = [
-  "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
-  "/car-6.jpg", "/car-7.jpg", "/car-8.jpg", "/car-9.jpg", "/car-10.jpg",
-];
-const houseImages = [
-  "/house-1.jpg", "/house-2.jpg", "/house-3.jpg", "/house-4.jpg", "/house-5.jpg",
-  "/house-6.jpg", "/house-7.jpg", "/house-8.jpg", "/house-9.jpg", "/house-10.jpg",
-];
+
 export default function UserListings() {
   const [myListings, setMyListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -199,9 +192,7 @@ export default function UserListings() {
                 const isCar = item.listing_type === "car";
                 const detailUrl = isCar ? `/cars/${item.id}` : `/houses/${item.id}`;
                 const updateUrl = isCar ? `/araba-ilan-guncelle/${item.id}` : `/ev-ilan-guncelle/${item.id}`;
-                const defaultImg = isCar
-                  ? item.imageUrl || carImages[item.id % carImages.length]
-                  : item.imageUrl || houseImages[item.id % houseImages.length];
+                const displayImg = getListingCoverImage(item, isCar ? "car" : "house");
                 return (
                   <div
                     key={`${item.listing_type}-${item.id}`}
@@ -210,7 +201,7 @@ export default function UserListings() {
                     {/* Görsel ve Tip Rozeti */}
                     <Link to={detailUrl} className="group/img relative mb-2 block aspect-[4/3] w-full overflow-hidden rounded-lg bg-[#0F1720]">
                       <img
-                        src={defaultImg}
+                        src={displayImg}
                         alt={item.title}
                         className="h-full w-full object-cover transition-transform duration-300 group-hover/img:scale-105"
                       />

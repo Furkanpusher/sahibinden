@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X, Scale, User, Phone } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X, Scale, User, Phone, UserCheck, UserPlus, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
-import { fetchListings, formatApiError, authFetch } from "../../api";
+import { fetchListings, formatApiError, authFetch, toggleFollowSeller, getSellerProfile } from "../../api";
 import { useCompare } from "../../context/CompareContext";
 import ListingAlarmActions from "../../components/ListingAlarmActions";
 
@@ -41,6 +41,10 @@ export default function HouseDetailPage() {
   const [reportDescription, setReportDescription] = useState("");
   const [isReporting, setIsReporting] = useState(false);
 
+  // 🔹 Satıcı Takip State'leri
+  const [isFollowingSeller, setIsFollowingSeller] = useState(false);
+  const [isTogglingFollow, setIsTogglingFollow] = useState(false);
+
   const token = localStorage.getItem("access") || localStorage.getItem("token") || localStorage.getItem("access_token");
   const storedUser = localStorage.getItem("user") ? JSON.parse(localStorage.getItem("user")) : null;
   const currentUserId = localStorage.getItem("user_id") || storedUser?.id || storedUser?.pk || localStorage.getItem("userId");
@@ -48,7 +52,7 @@ export default function HouseDetailPage() {
 
   const API_URL = import.meta.env?.VITE_API_URL || "http://127.0.0.1:8001/api";
 
-  // 1. İlan Detayını ve Kullanıcının Favori Durumunu Çek
+  // 1. İlan Detayını ve Kullanıcının Favori / Takip Durumunu Çek
   useEffect(() => {
     setLoading(true);
     setError(null);
@@ -57,8 +61,9 @@ export default function HouseDetailPage() {
       .then((data) => {
         setHouse(data);
 
-        // Kullanıcı giriş yapmışsa bu ev favorilerinde var mı kontrol et
+        // Kullanıcı giriş yapmışsa
         if (token) {
+          // Favori kontrolü
           fetch(`${API_URL}/listings/favorites/`, {
             headers: {
               "Content-Type": "application/json",
@@ -75,11 +80,45 @@ export default function HouseDetailPage() {
               }
             })
             .catch((err) => console.error("Favori durumu alınamadı:", err));
+
+          // Takip kontrolü
+          if (data?.listing_owner?.id) {
+            getSellerProfile(data.listing_owner.id)
+              .then((prof) => {
+                if (prof?.seller?.is_following) {
+                  setIsFollowingSeller(true);
+                }
+              })
+              .catch(() => {});
+          }
         }
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
   }, [id, token, API_URL]);
+
+  // 🔹 SATICIYI TAKİP ET / ÇIK
+  const handleToggleFollowSeller = async () => {
+    if (!token) {
+      toast.info("Satıcıyı takip etmek için lütfen giriş yapınız.");
+      navigate("/login");
+      return;
+    }
+    const sellerId = house?.listing_owner?.id || house?.listing_owner?.pk;
+    if (!sellerId) return;
+
+    setIsTogglingFollow(true);
+    try {
+      const res = await toggleFollowSeller(sellerId);
+      setIsFollowingSeller(res.is_following);
+      toast.success(res.detail || (res.is_following ? "Satıcı takip edildi." : "Takipten çıkıldı."));
+    } catch (err) {
+      if (err.isSessionExpired) return;
+      toast.error(formatApiError(err) || "Takip işlemi gerçekleştirilemedi.");
+    } finally {
+      setIsTogglingFollow(false);
+    }
+  };
 
   const ownerId = house?.listing_owner?.id || house?.listing_owner?.pk || house?.listing_owner;
 
@@ -340,47 +379,98 @@ export default function HouseDetailPage() {
           <div className="flex-1 flex flex-col gap-4">
             {/* 👤 İlan Sahibi Bilgileri Kartı */}
             {house.listing_owner && typeof house.listing_owner === "object" && (
-              <div className="rounded-xl border border-[#232E3D] bg-[#161F2B] p-5">
-                <div className="pb-3 mb-4 border-b border-[#232E3D]">
+              <div className="rounded-xl border border-[#232E3D] bg-[#161F2B] p-5 shadow-sm">
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#232E3D]">
                   <h3 className="text-xs font-semibold uppercase tracking-wider text-[#8B95A3]">
                     İlan Sahibi
                   </h3>
+                  {house.listing_owner.id && (
+                    <Link
+                      to={`/sellers/${house.listing_owner.id}`}
+                      className="text-xs font-semibold text-[#E8A33D] hover:underline flex items-center gap-1"
+                    >
+                      <span>Tüm İlanları</span>
+                      <ExternalLink size={12} />
+                    </Link>
+                  )}
                 </div>
+
                 <div className="flex items-center justify-between gap-4">
-                  <div className="flex items-center gap-3">
+                  <Link
+                    to={house.listing_owner.id ? `/sellers/${house.listing_owner.id}` : "#"}
+                    className="flex items-center gap-3 group"
+                  >
                     {house.listing_owner.profile_picture ? (
                       <img
                         src={formatImgUrl(house.listing_owner.profile_picture)}
                         alt={house.listing_owner.username}
-                        className="w-12 h-12 rounded-full object-cover border border-[#232E3D]"
+                        className="w-12 h-12 rounded-full object-cover border border-[#232E3D] group-hover:border-[#E8A33D] transition-colors"
                       />
                     ) : (
-                      <div className="w-12 h-12 rounded-full bg-[#232E3D] flex items-center justify-center text-[#E8A33D] font-bold text-lg border border-[#344458]">
+                      <div className="w-12 h-12 rounded-full bg-[#232E3D] flex items-center justify-center text-[#E8A33D] font-bold text-lg border border-[#344458] group-hover:border-[#E8A33D] transition-colors">
                         {house.listing_owner.username?.[0]?.toUpperCase() || <User size={20} />}
                       </div>
                     )}
                     <div>
-                      <p className="font-semibold text-[#EDEFF2] text-base">
-                        {house.listing_owner.username || "Kullanıcı"}
+                      <p className="font-semibold text-[#EDEFF2] text-base group-hover:text-[#E8A33D] transition-colors flex items-center gap-1.5">
+                        <span>{house.listing_owner.username || "Kullanıcı"}</span>
                       </p>
-                      <p className="text-xs text-[#8B95A3]">Bireysel Satıcı</p>
+                      <p className="text-xs text-[#8B95A3]">Satıcı Profili</p>
                     </div>
-                  </div>
+                  </Link>
 
                   {house.listing_owner.phone_number ? (
                     <a
                       href={`tel:${house.listing_owner.phone_number}`}
-                      className="flex items-center gap-2 rounded-xl bg-[#E8A33D]/10 hover:bg-[#E8A33D] text-[#E8A33D] hover:text-[#0F1720] border border-[#E8A33D]/30 px-4 py-2.5 text-xs font-semibold transition-all shadow-sm"
+                      className="flex items-center gap-2 rounded-xl bg-[#E8A33D]/10 hover:bg-[#E8A33D] text-[#E8A33D] hover:text-[#0F1720] border border-[#E8A33D]/30 px-3.5 py-2 text-xs font-semibold transition-all shadow-sm"
                     >
-                      <Phone size={15} />
+                      <Phone size={14} />
                       <span>{house.listing_owner.phone_number}</span>
                     </a>
                   ) : (
-                    <span className="text-xs text-[#8B95A3] italic bg-[#0F1720] px-3 py-2 rounded-lg border border-[#232E3D]">
+                    <span className="text-xs text-[#8B95A3] italic bg-[#0F1720] px-3 py-1.5 rounded-lg border border-[#232E3D]">
                       Numara yok
                     </span>
                   )}
                 </div>
+
+                {/* Takip Et & Profil Butonları (Kendi ilanı değilse) */}
+                {!isOwner && house.listing_owner.id && (
+                  <div className="mt-4 pt-3 border-t border-[#232E3D] flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleToggleFollowSeller}
+                      disabled={isTogglingFollow}
+                      className={`flex-1 flex items-center justify-center gap-1.5 rounded-xl py-2 px-3 text-xs font-semibold transition-all border ${
+                        isFollowingSeller
+                          ? "border-[#232E3D] bg-[#0F1720] text-[#EDEFF2] hover:border-red-500/40 hover:bg-red-500/10 hover:text-red-400"
+                          : "border-[#E8A33D]/40 bg-[#E8A33D]/10 text-[#E8A33D] hover:bg-[#E8A33D] hover:text-[#0F1720]"
+                      }`}
+                    >
+                      {isTogglingFollow ? (
+                        <Loader2 size={13} className="animate-spin" />
+                      ) : isFollowingSeller ? (
+                        <>
+                          <UserCheck size={14} className="text-emerald-400" />
+                          <span>Takip Ediliyor</span>
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus size={14} />
+                          <span>Satıcıyı Takip Et</span>
+                        </>
+                      )}
+                    </button>
+
+                    <Link
+                      to={`/sellers/${house.listing_owner.id}`}
+                      className="flex items-center justify-center gap-1 rounded-xl border border-[#232E3D] bg-[#0F1720] px-3 py-2 text-xs font-medium text-[#8B95A3] hover:text-[#EDEFF2] hover:border-[#4A5568] transition-colors"
+                    >
+                      <span>Vitrin</span>
+                      <ExternalLink size={12} />
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
 

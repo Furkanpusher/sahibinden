@@ -13,17 +13,7 @@ import {
   ArrowUpRight
 } from "lucide-react";
 import UserMenu from "../../components/UserMenu";
-import { authFetch } from "../../api";
-
-const carImages = [
-  "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
-  "/car-6.jpg", "/car-7.jpg", "/car-8.jpg", "/car-9.jpg", "/car-10.jpg",
-];
-
-const houseImages = [
-  "/house-1.jpg", "/house-2.jpg", "/house-3.jpg", "/house-4.jpg", "/house-5.jpg",
-  "/house-6.jpg", "/house-7.jpg", "/house-8.jpg", "/house-9.jpg", "/house-10.jpg",
-];
+import { authFetch, getListingCoverImage } from "../../api";
 
 export default function UserReportsPage() {
   const [reports, setReports] = useState([]);
@@ -147,9 +137,7 @@ export default function UserReportsPage() {
 
                 const isCar = listing.listing_type === "car";
                 const detailUrl = isCar ? `/cars/${listing.id}` : `/houses/${listing.id}`;
-                const defaultImg = isCar
-                  ? carImages[listing.id % carImages.length]
-                  : houseImages[listing.id % houseImages.length];
+                const displayImg = getListingCoverImage(listing, isCar ? "car" : "house");
 
                 return (
                   <div
@@ -163,7 +151,7 @@ export default function UserReportsPage() {
                         className="group/img relative h-20 w-28 shrink-0 overflow-hidden rounded-xl bg-[#0F1720] border border-[#232E3D] transition-transform hover:scale-105"
                       >
                         <img
-                          src={defaultImg}
+                          src={displayImg}
                           alt={listing.title}
                           className="h-full w-full object-cover"
                         />

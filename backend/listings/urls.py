@@ -8,6 +8,7 @@ from .views import (
     StaffDeleteListingView, ListingImageUploadView,
     NotificationView, AlarmView,
     FollowToggleView, FollowingListView,
+    SellerDetailView,
 )
 
 
@@ -51,6 +52,9 @@ urlpatterns = [
          FollowToggleView.as_view(), name="toggle-follow"),
 
     path("following/", FollowingListView.as_view(), name="user-following"),
+
+    # Seller
+    path("sellers/<int:pk>/", SellerDetailView.as_view(), name="seller-detail"),
 
 
 ]

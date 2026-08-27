@@ -11,6 +11,9 @@ from .listing_services import (
     get_user_reports,
     get_all_reports,
     add_images_to_listing,
+    toggle_follow,
+    get_seller_by_id,
+    get_seller_listings,
 )
 from .alarm_services import (
     MAX_ALARMS_PER_USER,
@@ -47,6 +50,9 @@ __all__ = [
     "get_user_reports",
     "get_all_reports",
     "add_images_to_listing",
+    "toggle_follow",
+    "get_seller_by_id",
+    "get_seller_listings",
     # Alarm services
     "MAX_ALARMS_PER_USER",
     "can_user_create_new_alarm",

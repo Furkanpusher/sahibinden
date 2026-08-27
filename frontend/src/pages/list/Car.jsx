@@ -9,7 +9,7 @@ import {
   Search,
   Scale,
 } from "lucide-react";
-import { fetchListings } from "../../api";
+import { fetchListings, getListingCoverImage } from "../../api";
 import { FilterInput, FilterSelect } from "../../components/ListingUI";
 import UserMenu from "../../components/UserMenu";
 import Pagination from "../../components/Pagination";
@@ -17,26 +17,11 @@ import CreateSearchAlarmButton from "../../components/CreateSearchAlarmButton";
 import { getCities, getDistricts, getCarBrands, getCarModels } from "../../data/helper";
 import { useCompare } from "../../context/CompareContext";
 
-const defaultImages = [
-  "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
-  "/car-6.jpg", "/car-7.jpg", "/car-8.jpg", "/car-9.jpg", "/car-10.jpg",
-];
-
 const TRANSMISSIONS = ["Düz", "Otomatik", "Yarı Otomatik"];
-const BACKEND_BASE = "http://127.0.0.1:8001";
 
-// 📸 Fotoğraf URL Çözümleyici (Öncelik: Galeri/Kapak > Ana Resim > Default Havuzu)
+// 📸 Fotoğraf URL Çözümleyici
 const getCarCoverImage = (car) => {
-  const coverFromGallery = car.images?.find((img) => img.is_cover)?.image || car.images?.[0]?.image;
-  const rawUrl = coverFromGallery || car.image || car.imageUrl;
-
-  if (rawUrl) {
-    if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) return rawUrl;
-    return `${BACKEND_BASE}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`;
-  }
-
-  // Yüklenmiş görsel yoksa default listesinden seç
-  return defaultImages[car.id % defaultImages.length];
+  return getListingCoverImage(car, "car");
 };
 
 export default function CarListPage() {

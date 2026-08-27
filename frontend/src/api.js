@@ -1,6 +1,46 @@
 import { toast } from "sonner";
 
 const API_BASE = "http://localhost:8001/api/listings";
+export const BACKEND_BASE = "http://127.0.0.1:8001";
+
+const carFallbackImages = [
+  "/car-1.jpg", "/car-2.jpg", "/car-3.jpg", "/car-4.jpg", "/car-5.jpg",
+  "/car-6.jpg", "/car-7.jpg", "/car-8.jpg", "/car-9.jpg", "/car-10.jpg",
+];
+
+const houseFallbackImages = [
+  "/house-1.jpg", "/house-2.jpg", "/house-3.jpg", "/house-4.jpg", "/house-5.jpg",
+  "/house-6.jpg", "/house-7.jpg", "/house-8.jpg", "/house-9.jpg", "/house-10.jpg",
+];
+
+export const formatImgUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${BACKEND_BASE}${url.startsWith("/") ? "" : "/"}${url}`;
+};
+
+export const getListingCoverImage = (item, preferredType = null) => {
+  if (!item) return "/car-1.jpg";
+
+  // 1. Galeri resimlerinden kapak (is_cover = true) olanı veya ilk resmi al
+  const coverObj = item.images?.find((img) => img.is_cover) || item.images?.[0];
+  const rawUrl = coverObj?.image || item.image || item.imageUrl;
+
+  if (rawUrl) {
+    return formatImgUrl(rawUrl);
+  }
+
+  // 2. Yüklenmiş görsel yoksa kategoriye ve ID'ye göre sabit fallback seç
+  const isHouse =
+    preferredType === "house" ||
+    item.listing_type === "house" ||
+    item.meter_squared !== undefined ||
+    item.number_of_rooms !== undefined;
+
+  const fallbackList = isHouse ? houseFallbackImages : carFallbackImages;
+  const idNum = Number(item.id) || 0;
+  return fallbackList[Math.abs(idNum) % fallbackList.length];
+};
 
 export function isTokenExpired() {
   const token = localStorage.getItem("access_token") || localStorage.getItem("access");
@@ -207,6 +247,39 @@ export async function deleteNotification(notificationId) {
 }
 
 
+// FOLLOW & SELLER PROFILE FUNCTIONS
+
+export async function toggleFollowSeller(sellerId) {
+  const res = await authFetch(`${API_BASE}/sellers/${sellerId}/follow/`, {
+    method: "POST",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Takip işlemi başarısız oldu." }));
+    throw new Error(formatApiError(err));
+  }
+  return res.json();
+}
+
+export async function getFollowedSellers() {
+  const res = await authFetch(`${API_BASE}/following/`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Takip edilen satıcılar alınamadı." }));
+    throw new Error(formatApiError(err));
+  }
+  return res.json();
+}
+
+export async function getSellerProfile(sellerId, page = 1) {
+  const token = localStorage.getItem("access_token") || localStorage.getItem("access");
+  const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+  const res = await fetch(`${API_BASE}/sellers/${sellerId}/?page=${page}`, { headers });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: "Satıcı profili bulunamadı." }));
+    throw new Error(formatApiError(err));
+  }
+  return res.json();
+}
 
 // ALARM FUNCTIONS
 

@@ -1,20 +1,25 @@
+from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from listings.serializers import (FavoriteSerializer, ReportSerializer,
-                                  ListingImageSerializer, NotificationSerializer,
-                                  FollowedSellerWithListingsSerializer,)
-
+from listings.serializers import (
+    FavoriteSerializer, ReportSerializer,
+    ListingImageSerializer, NotificationSerializer,
+    FollowedSellerWithListingsSerializer,
+    SellerPublicProfileSerializer, ListingSerializer
+)
 from ..services import (toggle_favorite, get_user_favorites,
                         report_listing, get_user_reports,
                         add_images_to_listing, toggle_follow,
+                        get_seller_by_id, get_seller_listings,
                         )
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 from listings.models import Listing, Notification
 from accounts.models import CustomUser
+from .base import StandardListingPagination
 
 
 # FAVORİTE VİEWS
@@ -128,7 +133,8 @@ class FollowToggleView(APIView):
 
     def post(self, request, pk):  # for following and unfollowing
         is_following, follower_count = toggle_follow(
-            follower=request.user, seller_id=pk)
+            follower=request.user,
+            seller_id=pk)
 
         return Response({
             "is_following": is_following,
@@ -151,3 +157,30 @@ class FollowingListView(APIView):
         serializer = FollowedSellerWithListingsSerializer(
             followed_sellers, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class SellerDetailView(APIView):
+    permission_classes = [AllowAny]
+    pagination_class = StandardListingPagination
+
+    def get(self, request, pk):
+        seller = get_seller_by_id(pk)
+        listings_qs = get_seller_listings(seller)
+
+        seller_serializer = SellerPublicProfileSerializer(
+            seller,
+            context={'request': request}
+        )
+
+        # seller paginator
+        paginator = self.pagination_class()
+        paginated_listings = paginator.paginate_queryset(
+            listings_qs, request, view=self)
+        listings_serializer = ListingSerializer(
+            paginated_listings, many=True, context={"request": request}
+        )
+
+        return Response({
+            "seller": seller_serializer.data,
+            "listings": paginator.get_paginated_response(listings_serializer.data).data
+        }, status=status.HTTP_200_OK)

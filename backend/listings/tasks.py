@@ -21,3 +21,8 @@ def listing_updated_notification(listing_pk):
 @shared_task
 def check_new_listing_alarms():
     return evaluate_all_active_criteria_alarms()
+
+
+@shared_task
+def send_seller_followers_notification(listing_pk):
+    send_seller_followers_notifications(listing_pk)

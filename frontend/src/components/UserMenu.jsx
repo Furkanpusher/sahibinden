@@ -4,6 +4,7 @@ import {
   User,
   ChevronDown,
   Heart,
+  UserCheck,
   Layers,
   Flag,
   LogOut,
@@ -214,6 +215,16 @@ export default function UserMenu() {
               >
                 <Heart size={16} className="text-[#E8A33D]" />
                 Favorilerim
+              </Link>
+
+              {/* Takip Ettiklerim */}
+              <Link
+                to="/takip-ettiklerim"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs sm:text-sm text-[#EDEFF2] hover:bg-[#1C2733] hover:text-[#E8A33D] transition-colors"
+              >
+                <UserCheck size={16} className="text-[#10B981]" />
+                Takip Ettiklerim
               </Link>
 
               {/* İlanlarım */}

@@ -1,5 +1,6 @@
 from decimal import Decimal
 from listings.models import Favorite, Alarm, Notification, Listing
+from accounts.models import Follow
 
 
 def bulk_create_notifications(notifications):
@@ -132,3 +133,37 @@ def send_criteria_match_notifications(alarm, matched_listings):
 # Aliases for backwards compatibility
 process_price_change_notifications = send_price_change_notifications
 process_favorite_updated_notifications = send_favorite_update_notifications
+
+
+def send_seller_followers_notifications(listing_pk):
+    # get the listing and the owner
+    listing = Listing.objects.select_related(
+        "listing_owner").filter(pk=listing_pk).first()
+    if not listing or not listing.listing_owner:
+        return
+    seller = listing.listing_owner
+
+    # get the seller's followers id's
+    target_user_ids = set(
+        Follow.objects.filter(seller=seller).values_list(
+            "follower_id", flat=True)
+    )
+    if not target_user_ids:
+        return
+
+    # set the message
+    message = f"Takip ettiğiniz {seller.username} yeni bir ilan yayınladı: {listing.title}"
+
+    # create the notifications
+    notifications = [
+        Notification(
+            user_id=user_id,
+            listing_id=listing_pk,
+            message=message,
+        )
+        for user_id in target_user_ids
+    ]
+    bulk_create_notifications(notifications)
+    print(
+        f"[FOLLOW] Satıcı {seller.username} yeni ilan (#{listing_pk}) yayınladı, {len(notifications)} takipçiye bildirim iletildi."
+    )

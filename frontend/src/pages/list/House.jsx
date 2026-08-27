@@ -9,7 +9,7 @@ import {
   Search,
   Scale,
 } from "lucide-react";
-import { fetchListings } from "../../api";
+import { fetchListings, getListingCoverImage } from "../../api";
 import { FilterInput, FilterSelect } from "../../components/ListingUI";
 import UserMenu from "../../components/UserMenu";
 import Pagination from "../../components/Pagination";
@@ -18,25 +18,10 @@ import { getCities, getDistricts } from "../../data/helper";
 import { useCompare } from "../../context/CompareContext";
 
 const ROOM_OPTIONS = ["1+0", "1+1", "2+1", "3+1", "4+1", "5+1", "Dupleks"];
-const defaultImages = [
-  "/house-1.jpg", "/house-2.jpg", "/house-3.jpg", "/house-4.jpg", "/house-5.jpg",
-  "/house-6.jpg", "/house-7.jpg", "/house-8.jpg", "/house-9.jpg", "/house-10.jpg",
-];
 
-const BACKEND_BASE = "http://127.0.0.1:8001";
-
-// 📸 Fotoğraf URL Çözümleyici (Öncelik: Galeri/Kapak > Ana Resim > Default Havuzu)
+// 📸 Fotoğraf URL Çözümleyici
 const getHouseCoverImage = (house) => {
-  const coverFromGallery = house.images?.find((img) => img.is_cover)?.image || house.images?.[0]?.image;
-  const rawUrl = coverFromGallery || house.image || house.imageUrl;
-
-  if (rawUrl) {
-    if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) return rawUrl;
-    return `${BACKEND_BASE}${rawUrl.startsWith("/") ? "" : "/"}${rawUrl}`;
-  }
-
-  // Yüklenmiş görsel yoksa default listesinden seç
-  return defaultImages[house.id % defaultImages.length];
+  return getListingCoverImage(house, "house");
 };
 
 export default function HouseListPage() {

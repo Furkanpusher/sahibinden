@@ -18,6 +18,8 @@ import StaffReports from "./pages/staff/StaffReports.jsx";
 import UserFavorites from "./pages/profile/UserFavorites.jsx";
 import UserListings from "./pages/profile/UserListings.jsx";
 import UserReports from "./pages/profile/UserReports.jsx";
+import UserFollowing from "./pages/profile/UserFollowing.jsx";
+import SellerPage from "./pages/seller/SellerPage.jsx";
 
 export default function App() {
   return (
@@ -36,6 +38,9 @@ export default function App() {
           <Route path="/araba-ilan-guncelle/:id" element={<CarUpdate />} />
           <Route path="/ev-ilan-guncelle/:id" element={<HouseUpdate />} />
 
+          {/* Seller showcase route */}
+          <Route path="/sellers/:id" element={<SellerPage />} />
+
           {/* Compare route */}
           <Route path="/karsilastir" element={<ComparePage />} />
 
@@ -46,12 +51,10 @@ export default function App() {
           <Route path="/favorilerim" element={<UserFavorites />} />
           <Route path="/ilanlarim" element={<UserListings />} />
           <Route path="/raporlarim" element={<UserReports />} />
+          <Route path="/takip-ettiklerim" element={<UserFollowing />} />
 
           {/* Profile route */}
           <Route path="/profilim" element={<Profile />} />
-
-
-
         </Routes>
         <CompareBar />
       </CompareProvider>

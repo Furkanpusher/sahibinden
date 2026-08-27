@@ -125,6 +125,9 @@ class AlarmSerializer(serializers.ModelSerializer):
                   'alarm_type', 'params', 'is_active', 'last_checked', 'created_at']
 
 
+# FOLLOW SERIALIZERS
+
+
 class FollowedSellerWithListingsSerializer(serializers.ModelSerializer):
     # because related_name is "ilanlar" in listings model, we use source="ilanlar"
     listings = ListingSerializer(source="ilanlar", many=True, read_only=True)
@@ -145,3 +148,38 @@ class FollowedSellerWithListingsSerializer(serializers.ModelSerializer):
 
     def get_total_listings_count(self, obj):
         return obj.ilanlar.count()
+
+
+class SellerPublicProfileSerializer(serializers.ModelSerializer):
+    total_listings_count = serializers.SerializerMethodField()
+    follower_count = serializers.SerializerMethodField()
+    is_following = serializers.SerializerMethodField()
+    # is the current user following this seller?
+
+    class Meta:
+        model = CustomUser
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "phone_number",
+            "profile_picture",
+            "date_joined",
+            "total_listings_count",
+            "follower_count",
+            "is_following",
+        ]
+
+    def get_total_listings_count(self, obj):
+        return obj.ilanlar.count()
+
+    def get_follower_count(self, obj):
+        return obj.followers.count()
+
+    def get_is_following(self, obj):
+        request = self.context.get("request")
+        # if logged in, check if the user follows this seller, else return False
+        if request and request.user.is_authenticated:
+            return obj.followers.filter(follower=request.user).exists()
+        return False

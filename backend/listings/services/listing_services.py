@@ -2,7 +2,9 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
 from listings.models import Listing, Favorite, Report, ListingImage
 from accounts.models import CustomUser, Follow
-from listings.tasks import price_update_notification, listing_updated_notification
+from listings.tasks import (price_update_notification,
+                            listing_updated_notification,
+                            send_seller_followers_notification)
 
 
 """ BASIC GET METHODS """
@@ -33,7 +35,10 @@ def filter_listings(model_class, filter_class, query_params):
 
 def create_listing(model_class, user, data):
     # Create a new listing
-    return model_class.objects.create(listing_owner=user, **data)
+    listing = model_class.objects.create(listing_owner=user, **data)
+    # send notification to this sellers followers about this new listing
+    send_seller_followers_notification.delay(listing.pk)
+    return listing
 
 
 def delete_listing(user, pk):
@@ -142,3 +147,11 @@ def toggle_follow(follower, seller_id):
         return False, seller.followers.count()
     return True, seller.followers.count()
     # return the count of followers, we can do this because of "related_name" field in Follow model
+
+
+def get_seller_by_id(seller_id):
+    return get_object_or_404(CustomUser, pk=seller_id)
+
+
+def get_seller_listings(seller):
+    return seller.ilanlar.all().prefetch_related("images").order_by("-listing_date")

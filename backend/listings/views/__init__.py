@@ -6,7 +6,7 @@ from .house import HouseListView, HouseDetailView
 from .common import (FavoriteToggleView, UserFavoritesListView,
                      ReportListingView, UserReportsListView,
                      ListingImageUploadView, NotificationView,
-                     FollowToggleView, FollowingListView,)
+                     FollowToggleView, FollowingListView, SellerDetailView)
 
 from .staff import StaffReportListView, StaffDeleteReportView, StaffDeleteListingView
 from .alarm import AlarmView
