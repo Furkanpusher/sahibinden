@@ -1,6 +1,7 @@
 # Listing serializers halleder
 from .models import Listing, CarListing, HouseListing, Favorite, Report, ListingImage, Notification, Alarm
 from rest_framework import serializers
+from accounts.serializers import UserPublicSerializer
 
 
 class ListingImageSerializer(serializers.ModelSerializer):
@@ -11,9 +12,7 @@ class ListingImageSerializer(serializers.ModelSerializer):
 
 class ListingSerializer(serializers.ModelSerializer):
 
-    listing_owner = serializers.PrimaryKeyRelatedField(read_only=True)
-    # only shows the id rather than the whole object
-
+    listing_owner = UserPublicSerializer(read_only=True)
     images = ListingImageSerializer(many=True, read_only=True)
 
     # important for frontend routing
@@ -33,7 +32,7 @@ class ListingSerializer(serializers.ModelSerializer):
 
 
 class CarListingSerializer(serializers.ModelSerializer):
-    listing_owner = serializers.PrimaryKeyRelatedField(read_only=True)
+    listing_owner = UserPublicSerializer(read_only=True)
     images = ListingImageSerializer(many=True, read_only=True)
 
     TRANSMISSION_MAP = {
@@ -70,7 +69,7 @@ class CarListingSerializer(serializers.ModelSerializer):
 
 
 class HouseListingSerializer(serializers.ModelSerializer):
-    listing_owner = serializers.PrimaryKeyRelatedField(read_only=True)
+    listing_owner = UserPublicSerializer(read_only=True)
     images = ListingImageSerializer(many=True, read_only=True)
 
     class Meta:

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X, Scale } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Trash2, Pencil, Heart, Flag, X, Scale, User, Phone } from "lucide-react";
 import { toast } from "sonner";
 import { fetchListings, formatApiError, authFetch } from "../../api";
 import { useCompare } from "../../context/CompareContext";
@@ -83,10 +83,10 @@ export default function HouseDetailPage() {
 
   const ownerId = house?.listing_owner?.id || house?.listing_owner?.pk || house?.listing_owner;
 
-  const isOwner = Boolean(token) && 
-                  Boolean(currentUserId) && 
-                  Boolean(ownerId) && 
-                  String(currentUserId) === String(ownerId);
+  const isOwner = Boolean(token) &&
+    Boolean(currentUserId) &&
+    Boolean(ownerId) &&
+    String(currentUserId) === String(ownerId);
 
   const canEditOrDelete = isOwner || isStaff;
 
@@ -203,8 +203,8 @@ export default function HouseDetailPage() {
     ...(house.image ? [formatImgUrl(house.image)] : [])
   ].filter(Boolean);
 
-  const images = uploadedImages.length > 0 
-    ? uploadedImages 
+  const images = uploadedImages.length > 0
+    ? uploadedImages
     : [defaultImages[house.id % defaultImages.length]];
 
   const activeImage = images[activeImageIndex] || images[0];
@@ -266,11 +266,10 @@ export default function HouseDetailPage() {
                 ) : (
                   <Heart
                     size={20}
-                    className={`transition-colors ${
-                      isFavorited
-                        ? "fill-red-500 text-red-500"
-                        : "text-[#8B95A3] hover:text-white"
-                    }`}
+                    className={`transition-colors ${isFavorited
+                      ? "fill-red-500 text-red-500"
+                      : "text-[#8B95A3] hover:text-white"
+                      }`}
                   />
                 )}
               </button>
@@ -284,11 +283,10 @@ export default function HouseDetailPage() {
                     key={idx}
                     type="button"
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${
-                      activeImageIndex === idx
-                        ? "border-[#E8A33D] ring-2 ring-[#E8A33D]/20 scale-105"
-                        : "border-[#232E3D] opacity-60 hover:opacity-100"
-                    }`}
+                    className={`relative shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all ${activeImageIndex === idx
+                      ? "border-[#E8A33D] ring-2 ring-[#E8A33D]/20 scale-105"
+                      : "border-[#232E3D] opacity-60 hover:opacity-100"
+                      }`}
                   >
                     <img src={imgUrl} alt={`thumb-${idx}`} className="w-full h-full object-cover" />
                   </button>
@@ -319,11 +317,10 @@ export default function HouseDetailPage() {
                       "house"
                     )
                   }
-                  className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold transition-all ${
-                    isInCompare(house.id)
-                      ? "border-[#E8A33D] bg-[#E8A33D]/15 text-[#E8A33D]"
-                      : "border-[#232E3D] bg-[#0F1720] text-[#8B95A3] hover:border-[#4A5568] hover:text-[#EDEFF2]"
-                  }`}
+                  className={`flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold transition-all ${isInCompare(house.id)
+                    ? "border-[#E8A33D] bg-[#E8A33D]/15 text-[#E8A33D]"
+                    : "border-[#232E3D] bg-[#0F1720] text-[#8B95A3] hover:border-[#4A5568] hover:text-[#EDEFF2]"
+                    }`}
                 >
                   <Scale size={15} />
                   <span>{isInCompare(house.id) ? "Karşılaştırmada" : "Karşılaştır"}</span>
@@ -341,13 +338,58 @@ export default function HouseDetailPage() {
 
           {/* Sağ: Key-Value Tablo + Aksiyon Butonları */}
           <div className="flex-1 flex flex-col gap-4">
+            {/* 👤 İlan Sahibi Bilgileri Kartı */}
+            {house.listing_owner && typeof house.listing_owner === "object" && (
+              <div className="rounded-xl border border-[#232E3D] bg-[#161F2B] p-5">
+                <div className="pb-3 mb-4 border-b border-[#232E3D]">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-[#8B95A3]">
+                    İlan Sahibi
+                  </h3>
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    {house.listing_owner.profile_picture ? (
+                      <img
+                        src={formatImgUrl(house.listing_owner.profile_picture)}
+                        alt={house.listing_owner.username}
+                        className="w-12 h-12 rounded-full object-cover border border-[#232E3D]"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-[#232E3D] flex items-center justify-center text-[#E8A33D] font-bold text-lg border border-[#344458]">
+                        {house.listing_owner.username?.[0]?.toUpperCase() || <User size={20} />}
+                      </div>
+                    )}
+                    <div>
+                      <p className="font-semibold text-[#EDEFF2] text-base">
+                        {house.listing_owner.username || "Kullanıcı"}
+                      </p>
+                      <p className="text-xs text-[#8B95A3]">Bireysel Satıcı</p>
+                    </div>
+                  </div>
+
+                  {house.listing_owner.phone_number ? (
+                    <a
+                      href={`tel:${house.listing_owner.phone_number}`}
+                      className="flex items-center gap-2 rounded-xl bg-[#E8A33D]/10 hover:bg-[#E8A33D] text-[#E8A33D] hover:text-[#0F1720] border border-[#E8A33D]/30 px-4 py-2.5 text-xs font-semibold transition-all shadow-sm"
+                    >
+                      <Phone size={15} />
+                      <span>{house.listing_owner.phone_number}</span>
+                    </a>
+                  ) : (
+                    <span className="text-xs text-[#8B95A3] italic bg-[#0F1720] px-3 py-2 rounded-lg border border-[#232E3D]">
+                      Numara yok
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
             <div className="rounded-xl border border-[#232E3D] bg-[#161F2B] overflow-hidden">
               {details.map((d, i) => (
                 <div
                   key={d.label}
-                  className={`flex justify-between px-5 py-3 text-sm ${
-                    i % 2 === 0 ? "bg-[#161F2B]" : "bg-[#1A2430]"
-                  }`}
+                  className={`flex justify-between px-5 py-3 text-sm ${i % 2 === 0 ? "bg-[#161F2B]" : "bg-[#1A2430]"
+                    }`}
                 >
                   <span className="text-[#8B95A3]">{d.label}</span>
                   <span className="text-[#EDEFF2] font-medium text-right">{d.value}</span>
