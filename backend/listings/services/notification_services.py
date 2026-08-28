@@ -121,7 +121,7 @@ def send_criteria_match_notifications(alarm, matched_listings):
     notifications = [
         Notification(
             user=alarm.user,
-            alarm=alarm,
+            alarm=alarm,  # alarm.type
             listing_id=item.id,
             message=f"Kriterlerinize uygun ilan bulundu: {item.title}",
         )

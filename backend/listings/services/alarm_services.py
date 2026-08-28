@@ -34,13 +34,13 @@ def create_alarm(alarm_type, params, listing_id, user):
         )
 
     # LISTING_REQUIRED
-    if alarm_type in Alarm.LISTING_REQUIRED:
+    if alarm_type in Alarm.LISTING_REQUIRED:   # price_change, favorite_updated, new_listing_check
         if not listing_id:
             raise ValidationError(
                 "For this alarm type, the listing must be specified."
             )
         listing = get_object_or_404(Listing, pk=listing_id)
-        if listing.listing_owner == user:
+        if listing.listing_owner == user:    # if the owner creates an alarm for his own listing
             raise ValidationError(
                 "You cannot create an alarm for your own listing."
             )
@@ -147,7 +147,7 @@ def evaluate_criteria_alarm(alarm):
     for key, lookup in category_lookups.items():
         if key in params and params[key]:
             val = params[key]
-            if lookup.endswith("__in"):
+            if lookup.endswith("__in"):  # list
                 raw_list = val if isinstance(val, list) else [val]
                 expanded = set()
                 for item in raw_list:
@@ -165,7 +165,7 @@ def evaluate_criteria_alarm(alarm):
                 filters[lookup] = val
 
     # Exclude already notified listings for this alarm
-    already_notified_ids = Notification.objects.filter(
+    already_notified_ids = Notification.objects.filter(  # Check thsi
         alarm=alarm,
         listing_id__isnull=False,
     ).values_list("listing_id", flat=True)

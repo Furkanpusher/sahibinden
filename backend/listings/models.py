@@ -192,7 +192,7 @@ class Alarm(models.Model):
 
     # to know if alarm needs a listing
     LISTING_REQUIRED = {"price_change", "favorite_updated", "favorite_removed"}
-    NON_LISTING_REQUIRED = {"new_listing_check"}
+    NON_LISTING_REQUIRED = {"new_listing_check"}  # periyodik
 
     # needed for listing based alarms
     listing = models.ForeignKey(Listing,  # null=True, blank=True for listing-independent alarms

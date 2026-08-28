@@ -357,8 +357,8 @@ export default function HouseListPage() {
                             key={house.id}
                             onClick={() => navigate(`/houses/${house.id}`)}
                             className={`group cursor-pointer transition-colors duration-150 ${isSelected
-                                ? "bg-[#E8A33D]/10"
-                                : "hover:bg-[#1c293a]/70"
+                              ? "bg-[#E8A33D]/10"
+                              : "hover:bg-[#1c293a]/70"
                               }`}
                           >
                             {/* Karşılaştır Seçim Kutusu */}

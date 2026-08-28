@@ -43,7 +43,7 @@ class BaseListingListView(APIView):
     filter_class = None
     cache_prefix = None
 
-    def get(self, request):
+    def get(self, request):  # get request while an item is deleted!
         # 1. Cache check
         cache_key, cached_data = get_cached_listing_page(
             self.cache_prefix, request)

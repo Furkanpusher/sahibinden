@@ -2,6 +2,7 @@ from celery import shared_task
 from listings.services.notification_services import (
     send_price_change_notifications,
     send_favorite_update_notifications,
+    send_seller_followers_notifications,
 )
 from listings.services.alarm_services import (
     evaluate_all_active_criteria_alarms,

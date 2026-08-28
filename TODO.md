@@ -72,11 +72,10 @@ For the user's dashboard/settings to view and manage all sellers they currently 
 # DONE
 Phase 3: Seller Showcase / Public Profile API
 Seller Listings Endpoint:
-An endpoint (e.g., GET /api/sellers/{id}/ or filtering GET /api/listings/?owner={id}) that returns all active listings by that seller.
-Support existing pagination, sorting, and category filters.
+An endpoint (e.g., GET /api/sellers/{id}/listings/ or filtering GET /api/listings/?owner={id}) that returns all active listings by that seller.
+Support your existing pagination, sorting, and category filters.
 Seller Profile Summary:
 Include public details: name/store name, join date, total active listings count, and follower count.
-
 
 
 # DONE
@@ -88,17 +87,14 @@ Bulk-create Notification records for all followers (e.g., "X published a new lis
 Link each notification directly to the new listing_id.
 
 
-
-# DONE
+# IN PROGRESS
 Phase 5: Frontend UI / UX
 Listing Detail Page:
 In the seller info card, make the seller's name/avatar a clickable link to their profile page.
 Add a dynamic "Takip Et" (Follow) / "Takip Ediliyor" (Following) button right next to the seller's name.
-Seller Profile Page (/sellers/:id):
+Seller Profile Page (/sellers/:id or /users/:id/listings):
 Header: Seller avatar, username/store name, member since date, total listings count, and Follow button.
 Content Grid: Display all car/house listings owned by this seller.
-User Following Page (/takip-ettiklerim):
-Manage all followed sellers with listing previews and unfollow actions.
 Notification Integration:
 When a follower clicks a "New listing from followed seller" notification, route them directly to the new listing detail page.
 
@@ -112,8 +108,18 @@ When a follower clicks a "New listing from followed seller" notification, route 
 
 
 
-# api/listings/cars speed : 40,0601
-# api/listings/house speed: 39,0232
+# api/listings/cars speed : 40,0601 ms 
+# api/listings/house speed: 39,0232 ms 
 
-# cache api/listings/cars speed :  13,2518
-# cache api/listings/house speed:  15,5752
+# cache api/listings/cars speed :  13,2518 ms
+# cache api/listings/house speed:  15,5752 ms
+
+
+
+
+# Harita, leaflet # 3
+# Elastic Search # 1
+# Mail # 2
+# Performance # 4
+
+# REFRESH TOKEN SENDS TO /LOGIN
