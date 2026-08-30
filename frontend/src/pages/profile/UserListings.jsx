@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, 
@@ -12,64 +12,114 @@ import {
   ArrowUpRight,
   Plus
 } from "lucide-react";
-import { fetchListings, getListingCoverImage } from "../../api";
+import { getSellerProfile, getListingCoverImage, authFetch } from "../../api";
 import UserMenu from "../../components/UserMenu";
+import Pagination from "../../components/Pagination";
+
+const BACKEND_BASE = "http://127.0.0.1:8001";
+const API_URL = import.meta.env?.VITE_API_URL || "http://127.0.0.1:8001/api";
 
 export default function UserListings() {
   const [myListings, setMyListings] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState("all"); // "all" | "car" | "house"
   const navigate = useNavigate();
+
   const token = localStorage.getItem("access_token") || localStorage.getItem("access");
-  // Kullanıcı ID'sini bul
-  let currentUserId = localStorage.getItem("user_id");
-  if (!currentUserId) {
+
+  // Kullanıcı ID'sini çoklu kaynaklardan güvenli bir şekilde çöz
+  const resolveUserId = useCallback(() => {
+    let uid = localStorage.getItem("user_id");
+    if (uid) return uid;
+
     try {
       const userObj = JSON.parse(localStorage.getItem("user") || "{}");
-      if (userObj.id) currentUserId = String(userObj.id);
-    } catch (e) {}
-  }
+      if (userObj.id) return String(userObj.id);
+    } catch {}
+
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (payload.user_id) return String(payload.user_id);
+      } catch {}
+    }
+
+    return null;
+  }, [token]);
+
+  // Kullanıcının ilanlarını satıcı endpoint'inden çek
+  const fetchMyListings = useCallback(async (userId, page = 1) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getSellerProfile(userId, page);
+      const results = data.listings?.results || (Array.isArray(data.listings) ? data.listings : []);
+      setMyListings(results);
+      setTotalItems(data.listings?.count || results.length);
+    } catch (err) {
+      if (err.isSessionExpired) return;
+      setError(err.message || "İlanlarınız yüklenemedi.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     if (!token) {
       navigate("/login");
       return;
     }
-    setLoading(true);
-    // Hem arabaları hem evleri çekip kullanıcının olanları filtreliyoruz
-    Promise.all([
-      fetchListings("/cars/", { page_size: 50 }),
-      fetchListings("/houses/", { page_size: 50 }),
-    ])
-      .then(([carsData, housesData]) => {
-        const carList = Array.isArray(carsData) ? carsData : (carsData?.results || []);
-        const houseList = Array.isArray(housesData) ? housesData : (housesData?.results || []);
 
-        const userCars = carList
-          .filter((c) => String(c.listing_owner) === String(currentUserId))
-          .map((c) => ({ ...c, listing_type: "car" }));
-        const userHouses = houseList
-          .filter((h) => String(h.listing_owner) === String(currentUserId))
-          .map((h) => ({ ...h, listing_type: "house" }));
-        // İlanları ID'ye göre azalan (en son eklenen en başta) sıralıyoruz
-        const combined = [...userCars, ...userHouses].sort((a, b) => b.id - a.id);
-        setMyListings(combined);
-      })
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [token, currentUserId, navigate]);
+    const uid = resolveUserId();
+    if (uid) {
+      fetchMyListings(uid, currentPage);
+    } else {
+      // Fallback: Kullanıcı profilinden ID'yi alıp yükle
+      setLoading(true);
+      authFetch(`${API_URL}/accounts/my-profile/`)
+        .then((res) => {
+          if (!res.ok) throw new Error("Kullanıcı bilgileri alınamadı.");
+          return res.json();
+        })
+        .then((data) => {
+          if (data?.id) {
+            localStorage.setItem("user_id", String(data.id));
+            fetchMyListings(data.id, currentPage);
+          } else {
+            setError("Kullanıcı kimliği doğrulanamadı.");
+            setLoading(false);
+          }
+        })
+        .catch((err) => {
+          if (err.isSessionExpired) return;
+          setError(err.message || "Profil bilgileri yüklenemedi.");
+          setLoading(false);
+        });
+    }
+  }, [token, currentPage, navigate, resolveUserId, fetchMyListings]);
+
+  // Kategori sekmesine göre filtreleme
   const filteredListings = myListings.filter((item) => {
     if (activeTab === "all") return true;
     return item.listing_type === activeTab;
   });
+
+  const carCount = myListings.filter((l) => l.listing_type === "car").length;
+  const houseCount = myListings.filter((l) => l.listing_type === "house").length;
+
   const formatTitle = (title) => {
     if (!title) return "";
     return title.length > 80 ? `${title.substring(0, 80)}...` : title;
   };
+
   const formatPrice = (price) => {
     if (!price) return "0 TL";
     return Number(price).toLocaleString("tr-TR") + " TL";
   };
+
   return (
     <div className="min-h-screen bg-[#0F1720] px-4 py-5 text-[#EDEFF2] sm:px-6 lg:px-8 lg:py-7">
       <div className="mx-auto max-w-7xl">
@@ -103,6 +153,7 @@ export default function UserListings() {
                 Yayınladığın tüm araç ve ev ilanlarını buradan yönetebilirsin.
               </p>
             </div>
+
             {/* Kategori Sekmeleri */}
             {!loading && myListings.length > 0 && (
               <div className="flex items-center gap-1.5 rounded-xl border border-[#232E3D] bg-[#161F2B] p-1 text-xs font-medium">
@@ -115,7 +166,7 @@ export default function UserListings() {
                       : "text-[#8B95A3] hover:text-[#EDEFF2]"
                   }`}
                 >
-                  Tümü ({myListings.length})
+                  Tümü ({totalItems > myListings.length ? totalItems : myListings.length})
                 </button>
                 <button
                   type="button"
@@ -127,7 +178,7 @@ export default function UserListings() {
                   }`}
                 >
                   <Car size={13} />
-                  Arabalar ({myListings.filter((l) => l.listing_type === "car").length})
+                  Arabalar ({carCount})
                 </button>
                 <button
                   type="button"
@@ -139,12 +190,13 @@ export default function UserListings() {
                   }`}
                 >
                   <HomeIcon size={13} />
-                  Evler ({myListings.filter((l) => l.listing_type === "house").length})
+                  Evler ({houseCount})
                 </button>
               </div>
             )}
           </div>
         </header>
+
         {/* İçerik */}
         <main>
           {loading && (
@@ -153,11 +205,13 @@ export default function UserListings() {
               <p className="text-sm font-medium">İlanlarınız getiriliyor...</p>
             </div>
           )}
+
           {error && (
             <div className="rounded-xl border border-[#E88080]/30 bg-[#E88080]/10 p-5 text-center text-[#E88080]">
               <p className="text-sm font-medium">Hata: {error}</p>
             </div>
           )}
+
           {!loading && !error && filteredListings.length === 0 && (
             <div className="flex min-h-[350px] flex-col items-center justify-center rounded-2xl border border-dashed border-[#2B3747] bg-[#161F2B]/40 p-10 text-center">
               <SearchX size={44} className="mb-3 text-[#667384]" />
@@ -185,73 +239,94 @@ export default function UserListings() {
               </div>
             </div>
           )}
+
           {/* İlan Kartları */}
           {!loading && !error && filteredListings.length > 0 && (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
-              {filteredListings.map((item) => {
-                const isCar = item.listing_type === "car";
-                const detailUrl = isCar ? `/cars/${item.id}` : `/houses/${item.id}`;
-                const updateUrl = isCar ? `/araba-ilan-guncelle/${item.id}` : `/ev-ilan-guncelle/${item.id}`;
-                const displayImg = getListingCoverImage(item, isCar ? "car" : "house");
-                return (
-                  <div
-                    key={`${item.listing_type}-${item.id}`}
-                    className="group relative flex flex-col overflow-hidden rounded-xl border border-[#232E3D] bg-[#161F2B] p-2.5 transition-all duration-300 hover:border-[#4A5568] hover:shadow-lg hover:shadow-black/20"
-                  >
-                    {/* Görsel ve Tip Rozeti */}
-                    <Link to={detailUrl} className="group/img relative mb-2 block aspect-[4/3] w-full overflow-hidden rounded-lg bg-[#0F1720]">
-                      <img
-                        src={displayImg}
-                        alt={item.title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover/img:scale-105"
-                      />
-                      <span className="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-[#0F1720]/80 px-2 py-0.5 text-[10px] font-semibold text-[#EDEFF2] backdrop-blur-sm border border-[#232E3D]">
-                        {isCar ? <Car size={11} className="text-[#E8A33D]" /> : <HomeIcon size={11} className="text-[#3B82F6]" />}
-                        {isCar ? "Araç" : "Ev"}
-                      </span>
-                    </Link>
-                    {/* Fiyat */}
-                    <Link to={detailUrl} className="block px-1 text-sm font-bold text-[#E8A33D] hover:underline">
-                      {formatPrice(item.price)}
-                    </Link>
-                    {/* Başlık */}
-                    <Link to={detailUrl} className="block">
-                      <h2
-                        className="px-1 mt-1 text-xs font-medium leading-4 text-[#EDEFF2] line-clamp-2 transition-colors hover:text-[#E8A33D]"
-                        title={item.title}
-                      >
-                        {formatTitle(item.title)}
-                      </h2>
-                    </Link>
-                    {/* Konum */}
-                    {(item.city || item.district) && (
-                      <div className="px-1 mt-1 flex items-center gap-1 text-[11px] text-[#667384] truncate">
-                        <MapPin size={11} className="shrink-0 text-[#8B95A3]" />
-                        <span>{[item.city, item.district].filter(Boolean).join(", ")}</span>
+            <>
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                {filteredListings.map((item) => {
+                  const isCar = item.listing_type === "car";
+                  const detailUrl = isCar ? `/cars/${item.id}` : `/houses/${item.id}`;
+                  const updateUrl = isCar ? `/araba-ilan-guncelle/${item.id}` : `/ev-ilan-guncelle/${item.id}`;
+                  const displayImg = getListingCoverImage(item, isCar ? "car" : "house");
+
+                  return (
+                    <div
+                      key={`${item.listing_type}-${item.id}`}
+                      className="group relative flex flex-col overflow-hidden rounded-xl border border-[#232E3D] bg-[#161F2B] p-2.5 transition-all duration-300 hover:border-[#4A5568] hover:shadow-lg hover:shadow-black/20"
+                    >
+                      {/* Görsel ve Tip Rozeti */}
+                      <Link to={detailUrl} className="group/img relative mb-2 block aspect-[4/3] w-full overflow-hidden rounded-lg bg-[#0F1720]">
+                        <img
+                          src={displayImg}
+                          alt={item.title}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover/img:scale-105"
+                          loading="lazy"
+                        />
+                        <span className="absolute top-2 left-2 flex items-center gap-1 rounded-md bg-[#0F1720]/80 px-2 py-0.5 text-[10px] font-semibold text-[#EDEFF2] backdrop-blur-sm border border-[#232E3D]">
+                          {isCar ? <Car size={11} className="text-[#E8A33D]" /> : <HomeIcon size={11} className="text-[#3B82F6]" />}
+                          {isCar ? "Araç" : "Ev"}
+                        </span>
+                      </Link>
+
+                      {/* Fiyat */}
+                      <Link to={detailUrl} className="block px-1 text-sm font-bold text-[#E8A33D] hover:underline">
+                        {formatPrice(item.price)}
+                      </Link>
+
+                      {/* Başlık */}
+                      <Link to={detailUrl} className="block">
+                        <h2
+                          className="px-1 mt-1 text-xs font-medium leading-4 text-[#EDEFF2] line-clamp-2 transition-colors hover:text-[#E8A33D]"
+                          title={item.title}
+                        >
+                          {formatTitle(item.title)}
+                        </h2>
+                      </Link>
+
+                      {/* Konum */}
+                      {(item.city || item.district) && (
+                        <div className="px-1 mt-1 flex items-center gap-1 text-[11px] text-[#667384] truncate">
+                          <MapPin size={11} className="shrink-0 text-[#8B95A3]" />
+                          <span>{[item.city, item.district].filter(Boolean).join(", ")}</span>
+                        </div>
+                      )}
+
+                      {/* Aksiyon Butonları (İlanı Gör / Düzenle) */}
+                      <div className="mt-auto pt-3">
+                        <div className="grid grid-cols-2 gap-1.5 border-t border-[#232E3D]/60 pt-2 text-xs">
+                          <Link
+                            to={detailUrl}
+                            className="flex items-center justify-center gap-1 rounded-lg bg-[#0F1720] py-1.5 text-[11px] font-medium text-[#8B95A3] hover:bg-[#1C2733] hover:text-[#EDEFF2] transition-colors"
+                          >
+                            Gör
+                            <ArrowUpRight size={12} />
+                          </Link>
+                          
+                          <Link
+                            to={updateUrl}
+                            className="flex items-center justify-center gap-1 rounded-lg bg-[#E8A33D]/10 border border-[#E8A33D]/20 py-1.5 text-[11px] font-medium text-[#E8A33D] hover:bg-[#E8A33D] hover:text-[#0F1720] transition-colors"
+                          >
+                            <Edit3 size={11} />
+                            Düzenle
+                          </Link>
+                        </div>
                       </div>
-                    )}
-                    {/* Aksiyon Butonları (İlanı Gör / Düzenle) */}
-                    <div className="mt-3 grid grid-cols-2 gap-1.5 border-t border-[#232E3D]/60 pt-2 text-xs">
-                      <Link
-                        to={detailUrl}
-                        className="flex items-center justify-center gap-1 rounded-lg bg-[#0F1720] py-1.5 text-[11px] font-medium text-[#8B95A3] hover:bg-[#1C2733] hover:text-[#EDEFF2] transition-colors"
-                      >
-                        Gör
-                        <ArrowUpRight size={12} />
-                      </Link>
-                      
-                      <Link
-                        to={updateUrl}
-                        className="flex items-center justify-center gap-1 rounded-lg bg-[#E8A33D]/10 border border-[#E8A33D]/20 py-1.5 text-[11px] font-medium text-[#E8A33D] hover:bg-[#E8A33D] hover:text-[#0F1720] transition-colors"
-                      >
-                        <Edit3 size={11} />
-                        Düzenle
-                      </Link>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+
+              {/* Sayfalama */}
+              {totalItems > 24 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalItems={totalItems}
+                  itemsPerPage={24}
+                  onPageChange={(page) => setCurrentPage(page)}
+                />
+              )}
+            </>
           )}
         </main>
       </div>

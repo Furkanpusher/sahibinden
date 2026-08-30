@@ -78,8 +78,6 @@ def temizle_vites(deger):
 
 
 def araba_satirini_isle(satir):
-    """CSV kolonları Türkçe kaldı (baslik, konum, fiyat...) - model alanları
-    İngilizce (title, location, price...). Burada eşleştirme yapılıyor."""
     return CarListing(
         title=satir.get("baslik", "") or "",
         location=satir.get("konum", "") or "",

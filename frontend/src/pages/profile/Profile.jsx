@@ -80,12 +80,14 @@ export default function Profile() {
           const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
           const updatedUser = {
             ...storedUser,
+            id: data.id || storedUser.id,
             username: data.username,
             email: data.email,
             phone_number: data.phone_number,
             profile_picture: data.profile_picture
           };
           localStorage.setItem("user", JSON.stringify(updatedUser));
+          if (data.id) localStorage.setItem("user_id", String(data.id));
           localStorage.setItem("username", data.username);
           window.dispatchEvent(new Event("user-updated"));
         } catch (err) {
@@ -158,12 +160,14 @@ export default function Profile() {
         const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
         const updatedUser = {
           ...storedUser,
+          id: resData.id || storedUser.id,
           username: resData.username,
           email: resData.email,
           phone_number: resData.phone_number,
           profile_picture: resData.profile_picture
         };
         localStorage.setItem("user", JSON.stringify(updatedUser));
+        if (resData.id) localStorage.setItem("user_id", String(resData.id));
         localStorage.setItem("username", resData.username);
         window.dispatchEvent(new Event("user-updated"));
       } catch (err) {
