@@ -27,6 +27,9 @@ services:
       - discovery.type=single-node
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - http.cors.enabled=true
+      - "http.cors.allow-origin=https://app.elasticvue.com"
+      - "http.cors.allow-headers=X-Requested-With,Content-Type,Content-Length,Authorization"
     ports:
       - "9200:9200"
       - "9300:9300"

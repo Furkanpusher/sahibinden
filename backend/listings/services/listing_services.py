@@ -36,8 +36,9 @@ def get_listing_by_id(model_class, pk):
 def create_listing(model_class, user, data):
     # Create a new listing
     listing = model_class.objects.create(listing_owner=user, **data)
-    # send notification to this sellers followers about this new listing
+    # .create() will trigger the post_save signal in elastic search
     send_seller_followers_notification.delay(listing.pk)
+    # send notification to this sellers followers about this new listing
     return listing
 
 
