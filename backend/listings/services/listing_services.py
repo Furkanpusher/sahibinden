@@ -16,6 +16,7 @@ def get_all_listings(model_class, query_params=None):
         "listing_owner").all().order_by("-listing_date")
     if query_params:
         ids = query_params.get("ids")
+        # we only use ids for the compare page
         if ids:
             id_list = [int(v.strip())
                        for v in str(ids).split(",") if v.strip().isdigit()]
