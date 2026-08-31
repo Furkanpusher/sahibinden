@@ -23,11 +23,16 @@ def get_listing_by_id(model_class, pk):
 """ FILTERING FUNCTION """
 
 
-def filter_listings(model_class, filter_class, query_params):
-    # you must specify which model and filter class you will use
+def filter_listings(model_class, query_params):
     qs = model_class.objects.select_related(
         "listing_owner").all().order_by("-listing_date")
-    return filter_class(query_params, queryset=qs).qs
+    ids = query_params.get("ids")
+    if ids:
+        id_list = [int(v.strip())
+                   for v in str(ids).split(",") if v.strip().isdigit()]
+        if id_list:
+            qs = qs.filter(id__in=id_list)
+    return qs
 
 
 """ LISTING CRUD OPERATIONS """

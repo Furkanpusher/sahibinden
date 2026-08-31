@@ -50,7 +50,7 @@ def send_price_change_notifications(old_price, new_price, listing_pk):
 
     print(
         f"[NOTIFICATION] İlan #{listing_pk} için {log_type} ({old_price} -> {new_price}). "
-        f"{len(target_user_ids)} kullanıcı bulundu!"
+        f"{len(target_user_ids)} kullanici bulundu!"
     )
 
     notifications = [

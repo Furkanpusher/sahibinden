@@ -40,7 +40,6 @@ class BaseListingListView(APIView):
     pagination_class = StandardListingPagination
     model_class = None
     serializer_class = None
-    filter_class = None
     cache_prefix = None
 
     def get(self, request):  # get request while an item is deleted!
@@ -52,7 +51,7 @@ class BaseListingListView(APIView):
 
         # 2. Database query and pagination
         queryset = filter_listings(
-            self.model_class, self.filter_class, request.query_params)
+            self.model_class, request.query_params)
         paginator = self.pagination_class()
         paginated_items = paginator.paginate_queryset(
             queryset, request, view=self)

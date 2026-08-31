@@ -38,6 +38,7 @@ class CarListingDocument(Document):
     )
     year = fields.IntegerField(attr='year')
     km = fields.IntegerField(attr='km')
+    # keyword field category, enum or dropdowns etc
     transmission_type = fields.KeywordField(attr='transmission_type')
     fuel_type = fields.KeywordField(attr='fuel_type')
     body_type = fields.KeywordField(attr='body_type')

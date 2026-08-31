@@ -101,90 +101,68 @@ def toggle_alarm(user, pk):
     return alarm.is_active
 
 
-# Maps simple frontend param names directly to Django query lookups
-CATEGORY_CONFIG = {
-    "car": {
-        "model": CarListing,
-        "lookups": {
-            "min_price": "price__gte",
-            "max_price": "price__lte",
-            "brands": "brand__in",
-            "transmission_types": "transmission_type__in",
-            "max_km": "km__lte",
-        },
-    },
-    "house": {
-        "model": HouseListing,
-        "lookups": {
-            "min_price": "price__gte",
-            "max_price": "price__lte",
-            "number_of_rooms": "number_of_rooms__in",
-            "min_meter_squared": "meter_squared__gte",
-            "floor": "floor__in",
-        },
-    },
-}
+from listings.services.search_services import (
+    search_car_listings,
+    search_house_listings,
+)
 
 
 def evaluate_criteria_alarm(alarm):
     """
-    Checks matching listings for a single 'new_listing_check' alarm
+    Checks matching listings for a single 'new_listing_check' alarm using Elasticsearch
     and creates notifications for the alarm owner.
     """
     if alarm.alarm_type != "new_listing_check" or not alarm.is_active:
         return 0
-    params = alarm.params or {}
-    category = params.get("category", "car")
-    config = CATEGORY_CONFIG.get(category)
-    if not config:
+
+    params = dict(alarm.params or {})
+    category = params.pop("category", "car")
+
+    # 1. Choose the appropriate Elasticsearch search function
+    search_func = search_house_listings if category == "house" else search_car_listings
+
+    # 2. Run Elasticsearch query with alarm parameters
+    try:
+        search_result = search_func(**params, page=1, page_size=50)
+        matched_hits = search_result.get("results", [])
+    except Exception as e:
+        print(f"[ALARM ERROR] Elasticsearch search failed for alarm #{alarm.id}: {e}")
         return 0
 
-    model_class = config["model"]
-    category_lookups = config["lookups"]
+    if not matched_hits:
+        alarm.last_checked = timezone.now()
+        alarm.save(update_fields=["last_checked"])
+        return 0
 
-    # Build criteria filters
-    filters = {}
-    for key, lookup in category_lookups.items():
-        if key in params and params[key]:
-            val = params[key]
-            if lookup.endswith("__in"):  # list
-                raw_list = val if isinstance(val, list) else [val]
-                expanded = set()
-                for item in raw_list:
-                    if isinstance(item, str):
-                        expanded.add(item)
-                        expanded.add(item.lower())
-                        expanded.add(item.capitalize())
-                        expanded.add(item.upper())
-                        if item.lower() in ("manuel", "düz"):
-                            expanded.update(["manuel", "Manuel", "Düz", "düz"])
-                    else:
-                        expanded.add(item)
-                filters[lookup] = list(expanded)
-            else:
-                filters[lookup] = val
-
-    # Exclude already notified listings for this alarm
-    already_notified_ids = Notification.objects.filter(  # Check thsi
-        alarm=alarm,
-        listing_id__isnull=False,
-    ).values_list("listing_id", flat=True)
-
-    # Fetch matching listings not owned by alarm owner and not previously notified
-    matched = list(
-        model_class.objects.filter(**filters)
-        .exclude(listing_owner=alarm.user)
-        .exclude(id__in=already_notified_ids)
-        .only("id", "title")
+    # 3. Exclude already notified listings for this alarm
+    already_notified_ids = set(
+        Notification.objects.filter(
+            alarm=alarm,
+            listing_id__isnull=False,
+        ).values_list("listing_id", flat=True)
     )
 
-    # Dispatch/Send notifications
-    if matched:
-        send_criteria_match_notifications(alarm, matched)
+    # 4. Filter out owner's own listings and already notified listings
+    class MatchedItem:
+        def __init__(self, id, title):
+            self.id = id
+            self.title = title
+
+    new_matched = []
+    for hit in matched_hits:
+        listing_id = hit.get("id")
+        owner_id = hit.get("owner_id")
+
+        if listing_id and listing_id not in already_notified_ids and owner_id != alarm.user_id:
+            new_matched.append(MatchedItem(id=listing_id, title=hit.get("title", "İlan")))
+
+    # 5. Dispatch notifications for new matches
+    if new_matched:
+        send_criteria_match_notifications(alarm, new_matched)
 
     alarm.last_checked = timezone.now()
     alarm.save(update_fields=["last_checked"])
-    return len(matched)
+    return len(new_matched)
 
 
 def evaluate_all_active_criteria_alarms():

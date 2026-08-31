@@ -14,32 +14,52 @@ class CarSearchAPIView(APIView):
     """
     Elasticsearch full-text search & filtering endpoint for Car Listings.
     """
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAny]  # anyone can search
 
     @extend_schema(
         summary="Elasticsearch Araç Arama & Filtreleme",
         description="Başlık, marka, modelde full-text ve fuzzy arama ile çoklu parametre filtrelemesi yapar.",
         parameters=[
-            OpenApiParameter(name="q", description="Arama metni (Başlık, Marka, Model)", required=False, type=str),
-            OpenApiParameter(name="brand", description="Marka", required=False, type=str),
-            OpenApiParameter(name="model", description="Model", required=False, type=str),
-            OpenApiParameter(name="city", description="Şehir", required=False, type=str),
-            OpenApiParameter(name="district", description="İlçe", required=False, type=str),
-            OpenApiParameter(name="transmission_type", description="Vites Türü", required=False, type=str),
-            OpenApiParameter(name="fuel_type", description="Yakıt Türü", required=False, type=str),
-            OpenApiParameter(name="body_type", description="Kasa Tipi", required=False, type=str),
-            OpenApiParameter(name="color", description="Renk", required=False, type=str),
-            OpenApiParameter(name="from_whom", description="Kimden", required=False, type=str),
-            OpenApiParameter(name="for_trade", description="Takaslı mı (true/false)", required=False, type=bool),
-            OpenApiParameter(name="min_price", description="Minimum Fiyat", required=False, type=float),
-            OpenApiParameter(name="max_price", description="Maksimum Fiyat", required=False, type=float),
-            OpenApiParameter(name="min_year", description="Minimum Yıl", required=False, type=int),
-            OpenApiParameter(name="max_year", description="Maksimum Yıl", required=False, type=int),
-            OpenApiParameter(name="min_km", description="Minimum KM", required=False, type=int),
-            OpenApiParameter(name="max_km", description="Maksimum KM", required=False, type=int),
-            OpenApiParameter(name="sort", description="Sıralama (price_asc, price_desc, year_desc, km_asc, date_desc)", required=False, type=str),
-            OpenApiParameter(name="page", description="Sayfa Numarası", required=False, type=int),
-            OpenApiParameter(name="page_size", description="Sayfa Başına İlan", required=False, type=int),
+            OpenApiParameter(
+                name="q", description="Arama metni (Başlık, Marka, Model)", required=False, type=str),
+            OpenApiParameter(name="brand", description="Marka",
+                             required=False, type=str),
+            OpenApiParameter(name="model", description="Model",
+                             required=False, type=str),
+            OpenApiParameter(name="city", description="Şehir",
+                             required=False, type=str),
+            OpenApiParameter(name="district", description="İlçe",
+                             required=False, type=str),
+            OpenApiParameter(name="transmission_type",
+                             description="Vites Türü", required=False, type=str),
+            OpenApiParameter(
+                name="fuel_type", description="Yakıt Türü", required=False, type=str),
+            OpenApiParameter(
+                name="body_type", description="Kasa Tipi", required=False, type=str),
+            OpenApiParameter(name="color", description="Renk",
+                             required=False, type=str),
+            OpenApiParameter(name="from_whom",
+                             description="Kimden", required=False, type=str),
+            OpenApiParameter(
+                name="for_trade", description="Takaslı mı (true/false)", required=False, type=bool),
+            OpenApiParameter(
+                name="min_price", description="Minimum Fiyat", required=False, type=float),
+            OpenApiParameter(
+                name="max_price", description="Maksimum Fiyat", required=False, type=float),
+            OpenApiParameter(
+                name="min_year", description="Minimum Yıl", required=False, type=int),
+            OpenApiParameter(
+                name="max_year", description="Maksimum Yıl", required=False, type=int),
+            OpenApiParameter(
+                name="min_km", description="Minimum KM", required=False, type=int),
+            OpenApiParameter(
+                name="max_km", description="Maksimum KM", required=False, type=int),
+            OpenApiParameter(
+                name="sort", description="Sıralama (price_asc, price_desc, year_desc, km_asc, date_desc)", required=False, type=str),
+            OpenApiParameter(
+                name="page", description="Sayfa Numarası", required=False, type=int),
+            OpenApiParameter(
+                name="page_size", description="Sayfa Başına İlan", required=False, type=int),
         ],
     )
     def get(self, request):
@@ -65,10 +85,11 @@ class CarSearchAPIView(APIView):
             'page': request.query_params.get('page', 1),
             'page_size': request.query_params.get('page_size', 20),
         }
-        
+
         # Parse boolean
         if params['for_trade'] is not None:
-            params['for_trade'] = str(params['for_trade']).lower() in ['true', '1', 'yes']
+            params['for_trade'] = str(params['for_trade']).lower() in [
+                'true', '1', 'yes']
 
         try:
             results = search_car_listings(**params)
@@ -90,22 +111,38 @@ class HouseSearchAPIView(APIView):
         summary="Elasticsearch Konut Arama & Filtreleme",
         description="Başlık, şehir, ilçede full-text ve fuzzy arama ile ev özellikleri filtrelemesi yapar.",
         parameters=[
-            OpenApiParameter(name="q", description="Arama metni (Başlık, Şehir, İlçe)", required=False, type=str),
-            OpenApiParameter(name="city", description="Şehir", required=False, type=str),
-            OpenApiParameter(name="district", description="İlçe", required=False, type=str),
-            OpenApiParameter(name="number_of_rooms", description="Oda Sayısı (örn: 3+1)", required=False, type=str),
-            OpenApiParameter(name="building_aged", description="Bina Yaşı", required=False, type=str),
-            OpenApiParameter(name="floor", description="Bulunduğu Kat", required=False, type=str),
-            OpenApiParameter(name="credit_eligibility", description="Krediye Uygun mu (true/false)", required=False, type=bool),
-            OpenApiParameter(name="min_price", description="Minimum Fiyat", required=False, type=float),
-            OpenApiParameter(name="max_price", description="Maksimum Fiyat", required=False, type=float),
-            OpenApiParameter(name="min_meter_squared", description="Minimum m²", required=False, type=int),
-            OpenApiParameter(name="max_meter_squared", description="Maksimum m²", required=False, type=int),
-            OpenApiParameter(name="min_floors", description="Minimum Kat Sayısı", required=False, type=int),
-            OpenApiParameter(name="max_floors", description="Maksimum Kat Sayısı", required=False, type=int),
-            OpenApiParameter(name="sort", description="Sıralama (price_asc, price_desc, meter_desc, date_desc)", required=False, type=str),
-            OpenApiParameter(name="page", description="Sayfa Numarası", required=False, type=int),
-            OpenApiParameter(name="page_size", description="Sayfa Başına İlan", required=False, type=int),
+            OpenApiParameter(
+                name="q", description="Arama metni (Başlık, Şehir, İlçe)", required=False, type=str),
+            OpenApiParameter(name="city", description="Şehir",
+                             required=False, type=str),
+            OpenApiParameter(name="district", description="İlçe",
+                             required=False, type=str),
+            OpenApiParameter(
+                name="number_of_rooms", description="Oda Sayısı (örn: 3+1)", required=False, type=str),
+            OpenApiParameter(name="building_aged",
+                             description="Bina Yaşı", required=False, type=str),
+            OpenApiParameter(
+                name="floor", description="Bulunduğu Kat", required=False, type=str),
+            OpenApiParameter(name="credit_eligibility",
+                             description="Krediye Uygun mu (true/false)", required=False, type=bool),
+            OpenApiParameter(
+                name="min_price", description="Minimum Fiyat", required=False, type=float),
+            OpenApiParameter(
+                name="max_price", description="Maksimum Fiyat", required=False, type=float),
+            OpenApiParameter(name="min_meter_squared",
+                             description="Minimum m²", required=False, type=int),
+            OpenApiParameter(name="max_meter_squared",
+                             description="Maksimum m²", required=False, type=int),
+            OpenApiParameter(
+                name="min_floors", description="Minimum Kat Sayısı", required=False, type=int),
+            OpenApiParameter(
+                name="max_floors", description="Maksimum Kat Sayısı", required=False, type=int),
+            OpenApiParameter(
+                name="sort", description="Sıralama (price_asc, price_desc, meter_desc, date_desc)", required=False, type=str),
+            OpenApiParameter(
+                name="page", description="Sayfa Numarası", required=False, type=int),
+            OpenApiParameter(
+                name="page_size", description="Sayfa Başına İlan", required=False, type=int),
         ],
     )
     def get(self, request):
@@ -129,7 +166,8 @@ class HouseSearchAPIView(APIView):
         }
 
         if params['credit_eligibility'] is not None:
-            params['credit_eligibility'] = str(params['credit_eligibility']).lower() in ['true', '1', 'yes']
+            params['credit_eligibility'] = str(params['credit_eligibility']).lower() in [
+                'true', '1', 'yes']
 
         try:
             results = search_house_listings(**params)
