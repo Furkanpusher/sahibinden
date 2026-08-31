@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from listings.permissions import IsOwnerOrReadOnly
 from ..services import (
-    filter_listings,
+    get_all_listings,
     get_listing_by_id,
     create_listing,
     delete_listing,
@@ -27,11 +27,10 @@ class StandardListingPagination(PageNumberPagination):
 
 class BaseListingListView(APIView):
     """
-    Base generic list view supporting caching, filtering, and pagination.
+    Base generic list view supporting caching, listing retrieval, and pagination.
     Subclasses should define:
       - model_class
       - serializer_class
-      - filter_class
       - cache_prefix
 
       this way it's a lot easier to add more categories in the future
@@ -50,7 +49,7 @@ class BaseListingListView(APIView):
             return Response(cached_data, status=status.HTTP_200_OK)
 
         # 2. Database query and pagination
-        queryset = filter_listings(
+        queryset = get_all_listings(
             self.model_class, request.query_params)
         paginator = self.pagination_class()
         paginated_items = paginator.paginate_queryset(

@@ -11,28 +11,22 @@ from listings.tasks import (price_update_notification,
 
 
 # Retrieves all listings of a specific model with their owners
-def get_all_listings(model_class):
-    return model_class.objects.select_related("listing_owner").all().order_by("-listing_date")
+def get_all_listings(model_class, query_params=None):
+    qs = model_class.objects.select_related(
+        "listing_owner").all().order_by("-listing_date")
+    if query_params:
+        ids = query_params.get("ids")
+        if ids:
+            id_list = [int(v.strip())
+                       for v in str(ids).split(",") if v.strip().isdigit()]
+            if id_list:
+                qs = qs.filter(id__in=id_list)
+    return qs
 
 
 # Retrieves a listing by ID for a given model
 def get_listing_by_id(model_class, pk):
     return get_object_or_404(model_class.objects.select_related("listing_owner"), pk=pk)
-
-
-""" FILTERING FUNCTION """
-
-
-def filter_listings(model_class, query_params):
-    qs = model_class.objects.select_related(
-        "listing_owner").all().order_by("-listing_date")
-    ids = query_params.get("ids")
-    if ids:
-        id_list = [int(v.strip())
-                   for v in str(ids).split(",") if v.strip().isdigit()]
-        if id_list:
-            qs = qs.filter(id__in=id_list)
-    return qs
 
 
 """ LISTING CRUD OPERATIONS """

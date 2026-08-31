@@ -1,7 +1,6 @@
 from .listing_services import (
     get_all_listings,
     get_listing_by_id,
-    filter_listings,
     create_listing,
     delete_listing,
     update_listing,
@@ -43,7 +42,6 @@ __all__ = [
     # Listing services
     "get_all_listings",
     "get_listing_by_id",
-    "filter_listings",
     "create_listing",
     "delete_listing",
     "update_listing",
