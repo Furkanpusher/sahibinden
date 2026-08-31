@@ -35,6 +35,10 @@ from .notification_services import (
     process_price_change_notifications,
     process_favorite_updated_notifications,
 )
+from .search_services import (
+    search_car_listings,
+    search_house_listings,
+)
 
 __all__ = [
     # Listing services
@@ -71,4 +75,7 @@ __all__ = [
     "send_criteria_match_notifications",
     "process_price_change_notifications",
     "process_favorite_updated_notifications",
+    # Search services
+    "search_car_listings",
+    "search_house_listings",
 ]

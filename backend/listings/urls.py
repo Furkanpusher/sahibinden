@@ -9,6 +9,7 @@ from .views import (
     NotificationView, AlarmView,
     FollowToggleView, FollowingListView,
     SellerDetailView,
+    CarSearchAPIView, HouseSearchAPIView,
 )
 
 
@@ -56,5 +57,8 @@ urlpatterns = [
     # Seller
     path("sellers/<int:pk>/", SellerDetailView.as_view(), name="seller-detail"),
 
+    # Elasticsearch Search Endpoints
+    path("search/cars/", CarSearchAPIView.as_view(), name="search-cars"),
+    path("search/houses/", HouseSearchAPIView.as_view(), name="search-houses"),
 
 ]

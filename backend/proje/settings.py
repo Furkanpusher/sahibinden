@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_spectacular',
     'django_filters',
+    'django_elasticsearch_dsl',
 ]
 
 REST_FRAMEWORK = {
@@ -195,5 +196,17 @@ CELERY_BEAT_SCHEDULE = {  # interval schedule
     "check-new-listing-alarms-every-1-min": {
         "task": "listings.tasks.check_new_listing_alarms",
         "schedule": 60.0,  # every 1 minute (60 seconds)
+    },
+}
+
+# Elasticsearch Configuration
+# https://django-elasticsearch-dsl.readthedocs.io/
+_es_host = os.environ.get('ELASTICSEARCH_HOST', 'http://127.0.0.1:9200')
+if not _es_host.startswith(('http://', 'https://')):
+    _es_host = f'http://{_es_host}'
+
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': _es_host
     },
 }

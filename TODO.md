@@ -103,8 +103,9 @@ When a follower clicks a "New listing from followed seller" notification, route 
 
 
 
-
-
+# Elastic Search
+# Map
+# Db optimization?
 
 
 

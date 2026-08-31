@@ -44,6 +44,7 @@ export default function HouseListPage() {
 
   // 1. Sayfa ilk açıldığında URL'deki parametreleri başlangıç değeri yapıyoruz
   const initialFilters = {
+    q: searchParams.get("q") || "",
     number_of_rooms: searchParams.get("number_of_rooms") || "",
     price_min: searchParams.get("price_min") || "",
     price_max: searchParams.get("price_max") || "",
@@ -56,6 +57,9 @@ export default function HouseListPage() {
 
   // 🔹 UYGULANAN STATE: Sadece "Filtrele" butonuna basılınca güncellenir (istek tetikler)
   const [appliedFilters, setAppliedFilters] = useState(initialFilters);
+
+  // 🔹 ARAMA ÇUBUĞU STATE'İ
+  const [searchInput, setSearchInput] = useState(searchParams.get("q") || "");
 
   // 🔹 Dropdown Seçenekleri (Helper'dan dinamik daralan veriler)
   const cities = useMemo(() => getCities(), []);
@@ -72,10 +76,10 @@ export default function HouseListPage() {
       page_size: itemsPerPage,
     };
 
-    fetchListings("/houses/", queryParams)
+    fetchListings("/search/houses/", queryParams)
       .then((data) => {
         setHouses(data.results || []);
-        setTotalCount(data.count || 0);
+        setTotalCount(data.count || data.total || 0);
       })
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
@@ -91,6 +95,31 @@ export default function HouseListPage() {
     }));
   };
 
+  // 🔹 ÜST ARAMA ÇUBUĞU İŞLEYİCİSİ
+  const handleSearchSubmit = (e) => {
+    if (e) e.preventDefault();
+    setCurrentPage(1);
+    const newFilters = { ...appliedFilters, q: searchInput };
+    const cleanParams = Object.fromEntries(
+      Object.entries({ ...newFilters, page: 1, page_size: itemsPerPage }).filter(([_, v]) => v !== "")
+    );
+    setSearchParams(cleanParams);
+    setAppliedFilters(newFilters);
+    setTempFilters((prev) => ({ ...prev, q: searchInput }));
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput("");
+    setCurrentPage(1);
+    const newFilters = { ...appliedFilters, q: "" };
+    const cleanParams = Object.fromEntries(
+      Object.entries({ ...newFilters, page: 1, page_size: itemsPerPage }).filter(([_, v]) => v !== "")
+    );
+    setSearchParams(cleanParams);
+    setAppliedFilters(newFilters);
+    setTempFilters((prev) => ({ ...prev, q: "" }));
+  };
+
   // 🔹 "FİLTRELE" BUTONUNA BASILINCA ÇALIŞIR
   const handleApplyFilters = (e) => {
     if (e) e.preventDefault();
@@ -98,25 +127,23 @@ export default function HouseListPage() {
     setCurrentPage(1); // Filtre değişince 1. sayfaya sıfırla
 
     const cleanParams = Object.fromEntries(
-      Object.entries({ ...tempFilters, page: 1, page_size: itemsPerPage }).filter(([_, v]) => v !== "")
+      Object.entries({ ...tempFilters, q: searchInput, page: 1, page_size: itemsPerPage }).filter(([_, v]) => v !== "")
     );
     setSearchParams(cleanParams);
-    setAppliedFilters(tempFilters);
+    setAppliedFilters({ ...tempFilters, q: searchInput });
   };
 
   // 🔹 "TEMİZLE" BUTONUNA BASILINCA ÇALIŞIR
   const handleResetFilters = () => {
     const emptyFilters = {
+      q: "",
       number_of_rooms: "",
       price_min: "",
       price_max: "",
       city: "",
       district: "",
     };
-    setCurrentPage(1);
-    setTempFilters(emptyFilters);
-    setAppliedFilters(emptyFilters);
-    setSearchParams({});
+    setSearchInput("");
     setCurrentPage(1);
     setTempFilters(emptyFilters);
     setAppliedFilters(emptyFilters);
@@ -214,6 +241,43 @@ export default function HouseListPage() {
             </div>
           </div>
         </header>
+
+        {/* 🔍 Üst Orta Arama Çubuğu (Elasticsearch) */}
+        <div className="mb-8 flex justify-center">
+          <form
+            onSubmit={handleSearchSubmit}
+            className="relative w-full max-w-2xl"
+          >
+            <div className="relative flex items-center">
+              <Search
+                size={18}
+                className="absolute left-4 text-[#8B95A3] pointer-events-none"
+              />
+              <input
+                type="text"
+                placeholder="Konum, oda, başlık veya kelime ile ara (Elasticsearch)..."
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                className="w-full rounded-xl border border-[#232E3D] bg-[#161F2B] py-3.5 pl-11 pr-24 text-sm text-[#EDEFF2] placeholder-[#667384] transition-all focus:border-[#E8A33D] focus:bg-[#1A2533] focus:outline-none focus:ring-2 focus:ring-[#E8A33D]/20 shadow-md"
+              />
+              {searchInput && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-16 text-xs text-[#8B95A3] hover:text-[#EDEFF2] transition-colors px-1 py-0.5"
+                >
+                  Temizle
+                </button>
+              )}
+              <button
+                type="submit"
+                className="absolute right-2 rounded-lg bg-[#E8A33D] px-3.5 py-1.5 text-xs font-semibold text-[#0F1720] hover:bg-[#F0B058] transition-colors"
+              >
+                Ara
+              </button>
+            </div>
+          </form>
+        </div>
 
         {/* Main Layout */}
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
