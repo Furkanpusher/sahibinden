@@ -4,7 +4,8 @@ from listings.models import Listing, Favorite, Report, ListingImage
 from accounts.models import CustomUser, Follow
 from listings.tasks import (price_update_notification,
                             listing_updated_notification,
-                            send_seller_followers_notification)
+                            send_seller_followers_notification,
+                            send_seller_followers_email_task)
 
 
 """ BASIC GET METHODS """
@@ -37,8 +38,13 @@ def create_listing(model_class, user, data):
     # Create a new listing
     listing = model_class.objects.create(listing_owner=user, **data)
     # .create() will trigger the post_save signal in elastic search
+    
+    # 1. Send in-app notifications
     send_seller_followers_notification.delay(listing.pk)
-    # send notification to this sellers followers about this new listing
+    
+    # 2. Send emails in background
+    send_seller_followers_email_task.delay(listing.pk)
+    
     return listing
 
 

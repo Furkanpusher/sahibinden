@@ -135,7 +135,48 @@ process_price_change_notifications = send_price_change_notifications
 process_favorite_updated_notifications = send_favorite_update_notifications
 
 
+def send_seller_followers_email(listing_pk):
+    """
+    Sends an email to all followers of a seller when a new listing is published.
+    """
+    listing = Listing.objects.select_related
+    ("listing_owner").filter(pk=listing_pk).first()
+    if not listing or not listing.listing_owner:
+        return
+    seller = listing.listing_owner
+
+    seller_followers = seller.followers.select_related("follower")
+    if not seller_followers.exists():
+        return
+
+    email_subject = f"Yeni İlan: {seller.username} bir ilan yayınladı!"
+    email_body = (
+        f"Merhaba,\n\n"
+        f"Takip ettiğiniz satıcı '{seller.username}' yeni bir ilan yayınladı!\n\n"
+        f"📌 Başlık: {listing.title}\n"
+        f"💰 Fiyat: {listing.price:,} ₺\n"
+        f"📍 Şehir: {listing.city or 'Belirtilmemiş'}\n\n"
+        f"İlanı incelemek için platformumuzu ziyaret edebilirsiniz."
+    )
+
+    for follow in seller_followers:
+        follower = follow.follower
+        if follower.email:
+            try:
+                follower.email_user(  # AbstractUser has this function
+                    subject=email_subject,
+                    message=email_body,
+                    fail_silently=True,
+                )
+            except Exception as e:
+                print(
+                    f"[EMAIL ERROR] {follower.email} adresine mail gönderilemedi: {e}")
+
+
 def send_seller_followers_notifications(listing_pk):
+    """
+    Creates in-app database notifications for all followers of a seller.
+    """
     # get the listing and the owner
     listing = Listing.objects.select_related(
         "listing_owner").filter(pk=listing_pk).first()
@@ -143,10 +184,9 @@ def send_seller_followers_notifications(listing_pk):
         return
     seller = listing.listing_owner
 
-    # get the seller's followers id's
+    # Get the seller's followers id's for sending in app notifications
     target_user_ids = set(
-        Follow.objects.filter(seller=seller).values_list(
-            "follower_id", flat=True)
+        seller.followers.values_list("follower_id", flat=True)
     )
     if not target_user_ids:
         return
