@@ -1,4 +1,4 @@
-import { Car, Home as HomeIcon, ArrowRight, ShieldAlert } from "lucide-react";
+import { Car, Home as HomeIcon, ArrowRight, ShieldAlert, Map } from "lucide-react";
 import { Link } from "react-router-dom";
 import UserMenu from "../../components/UserMenu";
 
@@ -52,7 +52,7 @@ export default function HomePage() {
         </div>
 
         {/* Categories */}
-        <div className="grid w-full max-w-4xl grid-cols-1 gap-5 md:grid-cols-2">
+        <div className="grid w-full max-w-5xl grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
           <CategoryCard
             to="/cars"
             icon={<Car size={28} />}
@@ -65,6 +65,13 @@ export default function HomePage() {
             icon={<HomeIcon size={28} />}
             title="Ev İlanları"
             desc="Oda sayısı, fiyat aralığı ve konuma göre ev ilanlarını keşfet."
+          />
+
+          <CategoryCard
+            to="/harita"
+            icon={<Map size={28} />}
+            title="Haritada Keşfet"
+            desc="Şehir seçerek harita üzerinden tüm araç ve ev ilanlarını incele."
           />
         </div>
 

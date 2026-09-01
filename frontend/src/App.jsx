@@ -20,6 +20,7 @@ import UserListings from "./pages/profile/UserListings.jsx";
 import UserReports from "./pages/profile/UserReports.jsx";
 import UserFollowing from "./pages/profile/UserFollowing.jsx";
 import SellerPage from "./pages/seller/SellerPage.jsx";
+import MapPage from "./pages/map/MapPage.jsx";
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
         <Toaster richColors position="top-right" theme="dark" closeButton />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/harita" element={<MapPage />} />
           <Route path="/cars" element={<CarList />} />
           <Route path="/houses" element={<HouseList />} />
           <Route path="/login" element={<AuthPage />} />

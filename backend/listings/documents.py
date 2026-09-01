@@ -3,9 +3,9 @@ from django_elasticsearch_dsl.registries import registry
 from .models import CarListing, HouseListing
 
 
-@registry.register_document
+@registry.register_document  # this will catche the post_save or post_delete signal
+# Turns the car instance to json using CarListingDocument
 class CarListingDocument(Document):
-    # Common Listing fields
     title = fields.TextField(
         attr='title',
         fields={
@@ -59,7 +59,7 @@ class CarListingDocument(Document):
         }
 
     class Django:
-        model = CarListing
+        model = CarListing  # Connedted to my car model
         fields = [
             'id',
         ]
