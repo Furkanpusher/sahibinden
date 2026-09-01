@@ -2,10 +2,7 @@ from django.core.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
 from listings.models import Listing, Favorite, Report, ListingImage
 from accounts.models import CustomUser, Follow
-from listings.tasks import (price_update_notification,
-                            listing_updated_notification,
-                            send_seller_followers_notification,
-                            send_seller_followers_email_task)
+from listings import tasks
 
 
 """ BASIC GET METHODS """
@@ -38,13 +35,13 @@ def create_listing(model_class, user, data):
     # Create a new listing
     listing = model_class.objects.create(listing_owner=user, **data)
     # .create() will trigger the post_save signal in elastic search
-    
+
     # 1. Send in-app notifications
-    send_seller_followers_notification.delay(listing.pk)
-    
+    tasks.send_seller_followers_notification.delay(listing.pk)
+
     # 2. Send emails in background
-    send_seller_followers_email_task.delay(listing.pk)
-    
+    tasks.send_seller_followers_email_task.delay(listing.pk)
+
     return listing
 
 
@@ -63,10 +60,10 @@ def update_listing(instance, serializer_class, data, partial=True):
         old_price = instance.price
         updated_instance = serializer.save()  # update the listing
         if old_price != updated_instance.price:
-            price_update_notification.delay(  # just price change
+            tasks.price_update_notification.delay(  # just price change
                 old_price, updated_instance.price, instance.pk)
         else:
-            listing_updated_notification.delay(
+            tasks.listing_updated_notification.delay(
                 instance.pk)  # other any update except price
         return updated_instance, None
     return None, serializer.errors

@@ -139,8 +139,8 @@ def send_seller_followers_email(listing_pk):
     """
     Sends an email to all followers of a seller when a new listing is published.
     """
-    listing = Listing.objects.select_related
-    ("listing_owner").filter(pk=listing_pk).first()
+    listing = Listing.objects.select_related(
+        "listing_owner").filter(pk=listing_pk).first()
     if not listing or not listing.listing_owner:
         return
     seller = listing.listing_owner
@@ -163,10 +163,10 @@ def send_seller_followers_email(listing_pk):
         follower = follow.follower
         if follower.email:
             try:
-                follower.email_user(  # AbstractUser has this function
+                follower.email_user(
                     subject=email_subject,
                     message=email_body,
-                    fail_silently=True,
+                    fail_silently=False,
                 )
             except Exception as e:
                 print(
