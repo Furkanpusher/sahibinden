@@ -17,77 +17,109 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// Single listing pin marker
+// Single listing pin marker (Compact clean SVG location pin + price tag)
 const createSingleMarker = (price, isHouse) => {
   const formattedPrice = price
     ? new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 0 }).format(price) + " ₺"
     : "";
+  const color = isHouse ? "#059669" : "#2563eb";
 
   return L.divIcon({
     className: "custom-leaflet-marker",
     html: `
       <div style="
-        background: ${isHouse ? '#059669' : '#2563eb'};
-        color: white;
-        padding: 5px 10px;
-        border-radius: 10px;
-        font-size: 11px;
-        font-weight: 700;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.35);
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 5px;
-        white-space: nowrap;
-        border: 2px solid white;
         cursor: pointer;
         transform: translate(-50%, -100%);
+        filter: drop-shadow(0 2px 5px rgba(0,0,0,0.35));
+        transition: transform 0.15s ease;
       ">
-        <span>${isHouse ? '🏠' : '🚗'}</span>
-        <span>${formattedPrice || (isHouse ? 'Ev' : 'Araç')}</span>
+        <svg width="20" height="26" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 0C5.37258 0 0 5.37258 0 12C0 21 12 32 12 32C12 32 24 21 24 12C24 5.37258 18.6274 0 12 0Z" fill="${color}"/>
+          <circle cx="12" cy="11.5" r="4" fill="white"/>
+        </svg>
+        ${formattedPrice ? `
+          <span style="
+            background: rgba(15, 23, 42, 0.95);
+            color: #ffffff;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-size: 9px;
+            font-weight: 700;
+            white-space: nowrap;
+            margin-top: 1px;
+            border: 1px solid rgba(255,255,255,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.25);
+          ">${formattedPrice}</span>
+        ` : ''}
       </div>
     `,
     iconSize: [0, 0],
     iconAnchor: [0, 0],
-    popupAnchor: [0, -22],
+    popupAnchor: [0, -26],
   });
 };
 
-// Grouped City Marker with Dropdown Badge
-const createCityGroupMarker = (cityName, count) => {
+// Grouped City Marker (Compact SVG location pin with count number and 'adet' inside)
+const createCityGroupMarker = (cityName, count, isHouse) => {
+  const color = isHouse ? "#059669" : "#2563eb";
+
   return L.divIcon({
     className: "custom-leaflet-city-marker",
     html: `
       <div style="
-        background: #0f172a;
-        color: white;
-        padding: 6px 12px;
-        border-radius: 9999px;
-        font-size: 12px;
-        font-weight: 700;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.4);
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 6px;
-        white-space: nowrap;
-        border: 2px solid #e8a33d;
         cursor: pointer;
         transform: translate(-50%, -100%);
+        filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+        transition: transform 0.15s ease;
       ">
-        <span style="color: #e8a33d;">📍</span>
-        <span>${cityName}</span>
+        <div style="position: relative; display: flex; align-items: center; justify-content: center;">
+          <svg width="30" height="38" viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 0C5.37258 0 0 5.37258 0 12C0 21 12 32 12 32C12 32 24 21 24 12C24 5.37258 18.6274 0 12 0Z" fill="${color}"/>
+            <circle cx="12" cy="11.5" r="7.5" fill="white"/>
+          </svg>
+          <div style="
+            position: absolute;
+            top: 4px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            user-select: none;
+          ">
+            <span style="
+              font-size: 9.5px;
+              font-weight: 900;
+              color: ${color};
+            ">${count > 99 ? '99+' : count}</span>
+            <span style="
+              font-size: 6px;
+              font-weight: 800;
+              color: ${color};
+              letter-spacing: -0.2px;
+              margin-top: 1px;
+            ">adet</span>
+          </div>
+        </div>
         <span style="
-          background: #e8a33d;
-          color: #0f172a;
-          padding: 1px 7px;
-          border-radius: 9999px;
+          color: #ffffff;
           font-size: 10px;
-          font-weight: 800;
-        ">${count} İlan</span>
+          font-weight: 700;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.9), 0 0 5px rgba(0,0,0,0.8);
+          margin-top: 1px;
+          white-space: nowrap;
+        ">${cityName}</span>
       </div>
     `,
     iconSize: [0, 0],
     iconAnchor: [0, 0],
-    popupAnchor: [0, -22],
+    popupAnchor: [0, -38],
   });
 };
 
@@ -310,8 +342,13 @@ export default function ListingMap({
         marker.bindPopup(popupContent, { maxWidth: 260, minWidth: 220 });
         markersLayerRef.current.addLayer(marker);
       } else {
-        // Multiple listings in this city -> Dropdown list popup!
-        const customIcon = createCityGroupMarker(cityName, items.length);
+        // Multiple listings in this city -> Group Marker
+        const isHouse =
+          listingType === "house" ||
+          items.some(
+            (i) => i.listing_type === "house" || i.meter_squared !== undefined
+          );
+        const customIcon = createCityGroupMarker(cityName, items.length, isHouse);
         const marker = L.marker(coords, { icon: customIcon });
 
         const itemsListHtml = items

@@ -16,7 +16,7 @@ import UserMenu from "../../components/UserMenu";
 import { fetchListings, getListingCoverImage } from "../../api";
 
 export default function MapPage() {
-  const [selectedCategory, setSelectedCategory] = useState("all"); // "all" | "car" | "house"
+  const [selectedCategory, setSelectedCategory] = useState("car"); // "car" | "house"
   const [selectedCity, setSelectedCity] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [listings, setListings] = useState([]);
@@ -31,21 +31,17 @@ export default function MapPage() {
     const params = {};
     if (selectedCity) params.city = selectedCity;
     if (searchQuery) params.q = searchQuery;
-    params.page_size = 50; // Show up to 50 pins on map
+    params.page_size = 500; // the items that will be display on the map
 
     const fetchAll = async () => {
       try {
         let results = [];
-        if (selectedCategory === "all" || selectedCategory === "car") {
+        if (selectedCategory === "car") {
           const carData = await fetchListings("/search/cars/", params).catch(() => ({ results: [] }));
-          const cars = (carData.results || []).map((c) => ({ ...c, listing_type: "car" }));
-          results = [...results, ...cars];
-        }
-
-        if (selectedCategory === "all" || selectedCategory === "house") {
+          results = (carData.results || []).map((c) => ({ ...c, listing_type: "car" }));
+        } else if (selectedCategory === "house") {
           const houseData = await fetchListings("/search/houses/", params).catch(() => ({ results: [] }));
-          const houses = (houseData.results || houseData || []).map((h) => ({ ...h, listing_type: "house" }));
-          results = [...results, ...houses];
+          results = (houseData.results || houseData || []).map((h) => ({ ...h, listing_type: "house" }));
         }
 
         if (isMounted) {
@@ -95,25 +91,11 @@ export default function MapPage() {
         <div className="flex items-center gap-1 bg-[#0F1720] p-1 rounded-xl border border-slate-800">
           <button
             type="button"
-            onClick={() => setSelectedCategory("all")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              selectedCategory === "all"
-                ? "bg-[#E8A33D] text-[#0F1720] shadow-sm"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span>Tümü</span>
-          </button>
-
-          <button
-            type="button"
             onClick={() => setSelectedCategory("car")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              selectedCategory === "car"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${selectedCategory === "car"
                 ? "bg-blue-600 text-white shadow-sm"
                 : "text-slate-400 hover:text-white"
-            }`}
+              }`}
           >
             <Car className="w-3.5 h-3.5" />
             <span>Araçlar</span>
@@ -122,11 +104,10 @@ export default function MapPage() {
           <button
             type="button"
             onClick={() => setSelectedCategory("house")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
-              selectedCategory === "house"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${selectedCategory === "house"
                 ? "bg-emerald-600 text-white shadow-sm"
                 : "text-slate-400 hover:text-white"
-            }`}
+              }`}
           >
             <HomeIcon className="w-3.5 h-3.5" />
             <span>Evler</span>
@@ -150,9 +131,8 @@ export default function MapPage() {
       <div className="flex-1 flex relative overflow-hidden">
         {/* 📋 Sidebar Listings List */}
         <div
-          className={`${
-            sidebarOpen ? "w-full sm:w-80 md:w-96" : "w-0 hidden"
-          } transition-all duration-300 bg-[#131D2A] border-r border-slate-800 flex flex-col z-10 shrink-0 h-full`}
+          className={`${sidebarOpen ? "w-full sm:w-80 md:w-96" : "w-0 hidden"
+            } transition-all duration-300 bg-[#131D2A] border-r border-slate-800 flex flex-col z-10 shrink-0 h-full`}
         >
           {/* Sidebar Search Header */}
           <div className="p-3 border-b border-slate-800 flex flex-col gap-2">
@@ -229,11 +209,10 @@ export default function MapPage() {
                       <div>
                         <div className="flex items-center gap-1.5 mb-1">
                           <span
-                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                              isHouse
-                                ? "bg-emerald-500/20 text-emerald-400"
-                                : "bg-blue-500/20 text-blue-400"
-                            }`}
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${isHouse
+                              ? "bg-emerald-500/20 text-emerald-400"
+                              : "bg-blue-500/20 text-blue-400"
+                              }`}
                           >
                             {isHouse ? "Ev" : "Araç"}
                           </span>
