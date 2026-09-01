@@ -42,19 +42,21 @@ export const getListingCoverImage = (item, preferredType = null) => {
   return fallbackList[Math.abs(idNum) % fallbackList.length];
 };
 
-export function isTokenExpired() {
-  const token = localStorage.getItem("access_token") || localStorage.getItem("access");
-  if (!token) return true;
+export function isTokenExpired(token) {
+  const t = token || localStorage.getItem("access_token") || localStorage.getItem("access");
+  if (!t) return true;
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    const payload = JSON.parse(atob(t.split(".")[1]));
     const now = Math.floor(Date.now() / 1000);
-    return payload.exp < now;
+    // 10 second safety buffer to prevent token expiring mid-request
+    return payload.exp < now + 10;
   } catch {
     return true;
   }
 }
 
 let isRedirecting = false;
+let refreshPromise = null; // Mutex to prevent multiple parallel refresh requests
 
 export class SessionExpiredError extends Error {
   constructor(message = "Oturum süreniz dolmuştur. Lütfen tekrar giriş yapınız.") {
@@ -65,26 +67,86 @@ export class SessionExpiredError extends Error {
 }
 
 export function handleSessionExpired() {
+  if (isRedirecting) return;
+  isRedirecting = true;
+
   toast.error("Oturum süreniz dolmuştur. Lütfen tekrar giriş yapınız.", {
     id: "session-expired-toast",
   });
 
-  // clear the local storage
+  // clear local storage
   localStorage.removeItem("access_token");
   localStorage.removeItem("access");
   localStorage.removeItem("refresh_token");
+  localStorage.removeItem("refresh");
   localStorage.removeItem("user_id");
   localStorage.removeItem("user");
   localStorage.removeItem("is_staff");
 
-  if (!isRedirecting) {
-    isRedirecting = true;
-    setTimeout(() => {
-      window.location.href = "/login";
-    }, 2000);
-  }
+  setTimeout(() => {
+    isRedirecting = false;
+    window.location.href = "/login";
+  }, 2000);
 }
 
+// Silently refreshes the access token using the refresh token
+export async function refreshAccessToken() {
+  const refreshToken = localStorage.getItem("refresh_token") || localStorage.getItem("refresh");
+  if (!refreshToken || isTokenExpired(refreshToken)) {
+    handleSessionExpired();
+    throw new SessionExpiredError();
+  }
+
+  // If a refresh is already in progress, wait for it
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${BACKEND_BASE}/api/accounts/token/refresh/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh: refreshToken }),
+      });
+
+      if (!res.ok) {
+        handleSessionExpired();
+        throw new SessionExpiredError();
+      }
+
+      const data = await res.json();
+      const newAccessToken = data.access || data.access_token;
+      localStorage.setItem("access_token", newAccessToken);
+      localStorage.setItem("access", newAccessToken);
+      if (data.refresh || data.refresh_token) {
+        localStorage.setItem("refresh_token", data.refresh || data.refresh_token);
+        localStorage.setItem("refresh", data.refresh || data.refresh_token);
+      }
+      return newAccessToken;
+    } catch (err) {
+      if (!(err instanceof SessionExpiredError)) {
+        handleSessionExpired();
+      }
+      throw err;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
+}
+
+// Retrieves a guaranteed valid access token (refreshes silently if expired)
+export async function getValidAccessToken() {
+  const token = localStorage.getItem("access_token") || localStorage.getItem("access");
+  if (token && !isTokenExpired(token)) {
+    return token;
+  }
+  return await refreshAccessToken();
+}
 
 export function formatApiError(err) {
   if (!err) return "Bir hata oluştu.";
@@ -117,27 +179,48 @@ export async function fetchListings(path, params = {}) {
   return res.json();
 }
 
-export async function postListing(path, data) {
-  const token = localStorage.getItem("access_token") || localStorage.getItem("access");
+// Generic authenticated fetch helper with automatic 401 retry & silent refresh
+export async function authFetch(url, options = {}, retryOn401 = true) {
+  const token = await getValidAccessToken();
 
-  if (!token || isTokenExpired()) {
-    handleSessionExpired();
-    throw new SessionExpiredError();
+  const headers = {
+    ...(options.headers || {}),
+    Authorization: `Bearer ${token}`,
+  };
+
+  let res = await fetch(url, { ...options, headers });
+
+  // If server returns 401 Unauthorized, attempt a silent refresh once and retry
+  if (res.status === 401 && retryOn401) {
+    try {
+      const newToken = await refreshAccessToken();
+      const retryHeaders = {
+        ...(options.headers || {}),
+        Authorization: `Bearer ${newToken}`,
+      };
+      res = await fetch(url, { ...options, headers: retryHeaders });
+    } catch {
+      handleSessionExpired();
+      throw new SessionExpiredError();
+    }
   }
-
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
-    },
-    body: JSON.stringify(data),
-  });
 
   if (res.status === 401) {
     handleSessionExpired();
     throw new SessionExpiredError();
   }
+
+  return res;
+}
+
+export async function postListing(path, data) {
+  const res = await authFetch(`${API_BASE}${path}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: `HTTP ${res.status}` }));
@@ -148,30 +231,15 @@ export async function postListing(path, data) {
 
 // Photo adding
 export async function uploadListingImages(listingId, files) {
-  const token = localStorage.getItem("access_token") || localStorage.getItem("access");
-
-  if (!token || isTokenExpired()) {
-    handleSessionExpired();
-    throw new SessionExpiredError();
-  }
-
   const formData = new FormData();
   for (let i = 0; i < files.length; i++) {
     formData.append("images", files[i]);
   }
 
-  const res = await fetch(`${API_BASE}/listings/${listingId}/images/`, {
+  const res = await authFetch(`${API_BASE}/listings/${listingId}/images/`, {
     method: "POST",
-    headers: {
-      "Authorization": `Bearer ${token}`,
-    },
     body: formData,
   });
-
-  if (res.status === 401) {
-    handleSessionExpired();
-    throw new SessionExpiredError();
-  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: "Fotoğraf yüklenemedi." }));
@@ -180,29 +248,6 @@ export async function uploadListingImages(listingId, files) {
   return res.json();
 }
 
-// Generic authenticated fetch helper
-export async function authFetch(url, options = {}) {
-  const token = localStorage.getItem("access_token") || localStorage.getItem("access");
-
-  if (!token || isTokenExpired()) {
-    handleSessionExpired();
-    throw new SessionExpiredError();
-  }
-
-  const headers = {
-    "Authorization": `Bearer ${token}`,
-    ...(options.headers || {}),
-  };
-
-  const res = await fetch(url, { ...options, headers });
-
-  if (res.status === 401) {
-    handleSessionExpired();
-    throw new SessionExpiredError();
-  }
-
-  return res;
-}
 
 
 // NOTIFICATION FUNCTIONS

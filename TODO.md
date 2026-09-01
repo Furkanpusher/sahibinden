@@ -44,67 +44,11 @@ AlarmChecker (base)
 
 
 
-# users will be able to follow sellers, when seller creates a new listing, the follower will get a notification
-
-# also in the detail page. when click to seller, it should go to all the listings of that seller
-
-
-# DONE
-Phase 1: Database & Model Design
-Create an Explicit Follow Relation:
-An intermediate model linking follower (User) and seller (User).
-Add a created_at timestamp.
-Add a unique constraint on (follower, seller) so a user cannot follow the same seller twice.
-Add validation to prevent a user from following themselves.
-
-
-# DONE
-Phase 2: Follow Management APIs
-Follow / Unfollow Endpoint:
-An authenticated endpoint (e.g., POST /api/sellers/{id}/follow/ or toggle action) to follow/unfollow a seller.
-Follow Status & Count Endpoint:
-Return follower count for the seller.
-Return a boolean flag (is_following: true/false) when the authenticated user views a seller's profile or listing.
-"Sellers I Follow" List Endpoint:
-For the user's dashboard/settings to view and manage all sellers they currently follow.
-
-
-# DONE
-Phase 3: Seller Showcase / Public Profile API
-Seller Listings Endpoint:
-An endpoint (e.g., GET /api/sellers/{id}/listings/ or filtering GET /api/listings/?owner={id}) that returns all active listings by that seller.
-Support your existing pagination, sorting, and category filters.
-Seller Profile Summary:
-Include public details: name/store name, join date, total active listings count, and follower count.
-
-
-# DONE
-Phase 4: Notification Trigger Logic
-Hook into Listing Creation:
-When a new listing is successfully published (status = active):
-Query the seller's active followers via the relationship.
-Bulk-create Notification records for all followers (e.g., "X published a new listing: [Title]").
-Link each notification directly to the new listing_id.
-
-
-# IN PROGRESS
-Phase 5: Frontend UI / UX
-Listing Detail Page:
-In the seller info card, make the seller's name/avatar a clickable link to their profile page.
-Add a dynamic "Takip Et" (Follow) / "Takip Ediliyor" (Following) button right next to the seller's name.
-Seller Profile Page (/sellers/:id or /users/:id/listings):
-Header: Seller avatar, username/store name, member since date, total listings count, and Follow button.
-Content Grid: Display all car/house listings owned by this seller.
-Notification Integration:
-When a follower clicks a "New listing from followed seller" notification, route them directly to the new listing detail page.
 
 
 
 
 
-
-# Map
-# Mail
 
 
 
@@ -116,10 +60,5 @@ When a follower clicks a "New listing from followed seller" notification, route 
 
 
 
-
-# Harita, leaflet # 3
-# Elastic Search # 1
-# Mail # 2
-# Performance # 4
 
 # REFRESH TOKEN SENDS TO /LOGIN
