@@ -2,15 +2,16 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from .models import CarListing, HouseListing
 
-INDEX_SETTINGS = {'number_of_shards': 1, 'number_of_replicas': 0}
 
-
-@registry.register_document
+@registry.register_document  # this will catche the post_save or post_delete signal
+# Turns the car instance to json using CarListingDocument
 class CarListingDocument(Document):
-    # Common fields
-    title = fields.TextField(
+    title = fields.TextField(  # lowers the text, and strips it
         attr='title',
-        fields={'raw': fields.KeywordField(), 'suggest': fields.CompletionField()}
+        fields={
+            'raw': fields.KeywordField(),  # don't strip the text
+            'suggest': fields.CompletionField(),  # for auto complete
+        }
     )
     city = fields.KeywordField(attr='city')
     district = fields.KeywordField(attr='district')
@@ -22,11 +23,22 @@ class CarListingDocument(Document):
     owner_username = fields.KeywordField()
 
     # Car specific fields
-    brand = fields.TextField(attr='brand', fields={'raw': fields.KeywordField()})
+    brand = fields.TextField(
+        attr='brand',
+        fields={
+            'raw': fields.KeywordField(),
+        }
+    )
     series = fields.TextField(attr='series')
-    model = fields.TextField(attr='model', fields={'raw': fields.KeywordField()})
+    model = fields.TextField(
+        attr='model',
+        fields={
+            'raw': fields.KeywordField(),
+        }
+    )
     year = fields.IntegerField(attr='year')
     km = fields.IntegerField(attr='km')
+    # keyword field category, enum or dropdowns etc
     transmission_type = fields.KeywordField(attr='transmission_type')
     fuel_type = fields.KeywordField(attr='fuel_type')
     body_type = fields.KeywordField(attr='body_type')
@@ -39,30 +51,44 @@ class CarListingDocument(Document):
     from_whom = fields.KeywordField(attr='from_whom')
     tramer = fields.DoubleField(attr='tramer')
 
-    class Index:
+    class Index:  # this is the index and the rules for storing the data
         name = 'cars'
-        settings = INDEX_SETTINGS
+        settings = {
+            'number_of_shards': 1,  # amount of times we split the data
+            'number_of_replicas': 0  # copies of the data for backup and faster search
+        }
 
     class Django:
-        model = CarListing
-        fields = ['id']
+        model = CarListing  # Connedted to my car model
+        fields = [
+            'id',
+        ]
 
     def prepare_image(self, instance):
-        return instance.image.url if instance.image else None
+        if instance.image:
+            return instance.image.url
+        return None
 
     def prepare_owner_id(self, instance):
-        return instance.listing_owner_id
+        if instance.listing_owner_id:
+            return instance.listing_owner_id
+        return None
 
     def prepare_owner_username(self, instance):
-        return instance.listing_owner.username if instance.listing_owner else None
+        if instance.listing_owner:
+            return instance.listing_owner.username
+        return None
 
 
 @registry.register_document
 class HouseListingDocument(Document):
-    # Common fields
+    # Common Listing fields
     title = fields.TextField(
         attr='title',
-        fields={'raw': fields.KeywordField(), 'suggest': fields.CompletionField()}
+        fields={
+            'raw': fields.KeywordField(),
+            'suggest': fields.CompletionField(),
+        }
     )
     city = fields.KeywordField(attr='city')
     district = fields.KeywordField(attr='district')
@@ -83,17 +109,28 @@ class HouseListingDocument(Document):
 
     class Index:
         name = 'houses'
-        settings = INDEX_SETTINGS
+        settings = {
+            'number_of_shards': 1,
+            'number_of_replicas': 0  # No need for replicas
+        }
 
     class Django:
         model = HouseListing
-        fields = ['id']
+        fields = [
+            'id',
+        ]
 
     def prepare_image(self, instance):
-        return instance.image.url if instance.image else None
+        if instance.image:
+            return instance.image.url
+        return None
 
     def prepare_owner_id(self, instance):
-        return instance.listing_owner_id
+        if instance.listing_owner_id:
+            return instance.listing_owner_id
+        return None
 
     def prepare_owner_username(self, instance):
-        return instance.listing_owner.username if instance.listing_owner else None
+        if instance.listing_owner:
+            return instance.listing_owner.username
+        return None

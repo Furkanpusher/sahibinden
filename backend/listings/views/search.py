@@ -16,6 +16,7 @@ class CarSearchAPIView(APIView):
     def get(self, request):
         try:
             results = search_car_listings(**request.query_params.dict())
+            # search functions support bot dropdown and quick text filtering&searcing
             return Response(results, status=status.HTTP_200_OK)
         except Exception as e:
             return Response(

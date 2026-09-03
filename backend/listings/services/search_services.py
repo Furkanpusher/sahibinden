@@ -44,7 +44,7 @@ def apply_range_filter(s, field_name, min_val=None, max_val=None):
 
 
 def normalize_transmission(value):
-    """Normalize transmission type string or list to match canonical DB values (Düz, Otomatik, Yarı Otomatik)."""
+    # gotta normalize the transmission_Type due to inconsistencies in the DB
     if not value:
         return value
 
@@ -100,7 +100,8 @@ def search_car_listings(
     s = apply_term_filter(s, "model.raw", models or model)
     s = apply_term_filter(s, "city", city)
     s = apply_term_filter(s, "district", district)
-    norm_trans = normalize_transmission(transmission_types or transmission_type)
+    norm_trans = normalize_transmission(
+        transmission_types or transmission_type)
     s = apply_term_filter(s, "transmission_type", norm_trans)
 
     # 3. Numeric Range filters (Fiyat, Yıl, KM)
@@ -150,7 +151,6 @@ def search_house_listings(
     building_aged=None,
     floor=None,
     floors=None,
-    credit_eligibility=None,
     min_price=None,
     max_price=None,
     min_meter_squared=None,
@@ -180,11 +180,6 @@ def search_house_listings(
     s = apply_term_filter(s, "number_of_rooms", number_of_rooms)
     s = apply_term_filter(s, "building_aged", building_aged)
     s = apply_term_filter(s, "floor", floors or floor)
-
-    if credit_eligibility is not None:
-        credit_val = str(credit_eligibility).lower() in ['true', '1', 'yes'] if isinstance(
-            credit_eligibility, str) else bool(credit_eligibility)
-        s = s.filter("term", credit_eligibility=credit_val)
 
     # 3. Numeric Range filters (Price, m2, Floors)
     eff_min_price = min_price if min_price is not None else kwargs.get(
