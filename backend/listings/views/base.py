@@ -82,7 +82,7 @@ class BaseListingListView(APIView):
 
 class BaseListingDetailView(APIView):
     """
-    Base generic detail view supporting retrieval, updates (full/partial),
+    Base generic detail view supporting updates (full/partial),
     and deletion with permission checks and cache invalidation.
     Subclasses should define:
       - model_class

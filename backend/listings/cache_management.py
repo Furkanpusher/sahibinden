@@ -4,7 +4,7 @@ from django.core.cache import cache
 # all cache management logic will be here
 
 CACHE_TIMEOUT = 60 * 60  # 1 hour
-CACHEABLE_PAGES = {"1", "2"}
+CACHEABLE_PAGES = {"1", "2"}  # PAGES THAT WE CACHE İN REDİS
 
 CAR_CACHE_PREFIX = "car_listings_page"
 HOUSE_CACHE_PREFIX = "house_listings_page"

@@ -19,6 +19,7 @@ from django.shortcuts import get_object_or_404
 from django.core.exceptions import PermissionDenied
 from listings.models import Listing, Notification
 from accounts.models import CustomUser
+from django.db.models import Count
 from .base import StandardListingPagination
 
 
@@ -152,10 +153,12 @@ class FollowingListView(APIView):
     def get(self, request):
         # 1. id's of the followed sellers
         seller_ids = request.user.following.values_list("seller_id", flat=True)
-        # 2. get sellers and their listings
+        # 2. get sellers with annotated listing count
         followed_sellers = CustomUser.objects.filter(
             id__in=seller_ids
-        ).prefetch_related("ilanlar__images")
+        ).annotate(
+            total_listings_count=Count("ilanlar", distinct=True)
+        )
 
         serializer = FollowedSellerWithListingsSerializer(
             followed_sellers, many=True)

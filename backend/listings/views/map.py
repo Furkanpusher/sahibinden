@@ -15,7 +15,7 @@ class MapView(APIView):
     """
     for map view that shows all categories of listings
     everyone can view the map, and go to the detail pages.
-    if q is used we use elastic search funtions
+    if q is used or it's a category search we'll use elastic search
     """
     permission_classes = [AllowAny]
 
@@ -40,7 +40,7 @@ class MapView(APIView):
         # results have count, total, page, page_size, and results
 
         for item in results:
-            # get the coords of the items that satisfy the query
+            # we add coords to the results
             coords = get_district_coordinates(
                 item.get("city"), item.get("district"))
             item["latitude"] = coords["latitude"] if coords else None

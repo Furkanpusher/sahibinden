@@ -145,10 +145,26 @@ class AlarmSerializer(serializers.ModelSerializer):
 # FOLLOW SERIALIZERS
 
 
+class FollowedSellerListingPreviewSerializer(serializers.ModelSerializer):
+    listing_type = serializers.SerializerMethodField()
+    images = ListingImageSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Listing
+        fields = ['id', 'title', 'price', 'listing_type', 'images']
+
+    def get_listing_type(self, obj):
+        if hasattr(obj, 'carlisting'):
+            return 'car'
+        elif hasattr(obj, 'houselisting'):
+            return 'house'
+        return 'unknown'
+
+
+# The sellers I followed
 class FollowedSellerWithListingsSerializer(serializers.ModelSerializer):
-    # because related_name is "ilanlar" in listings model, we use source="ilanlar"
-    listings = ListingSerializer(source="ilanlar", many=True, read_only=True)
-    total_listings_count = serializers.SerializerMethodField()
+    listings = serializers.SerializerMethodField()
+    total_listings_count = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = CustomUser
@@ -160,13 +176,18 @@ class FollowedSellerWithListingsSerializer(serializers.ModelSerializer):
             "phone_number",
             "profile_picture",
             "total_listings_count",
-            "listings",  # Satıcının tüm ilanları burada dizi olarak döner
+            "listings",
         ]
 
-    def get_total_listings_count(self, obj):
-        return obj.ilanlar.count()
+    def get_listings(self, obj):
+        # only fetch latest 2 listings for card preview
+        recent = obj.ilanlar.select_related(
+            'carlisting', 'houselisting'
+        ).prefetch_related('images').order_by('-listing_date')[:2]
+        return FollowedSellerListingPreviewSerializer(recent, many=True).data
 
 
+# Satıcı vitrini
 class SellerPublicProfileSerializer(serializers.ModelSerializer):
     total_listings_count = serializers.SerializerMethodField()
     follower_count = serializers.SerializerMethodField()
