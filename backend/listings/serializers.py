@@ -89,6 +89,22 @@ class FavoriteSerializer(serializers.ModelSerializer):
         fields = ['id', 'listing', 'created_at', 'user']
 
 
+class ListingMinimalSerializer(serializers.ModelSerializer):
+    # lightweight version for alarms and notifications
+    listing_type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Listing
+        fields = ['id', 'title', 'price', 'listing_type']
+
+    def get_listing_type(self, obj):
+        if hasattr(obj, 'carlisting'):
+            return 'car'
+        elif hasattr(obj, 'houselisting'):
+            return 'house'
+        return 'unknown'
+
+
 class ReportSerializer(serializers.ModelSerializer):
     listing = ListingSerializer(read_only=True)
 
@@ -98,7 +114,7 @@ class ReportSerializer(serializers.ModelSerializer):
 
 
 class NotificationSerializer(serializers.ModelSerializer):
-    listing = ListingSerializer(read_only=True)
+    listing = ListingMinimalSerializer(read_only=True)
 
     class Meta:
         model = Notification
@@ -107,8 +123,8 @@ class NotificationSerializer(serializers.ModelSerializer):
 
 class AlarmSerializer(serializers.ModelSerializer):
 
-    # if it's GET we'll use this and return the whole list object
-    listing = ListingSerializer(read_only=True)
+    # lightweight listing representation
+    listing = ListingMinimalSerializer(read_only=True)
 
     # if it's POST/PUT we'll use this and accept listing_id in POST/PUT
     listing_id = serializers.PrimaryKeyRelatedField(

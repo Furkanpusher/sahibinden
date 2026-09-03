@@ -11,7 +11,7 @@ from listings import tasks
 # Retrieves all listings of a specific model with their owners
 def get_all_listings(model_class, query_params=None):
     qs = model_class.objects.select_related(
-        "listing_owner").all().order_by("-listing_date")
+        "listing_owner").prefetch_related("images").all().order_by("-listing_date")
     if query_params:
         ids = query_params.get("ids")
         # we only use ids for the compare page

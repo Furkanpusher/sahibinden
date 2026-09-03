@@ -94,7 +94,10 @@ class NotificationView(APIView):
 
     def get(self, request):
         notifications = Notification.objects.filter(
-            user=request.user).select_related('listing')
+            user=request.user).select_related(
+                'listing',
+                'listing__houselisting',
+                'listing__carlisting')
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

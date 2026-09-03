@@ -16,3 +16,4 @@ django-redis==5.4.0
 celery==5.4.0
 django-elasticsearch-dsl>=8.0,<9.0
 elasticsearch>=8.0,<9.0
+django-silk==5.5.2

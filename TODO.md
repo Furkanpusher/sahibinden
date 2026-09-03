@@ -64,54 +64,9 @@ AlarmChecker (base)
 
 
 
-# json bırak backend ilçe kullan.
-
-
-Adım 1: İlçe Koordinat Servisi (In-Memory Lookup)
-Ürettiğiniz district_coordinates.json dosyasını backend ayağa kalktığında hafızaya (RAM) yükleyen küçük bir servis/fonksiyon tasarlanır.
-Bu servis veriyi bir Python sözlüğü (Dictionary) olarak tutar: (Şehir, İlçe) -> (Enlem, Boylam).
-Böylece diske tekrar tekrar gitmeden, mikrosaniyeler içinde O(1) hızında koordinat sorgulanır.
-
-
-Adım 2: Hafif Harita Serializer'ı (Lightweight Serializer)
-Haritaya özel sadece pinin ihtiyaç duyduğu alanları (id, title, price, image, city, district, listing_type) içeren sade bir Serializer hazırlanır.
-Serializer, ilanın city ve district değerini alıp Adım 1'deki hafıza sözlüğünden latitude ve longitude değerlerini hesaplayıp JSON çıktısına ekler.
-
-
-Adım 3: Harita API View'ı (MapListingsAPIView)
-Haritaya özel bir APIView oluşturulur.
-Bu View şu filtreleri kabul eder:
-category: car veya house
-city: Kullanıcı belirli bir ili seçtiyse (örn. İstanbul)
-q: Arama çubuğuna yazılan metin
-Veritabanından (veya Elasticsearch'ten) sadece harita için gerekli alanlar only() optimizasyonuyla minimum SQL yüküyle çekilir.
-
-
-Adım 4: URL Rotasının Tanımlanması (urls.py)
-backend/listings/urls.py altına path("map/", MapListingsAPIView.as_view(), name="map-listings") rotası eklenir.
-
-
-Adım 5: Frontend'in Sadeleştirilmesi
-Frontend tarafındaki (MapPage.jsx) iki ayrı arama endpoint'ini çağırıp birleştirme karmaşası kaldırılır.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# race condition
 
 # django silk
 

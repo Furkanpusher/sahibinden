@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'drf_spectacular',
     'django_elasticsearch_dsl',
+    'silk',
 ]
 
 REST_FRAMEWORK = {
@@ -68,6 +69,7 @@ REST_FRAMEWORK = {
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'silk.middleware.SilkyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -218,3 +220,9 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+
+# Silk Profiling Configuration
+SILKY_PYTHON_PROFILER = True
+SILKY_AUTHENTICATION = False
+SILKY_AUTHORISATION = False
+SILKY_MAX_RECORDED_REQUESTS = 1000

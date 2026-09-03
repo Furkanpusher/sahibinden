@@ -13,7 +13,10 @@ class AlarmView(APIView):
     def get(self, request):
         # user can see the alarms
         alarms = Alarm.objects.filter(
-            user=request.user).select_related('listing')
+            user=request.user).select_related(
+                'listing',
+                'listing__houselisting',
+                'listing__carlisting')
         serializer = AlarmSerializer(alarms, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -40,4 +43,3 @@ class AlarmView(APIView):
         is_now_active = toggle_alarm(request.user, pk)
         msg = 'Alarm activated successfully' if is_now_active else 'Alarm deactivated successfully'
         return Response({'message': msg, 'is_active': is_now_active}, status=status.HTTP_200_OK)
-
