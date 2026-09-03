@@ -21,6 +21,7 @@ def _normalize_key(text: Optional[str]) -> str:
 
 
 def _load_coordinates() -> Dict[Tuple[str, str], Dict[str, float]]:
+    # {[Ankara, Mamak]} -> {[latitude, 40.99], [longitude, 32.91]}
     """
     when the app starts it reads the json file
     creates a dictionary of (sehir, ilce) -> {'latitude': ..., 'longitude': ...} 

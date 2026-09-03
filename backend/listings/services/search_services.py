@@ -2,7 +2,7 @@ from ..documents import CarListingDocument, HouseListingDocument
 
 
 def format_hit(hit, index_name=None):
-    """Formats an Elasticsearch hit into a clean python dictionary."""
+    # we create the elastic search query dinamically
     data = hit.to_dict()
     data['id'] = int(hit.meta.id) if hasattr(
         hit, 'meta') and hasattr(hit.meta, 'id') else data.get('id')
@@ -12,17 +12,16 @@ def format_hit(hit, index_name=None):
 
 
 def apply_term_filter(s, field_name, value):
-    """
-    Applies Elasticsearch 'terms' filter if value is a list/tuple/set,
-    or 'term' filter if it is a single value.
-    """
+    # convert the result into a clean python dict
     if value in (None, "", []):
         return s
     if isinstance(value, (list, tuple, set)):
         clean_list = [v for v in value if v not in (None, "")]
         if clean_list:
+            # if more than one param "terms" filter work
             return s.filter("terms", **{field_name: clean_list})
         return s
+        # if one param then "term" filter works
     return s.filter("term", **{field_name: value})
 
 
@@ -36,35 +35,21 @@ def search_car_listings(
     district=None,
     transmission_type=None,
     transmission_types=None,
-    fuel_type=None,
-    body_type=None,
-    color=None,
-    for_trade=None,
-    from_whom=None,
     min_price=None,
     max_price=None,
-    price_min=None,
-    price_max=None,
     min_year=None,
     max_year=None,
-    year_min=None,
-    year_max=None,
     min_km=None,
     max_km=None,
-    km_min=None,
-    km_max=None,
     sort='-listing_date',
     page=1,
     page_size=20,
     **kwargs
 ):
-    """
-    Elasticsearch search and filter function for Car Listings.
-    Supports full-text fuzzy search, exact filters, multi-value list filters, and range queries.
-    """
+
     s = CarListingDocument.search()
 
-    # 1. Full text search across title, brand, model, series, city, district
+    # quick text based search in url parameters
     if q:
         s = s.query(
             "multi_match",
@@ -74,22 +59,21 @@ def search_car_listings(
             fuzziness="AUTO"
         )
 
-    # 2. Exact & Multi-value filters
+    #  Exact & Multi-value filters
+    # we want exact match in brand and model dropdowns
     s = apply_term_filter(s, "brand.raw", brands or brand)
     s = apply_term_filter(s, "model.raw", models or model)
     s = apply_term_filter(s, "city", city)
     s = apply_term_filter(s, "district", district)
-    s = apply_term_filter(s, "transmission_type", transmission_types or transmission_type)
-    s = apply_term_filter(s, "fuel_type", fuel_type)
-    s = apply_term_filter(s, "body_type", body_type)
-    s = apply_term_filter(s, "color", color)
-    s = apply_term_filter(s, "from_whom", from_whom)
+    s = apply_term_filter(s, "transmission_type",
+                          transmission_types or transmission_type)
 
     if for_trade is not None:
-        trade_val = str(for_trade).lower() in ['true', '1', 'yes'] if isinstance(for_trade, str) else bool(for_trade)
+        trade_val = str(for_trade).lower() in ['true', '1', 'yes'] if isinstance(
+            for_trade, str) else bool(for_trade)
         s = s.filter("term", for_trade=trade_val)
 
-    # 3. Numeric Range filters (Price)
+    # Numeric filters
     effective_min_price = min_price if min_price is not None else price_min
     effective_max_price = max_price if max_price is not None else price_max
     if effective_min_price is not None or effective_max_price is not None:
@@ -205,7 +189,8 @@ def search_house_listings(
     s = apply_term_filter(s, "floor", floors or floor)
 
     if credit_eligibility is not None:
-        credit_val = str(credit_eligibility).lower() in ['true', '1', 'yes'] if isinstance(credit_eligibility, str) else bool(credit_eligibility)
+        credit_val = str(credit_eligibility).lower() in ['true', '1', 'yes'] if isinstance(
+            credit_eligibility, str) else bool(credit_eligibility)
         s = s.filter("term", credit_eligibility=credit_val)
 
     # 3. Numeric Range filters (Price)
