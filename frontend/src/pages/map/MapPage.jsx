@@ -30,7 +30,7 @@ export default function MapPage() {
 
     const timer = setTimeout(async () => {
       try {
-        const params = { category: selectedCategory };
+        const params = { category: selectedCategory }; // only can select category and city
         if (selectedCity) params.city = selectedCity;
         if (searchQuery.trim()) params.q = searchQuery.trim();
 
@@ -84,8 +84,8 @@ export default function MapPage() {
             type="button"
             onClick={() => setSelectedCategory("car")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${selectedCategory === "car"
-                ? "bg-blue-600 text-white shadow-sm"
-                : "text-slate-400 hover:text-white"
+              ? "bg-blue-600 text-white shadow-sm"
+              : "text-slate-400 hover:text-white"
               }`}
           >
             <Car className="w-3.5 h-3.5" />
@@ -96,8 +96,8 @@ export default function MapPage() {
             type="button"
             onClick={() => setSelectedCategory("house")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${selectedCategory === "house"
-                ? "bg-emerald-600 text-white shadow-sm"
-                : "text-slate-400 hover:text-white"
+              ? "bg-emerald-600 text-white shadow-sm"
+              : "text-slate-400 hover:text-white"
               }`}
           >
             <HomeIcon className="w-3.5 h-3.5" />
