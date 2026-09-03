@@ -1,3 +1,7 @@
+from listings.services.search_services import (
+    search_car_listings,
+    search_house_listings,
+)
 from django.core.exceptions import ValidationError, PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
@@ -101,12 +105,6 @@ def toggle_alarm(user, pk):
     return alarm.is_active
 
 
-from listings.services.search_services import (
-    search_car_listings,
-    search_house_listings,
-)
-
-
 def evaluate_criteria_alarm(alarm):
     """
     Checks matching listings for a single 'new_listing_check' alarm using Elasticsearch
@@ -118,7 +116,7 @@ def evaluate_criteria_alarm(alarm):
     params = dict(alarm.params or {})
     category = params.pop("category", "car")
 
-    # 1. Choose the appropriate Elasticsearch search function
+    # 1. Choose the right Elasticsearch search function
     search_func = search_house_listings if category == "house" else search_car_listings
 
     # 2. Run Elasticsearch query with alarm parameters
@@ -126,50 +124,49 @@ def evaluate_criteria_alarm(alarm):
         search_result = search_func(**params, page=1, page_size=50)
         matched_hits = search_result.get("results", [])
     except Exception as e:
-        print(f"[ALARM ERROR] Elasticsearch search failed for alarm #{alarm.id}: {e}")
+        print(
+            f"[ALARM ERROR] Elasticsearch search failed for alarm #{alarm.id}: {e}")
         return 0
 
     if not matched_hits:
+        # didn't found any lists for that alarm, update the last_checked for periodic checks
         alarm.last_checked = timezone.now()
         alarm.save(update_fields=["last_checked"])
         return 0
 
-    # 3. Gelen ilanlarin ID'lerini topla ve daha once bildirilmis olanlari tek sorguda bul
-    hit_ids = [hit["id"] for hit in matched_hits if hit.get("id")]
-    already_notified_ids = set(
-        Notification.objects.filter(alarm=alarm, listing_id__in=hit_ids)
-        .values_list("listing_id", flat=True)
-    )
-
-    # 4. Kendi ilanlarini ve bildirilmis olanlari atlayarak yeni bildirimleri hazirla
-    notifications_to_create = []
+    # Skip owner's own listings and already notified listings
+    new_count = 0
     for hit in matched_hits:
         listing_id = hit.get("id")
-        if not listing_id or hit.get("owner_id") == alarm.user_id or listing_id in already_notified_ids:
+        if not listing_id:
             continue
 
-        notifications_to_create.append(
-            Notification(
-                user=alarm.user,
-                alarm=alarm,
-                listing_id=listing_id,
-                message=f"Kriterlerinize uygun ilan bulundu: {hit.get('title', 'İlan')}"
-            )
-        )
+        # Skip owner's own listings
+        if hit.get("owner_id") == alarm.user_id:
+            continue
 
-    # 5. Yeni bildirimleri veritabanina tek sorguda kaydet
-    if notifications_to_create:
-        Notification.objects.bulk_create(notifications_to_create)
+        # Skip already notified listings for this alarm
+        if Notification.objects.filter(alarm=alarm, listing_id=listing_id).exists():
+            continue
+
+        # Create notification for new matches
+        Notification.objects.create(
+            user=alarm.user,
+            alarm=alarm,
+            listing_id=listing_id,
+            message=f"Kriterlerinize uygun ilan bulundu: {hit.get('title', 'İlan')}"
+        )
+        new_count += 1
 
     alarm.last_checked = timezone.now()
     alarm.save(update_fields=["last_checked"])
-    return len(notifications_to_create)
+    return new_count
 
 
 def evaluate_all_active_criteria_alarms():
     """
     Orchestrates scanning all active 'new_listing_check' alarms.
-    Used directly by the Celery periodic task.
+    Used directly by the Celery Beat periodic task.
     """
     active_alarms = Alarm.objects.filter(
         alarm_type="new_listing_check",

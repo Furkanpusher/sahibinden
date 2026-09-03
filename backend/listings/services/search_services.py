@@ -43,6 +43,28 @@ def apply_range_filter(s, field_name, min_val=None, max_val=None):
     return s
 
 
+def normalize_transmission(value):
+    """Normalize transmission type string or list to match canonical DB values (Düz, Otomatik, Yarı Otomatik)."""
+    if not value:
+        return value
+
+    def _norm(v):
+        if not isinstance(v, str):
+            return v
+        cleaned = v.strip().lower().replace("ı", "i").replace("İ", "i")
+        if cleaned == "otomatik":
+            return "Otomatik"
+        if cleaned in ("duz", "düz", "manuel"):
+            return "Düz"
+        if cleaned in ("yari otomatik", "yarı otomatik"):
+            return "Yarı Otomatik"
+        return v
+
+    if isinstance(value, (list, tuple, set)):
+        return [_norm(v) for v in value]
+    return _norm(value)
+
+
 def search_car_listings(
     q=None,
     brand=None,
@@ -78,8 +100,8 @@ def search_car_listings(
     s = apply_term_filter(s, "model.raw", models or model)
     s = apply_term_filter(s, "city", city)
     s = apply_term_filter(s, "district", district)
-    s = apply_term_filter(s, "transmission_type",
-                          transmission_types or transmission_type)
+    norm_trans = normalize_transmission(transmission_types or transmission_type)
+    s = apply_term_filter(s, "transmission_type", norm_trans)
 
     # 3. Numeric Range filters (Fiyat, Yıl, KM)
     eff_min_price = min_price if min_price is not None else kwargs.get(

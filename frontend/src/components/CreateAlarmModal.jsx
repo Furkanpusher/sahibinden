@@ -19,9 +19,9 @@ import { getCarBrands } from "../data/helper";
 
 const ROOM_OPTIONS = ["1+0", "1+1", "2+1", "3+1", "4+1", "5+1", "Dupleks"];
 const TRANSMISSIONS = [
-  { label: "Manuel", value: "manuel" },
-  { label: "Otomatik", value: "otomatik" },
-  { label: "Yarı Otomatik", value: "yarı otomatik" },
+  { label: "Düz (Manuel)", value: "Düz" },
+  { label: "Otomatik", value: "Otomatik" },
+  { label: "Yarı Otomatik", value: "Yarı Otomatik" },
 ];
 
 const FLOOR_OPTIONS = [
