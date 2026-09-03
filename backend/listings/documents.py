@@ -2,16 +2,15 @@ from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from .models import CarListing, HouseListing
 
+INDEX_SETTINGS = {'number_of_shards': 1, 'number_of_replicas': 0}
 
-@registry.register_document  # this will catche the post_save or post_delete signal
-# Turns the car instance to json using CarListingDocument
+
+@registry.register_document
 class CarListingDocument(Document):
+    # Common fields
     title = fields.TextField(
         attr='title',
-        fields={
-            'raw': fields.KeywordField(),
-            'suggest': fields.CompletionField(),
-        }
+        fields={'raw': fields.KeywordField(), 'suggest': fields.CompletionField()}
     )
     city = fields.KeywordField(attr='city')
     district = fields.KeywordField(attr='district')
@@ -23,22 +22,11 @@ class CarListingDocument(Document):
     owner_username = fields.KeywordField()
 
     # Car specific fields
-    brand = fields.TextField(
-        attr='brand',
-        fields={
-            'raw': fields.KeywordField(),
-        }
-    )
+    brand = fields.TextField(attr='brand', fields={'raw': fields.KeywordField()})
     series = fields.TextField(attr='series')
-    model = fields.TextField(
-        attr='model',
-        fields={
-            'raw': fields.KeywordField(),
-        }
-    )
+    model = fields.TextField(attr='model', fields={'raw': fields.KeywordField()})
     year = fields.IntegerField(attr='year')
     km = fields.IntegerField(attr='km')
-    # keyword field category, enum or dropdowns etc
     transmission_type = fields.KeywordField(attr='transmission_type')
     fuel_type = fields.KeywordField(attr='fuel_type')
     body_type = fields.KeywordField(attr='body_type')
@@ -53,42 +41,28 @@ class CarListingDocument(Document):
 
     class Index:
         name = 'cars'
-        settings = {
-            'number_of_shards': 1,
-            'number_of_replicas': 0
-        }
+        settings = INDEX_SETTINGS
 
     class Django:
-        model = CarListing  # Connedted to my car model
-        fields = [
-            'id',
-        ]
+        model = CarListing
+        fields = ['id']
 
     def prepare_image(self, instance):
-        if instance.image:
-            return instance.image.url
-        return None
+        return instance.image.url if instance.image else None
 
     def prepare_owner_id(self, instance):
-        if instance.listing_owner_id:
-            return instance.listing_owner_id
-        return None
+        return instance.listing_owner_id
 
     def prepare_owner_username(self, instance):
-        if instance.listing_owner:
-            return instance.listing_owner.username
-        return None
+        return instance.listing_owner.username if instance.listing_owner else None
 
 
 @registry.register_document
 class HouseListingDocument(Document):
-    # Common Listing fields
+    # Common fields
     title = fields.TextField(
         attr='title',
-        fields={
-            'raw': fields.KeywordField(),
-            'suggest': fields.CompletionField(),
-        }
+        fields={'raw': fields.KeywordField(), 'suggest': fields.CompletionField()}
     )
     city = fields.KeywordField(attr='city')
     district = fields.KeywordField(attr='district')
@@ -109,28 +83,17 @@ class HouseListingDocument(Document):
 
     class Index:
         name = 'houses'
-        settings = {
-            'number_of_shards': 1,
-            'number_of_replicas': 0
-        }
+        settings = INDEX_SETTINGS
 
     class Django:
         model = HouseListing
-        fields = [
-            'id',
-        ]
+        fields = ['id']
 
     def prepare_image(self, instance):
-        if instance.image:
-            return instance.image.url
-        return None
+        return instance.image.url if instance.image else None
 
     def prepare_owner_id(self, instance):
-        if instance.listing_owner_id:
-            return instance.listing_owner_id
-        return None
+        return instance.listing_owner_id
 
     def prepare_owner_username(self, instance):
-        if instance.listing_owner:
-            return instance.listing_owner.username
-        return None
+        return instance.listing_owner.username if instance.listing_owner else None

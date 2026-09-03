@@ -2,7 +2,7 @@ from ..documents import CarListingDocument, HouseListingDocument
 
 
 def format_hit(hit, index_name=None):
-    # we create the elastic search query dinamically
+    # Formats an Elasticsearch hit into a clean python dictionary
     data = hit.to_dict()
     data['id'] = int(hit.meta.id) if hasattr(
         hit, 'meta') and hasattr(hit.meta, 'id') else data.get('id')
@@ -12,17 +12,35 @@ def format_hit(hit, index_name=None):
 
 
 def apply_term_filter(s, field_name, value):
-    # convert the result into a clean python dict
+    # Applies 'terms' filter if value is list/tuple/set, or 'term' if single value
     if value in (None, "", []):
         return s
     if isinstance(value, (list, tuple, set)):
         clean_list = [v for v in value if v not in (None, "")]
         if clean_list:
-            # if more than one param "terms" filter work
             return s.filter("terms", **{field_name: clean_list})
         return s
-        # if one param then "term" filter works
     return s.filter("term", **{field_name: value})
+
+
+def apply_range_filter(s, field_name, min_val=None, max_val=None):
+    # Applies numeric range filter (gte/lte) safely
+    if min_val in (None, "") and max_val in (None, ""):
+        return s
+    r = {}
+    if min_val not in (None, ""):
+        try:
+            r["gte"] = float(min_val)
+        except (ValueError, TypeError):
+            pass
+    if max_val not in (None, ""):
+        try:
+            r["lte"] = float(max_val)
+        except (ValueError, TypeError):
+            pass
+    if r:
+        return s.filter("range", **{field_name: r})
+    return s
 
 
 def search_car_listings(
@@ -37,19 +55,15 @@ def search_car_listings(
     transmission_types=None,
     min_price=None,
     max_price=None,
-    min_year=None,
-    max_year=None,
-    min_km=None,
     max_km=None,
     sort='-listing_date',
     page=1,
     page_size=20,
     **kwargs
 ):
-
     s = CarListingDocument.search()
 
-    # quick text based search in url parameters
+    # 1. Full text search across title, brand, model, series, city, district
     if q:
         s = s.query(
             "multi_match",
@@ -59,8 +73,7 @@ def search_car_listings(
             fuzziness="AUTO"
         )
 
-    #  Exact & Multi-value filters
-    # we want exact match in brand and model dropdowns
+    # 2. Exact & Multi-value filters (Dropdowns)
     s = apply_term_filter(s, "brand.raw", brands or brand)
     s = apply_term_filter(s, "model.raw", models or model)
     s = apply_term_filter(s, "city", city)
@@ -68,46 +81,12 @@ def search_car_listings(
     s = apply_term_filter(s, "transmission_type",
                           transmission_types or transmission_type)
 
-    if for_trade is not None:
-        trade_val = str(for_trade).lower() in ['true', '1', 'yes'] if isinstance(
-            for_trade, str) else bool(for_trade)
-        s = s.filter("term", for_trade=trade_val)
-
-    # Numeric filters
-    effective_min_price = min_price if min_price is not None else price_min
-    effective_max_price = max_price if max_price is not None else price_max
-    if effective_min_price is not None or effective_max_price is not None:
-        p_range = {}
-        if effective_min_price not in (None, ""):
-            p_range["gte"] = float(effective_min_price)
-        if effective_max_price not in (None, ""):
-            p_range["lte"] = float(effective_max_price)
-        if p_range:
-            s = s.filter("range", price=p_range)
-
-    # Numeric Range filters (Year)
-    effective_min_year = min_year if min_year is not None else year_min
-    effective_max_year = max_year if max_year is not None else year_max
-    if effective_min_year is not None or effective_max_year is not None:
-        y_range = {}
-        if effective_min_year not in (None, ""):
-            y_range["gte"] = int(effective_min_year)
-        if effective_max_year not in (None, ""):
-            y_range["lte"] = int(effective_max_year)
-        if y_range:
-            s = s.filter("range", year=y_range)
-
-    # Numeric Range filters (KM)
-    effective_min_km = min_km if min_km is not None else km_min
-    effective_max_km = max_km if max_km is not None else km_max
-    if effective_min_km is not None or effective_max_km is not None:
-        km_range = {}
-        if effective_min_km not in (None, ""):
-            km_range["gte"] = int(effective_min_km)
-        if effective_max_km not in (None, ""):
-            km_range["lte"] = int(effective_max_km)
-        if km_range:
-            s = s.filter("range", km=km_range)
+    # 3. Numeric Range filters (Fiyat, Yıl, KM)
+    eff_min_price = min_price if min_price is not None else kwargs.get(
+        'price_min')
+    eff_max_price = max_price if max_price is not None else kwargs.get(
+        'price_max')
+    s = apply_range_filter(s, "price", eff_min_price, eff_max_price)
 
     # 4. Sorting
     sort_mapping = {
@@ -152,12 +131,8 @@ def search_house_listings(
     credit_eligibility=None,
     min_price=None,
     max_price=None,
-    price_min=None,
-    price_max=None,
     min_meter_squared=None,
     max_meter_squared=None,
-    meter_squared_min=None,
-    meter_squared_max=None,
     min_floors=None,
     max_floors=None,
     sort='-listing_date',
@@ -165,10 +140,6 @@ def search_house_listings(
     page_size=20,
     **kwargs
 ):
-    """
-    Elasticsearch search and filter function for House Listings.
-    Supports full-text fuzzy search, exact filters, multi-value list filters, and range queries.
-    """
     s = HouseListingDocument.search()
 
     # 1. Full text search across title, city, district, number of rooms, and floor number
@@ -193,39 +164,20 @@ def search_house_listings(
             credit_eligibility, str) else bool(credit_eligibility)
         s = s.filter("term", credit_eligibility=credit_val)
 
-    # 3. Numeric Range filters (Price)
-    effective_min_price = min_price if min_price is not None else price_min
-    effective_max_price = max_price if max_price is not None else price_max
-    if effective_min_price is not None or effective_max_price is not None:
-        p_range = {}
-        if effective_min_price not in (None, ""):
-            p_range["gte"] = float(effective_min_price)
-        if effective_max_price not in (None, ""):
-            p_range["lte"] = float(effective_max_price)
-        if p_range:
-            s = s.filter("range", price=p_range)
+    # 3. Numeric Range filters (Price, m2, Floors)
+    eff_min_price = min_price if min_price is not None else kwargs.get(
+        'price_min')
+    eff_max_price = max_price if max_price is not None else kwargs.get(
+        'price_max')
+    s = apply_range_filter(s, "price", eff_min_price, eff_max_price)
 
-    # Numeric Range filters (Meter squared)
-    effective_min_m2 = min_meter_squared if min_meter_squared is not None else meter_squared_min
-    effective_max_m2 = max_meter_squared if max_meter_squared is not None else meter_squared_max
-    if effective_min_m2 is not None or effective_max_m2 is not None:
-        m_range = {}
-        if effective_min_m2 not in (None, ""):
-            m_range["gte"] = int(effective_min_m2)
-        if effective_max_m2 not in (None, ""):
-            m_range["lte"] = int(effective_max_m2)
-        if m_range:
-            s = s.filter("range", meter_squared=m_range)
+    eff_min_m2 = min_meter_squared if min_meter_squared is not None else kwargs.get(
+        'meter_squared_min')
+    eff_max_m2 = max_meter_squared if max_meter_squared is not None else kwargs.get(
+        'meter_squared_max')
+    s = apply_range_filter(s, "meter_squared", eff_min_m2, eff_max_m2)
 
-    # Numeric Range filters (Number of floors)
-    if min_floors is not None or max_floors is not None:
-        f_range = {}
-        if min_floors not in (None, ""):
-            f_range["gte"] = int(min_floors)
-        if max_floors not in (None, ""):
-            f_range["lte"] = int(max_floors)
-        if f_range:
-            s = s.filter("range", number_of_floors=f_range)
+    s = apply_range_filter(s, "number_of_floors", min_floors, max_floors)
 
     # 4. Sorting
     sort_mapping = {

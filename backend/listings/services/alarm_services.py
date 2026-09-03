@@ -8,7 +8,7 @@ from listings.models import (
     HouseListing,
     Notification,
 )
-from listings.services.notification_services import send_criteria_match_notifications
+
 
 MAX_ALARMS_PER_USER = 5
 
@@ -134,35 +134,36 @@ def evaluate_criteria_alarm(alarm):
         alarm.save(update_fields=["last_checked"])
         return 0
 
-    # 3. Exclude already notified listings for this alarm
+    # 3. Gelen ilanlarin ID'lerini topla ve daha once bildirilmis olanlari tek sorguda bul
+    hit_ids = [hit["id"] for hit in matched_hits if hit.get("id")]
     already_notified_ids = set(
-        Notification.objects.filter(
-            alarm=alarm,
-            listing_id__isnull=False,
-        ).values_list("listing_id", flat=True)
+        Notification.objects.filter(alarm=alarm, listing_id__in=hit_ids)
+        .values_list("listing_id", flat=True)
     )
 
-    # 4. Filter out owner's own listings and already notified listings
-    class MatchedItem:
-        def __init__(self, id, title):
-            self.id = id
-            self.title = title
-
-    new_matched = []
+    # 4. Kendi ilanlarini ve bildirilmis olanlari atlayarak yeni bildirimleri hazirla
+    notifications_to_create = []
     for hit in matched_hits:
         listing_id = hit.get("id")
-        owner_id = hit.get("owner_id")
+        if not listing_id or hit.get("owner_id") == alarm.user_id or listing_id in already_notified_ids:
+            continue
 
-        if listing_id and listing_id not in already_notified_ids and owner_id != alarm.user_id:
-            new_matched.append(MatchedItem(id=listing_id, title=hit.get("title", "İlan")))
+        notifications_to_create.append(
+            Notification(
+                user=alarm.user,
+                alarm=alarm,
+                listing_id=listing_id,
+                message=f"Kriterlerinize uygun ilan bulundu: {hit.get('title', 'İlan')}"
+            )
+        )
 
-    # 5. Dispatch notifications for new matches
-    if new_matched:
-        send_criteria_match_notifications(alarm, new_matched)
+    # 5. Yeni bildirimleri veritabanina tek sorguda kaydet
+    if notifications_to_create:
+        Notification.objects.bulk_create(notifications_to_create)
 
     alarm.last_checked = timezone.now()
     alarm.save(update_fields=["last_checked"])
-    return len(new_matched)
+    return len(notifications_to_create)
 
 
 def evaluate_all_active_criteria_alarms():
