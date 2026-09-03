@@ -43,15 +43,8 @@ class CarListingDocument(Document):
     fuel_type = fields.KeywordField(attr='fuel_type')
     body_type = fields.KeywordField(attr='body_type')
     color = fields.KeywordField(attr='color')
-    engine_size = fields.KeywordField(attr='engine_size')
-    engine_power = fields.KeywordField(attr='engine_power')
-    traction = fields.KeywordField(attr='traction')
-    status = fields.KeywordField(attr='status')
-    for_trade = fields.BooleanField(attr='for_trade')
-    from_whom = fields.KeywordField(attr='from_whom')
-    tramer = fields.DoubleField(attr='tramer')
 
-    class Index:  # this is the index and the rules for storing the data
+    class Index:  # this is the index name and the rules for storing the data
         name = 'cars'
         settings = {
             'number_of_shards': 1,  # amount of times we split the data
@@ -105,7 +98,6 @@ class HouseListingDocument(Document):
     number_of_floors = fields.IntegerField(attr='number_of_floors')
     number_of_rooms = fields.KeywordField(attr='number_of_rooms')
     floor = fields.KeywordField(attr='floor')
-    credit_eligibility = fields.BooleanField(attr='credit_eligibility')
 
     class Index:
         name = 'houses'
@@ -121,6 +113,7 @@ class HouseListingDocument(Document):
         ]
 
     def prepare_image(self, instance):
+        # name should be prepare_<field_name>
         if instance.image:
             return instance.image.url
         return None
@@ -131,6 +124,6 @@ class HouseListingDocument(Document):
         return None
 
     def prepare_owner_username(self, instance):
-        if instance.listing_owner:
+        if instance.listing_owner:  # we check if it's null, it can't but still good practice!
             return instance.listing_owner.username
         return None

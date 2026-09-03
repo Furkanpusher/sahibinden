@@ -121,7 +121,7 @@ CACHES = {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
         },
         "TIMEOUT": 60 * 15,  # 15 minutes default cache TTL
-        # TTL: Time to Live - Önbelleğe alınan verinin kaç saniye sonra silineceğini belirler
+        # TTL: Time to Live, how long the data stays validated in the cache
     }
 }
 
