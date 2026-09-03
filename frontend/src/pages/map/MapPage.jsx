@@ -23,41 +23,32 @@ export default function MapPage() {
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  // Fetch listings based on category & city
+  // Fetch listings based on category & city via unified /map/ endpoint
   useEffect(() => {
     let isMounted = true;
     setLoading(true);
 
-    const params = {};
-    if (selectedCity) params.city = selectedCity;
-    if (searchQuery) params.q = searchQuery;
-    params.page_size = 500; // the items that will be display on the map
-
-    const fetchAll = async () => {
+    const timer = setTimeout(async () => {
       try {
-        let results = [];
-        if (selectedCategory === "car") {
-          const carData = await fetchListings("/search/cars/", params).catch(() => ({ results: [] }));
-          results = (carData.results || []).map((c) => ({ ...c, listing_type: "car" }));
-        } else if (selectedCategory === "house") {
-          const houseData = await fetchListings("/search/houses/", params).catch(() => ({ results: [] }));
-          results = (houseData.results || houseData || []).map((h) => ({ ...h, listing_type: "house" }));
-        }
+        const params = { category: selectedCategory };
+        if (selectedCity) params.city = selectedCity;
+        if (searchQuery.trim()) params.q = searchQuery.trim();
 
+        const data = await fetchListings("/map/", params);
         if (isMounted) {
-          setListings(results);
+          setListings(Array.isArray(data) ? data : data.results || []);
         }
       } catch (err) {
         console.error("Harita verileri yüklenirken hata:", err);
+        if (isMounted) setListings([]);
       } finally {
         if (isMounted) setLoading(false);
       }
-    };
-
-    fetchAll();
+    }, 250);
 
     return () => {
       isMounted = false;
+      clearTimeout(timer);
     };
   }, [selectedCategory, selectedCity, searchQuery]);
 

@@ -3,6 +3,7 @@ from listings.models import Listing, CarListing, HouseListing, Favorite, Report,
 from accounts.models import CustomUser
 from rest_framework import serializers
 from accounts.serializers import UserPublicSerializer
+from .services.map_services import get_district_coordinates
 
 
 class ListingImageSerializer(serializers.ModelSerializer):
@@ -183,3 +184,51 @@ class SellerPublicProfileSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return obj.followers.filter(follower=request.user).exists()
         return False
+
+
+class MapSerializer(serializers.ModelSerializer):
+    listing_type = serializers.SerializerMethodField()
+    latitude = serializers.SerializerMethodField()
+    longitude = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Listing
+        fields = [
+            "id",
+            "title",
+            "price",
+            "city",
+            "district",
+            "latitude",
+            "longitude",
+            "listing_type",
+            "image",
+        ]
+
+    def get_listing_type(self, obj):
+        if hasattr(obj, "carlisting"):
+            return "car"
+        elif hasattr(obj, "houselisting"):
+            return "house"
+        return "unknown"
+
+    def get_latitude(self, obj):
+        coords = get_district_coordinates(obj.city, obj.district)
+        return coords["latitude"] if coords else None
+
+    def get_longitude(self, obj):
+        coords = get_district_coordinates(obj.city, obj.district)
+        return coords["longitude"] if coords else None
+
+    def get_image(self, obj):  # get the cover image, if not get the first one
+        images = list(obj.images.all())
+        if not images:
+            return None
+        cover = next((img for img in images if img.is_cover), images[0])
+        if cover and cover.image:
+            request = self.context.get("request")
+            if request:
+                return request.build_absolute_uri(cover.image.url)
+            return cover.image.url
+        return None

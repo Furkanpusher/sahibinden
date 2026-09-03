@@ -33,6 +33,9 @@ from .notification_services import (
     process_price_change_notifications,
     process_favorite_updated_notifications,
 )
+from .map_services import (
+    get_district_coordinates,
+)
 from .search_services import (
     search_car_listings,
     search_house_listings,
@@ -74,4 +77,6 @@ __all__ = [
     # Search services
     "search_car_listings",
     "search_house_listings",
+    # MAP services
+    "get_district_coordinates",
 ]

@@ -10,6 +10,7 @@ from .views import (
     FollowToggleView, FollowingListView,
     SellerDetailView,
     CarSearchAPIView, HouseSearchAPIView,
+    MapView,
 )
 
 
@@ -60,5 +61,6 @@ urlpatterns = [
     # Elasticsearch Search Endpoints
     path("search/cars/", CarSearchAPIView.as_view(), name="search-cars"),
     path("search/houses/", HouseSearchAPIView.as_view(), name="search-houses"),
+    path("map/", MapView.as_view(), name="map-listings"),
 
 ]
