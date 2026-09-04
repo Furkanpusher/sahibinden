@@ -181,8 +181,8 @@ CORS_ALLOW_HEADERS = list(default_headers) + ["authorization"]
 
 
 SIMPLE_JWT = {  # jwt token timeouts
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(hours=6),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
     # header should accept both jwt and bearer headers
     "AUTH_HEADER_TYPES": ("Bearer", "JWT"),
 }

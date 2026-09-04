@@ -187,7 +187,7 @@ class FollowedSellerWithListingsSerializer(serializers.ModelSerializer):
         return FollowedSellerListingPreviewSerializer(recent, many=True).data
 
 
-# Satıcı vitrini
+# Seller public profile
 class SellerPublicProfileSerializer(serializers.ModelSerializer):
     total_listings_count = serializers.SerializerMethodField()
     follower_count = serializers.SerializerMethodField()
