@@ -43,6 +43,7 @@ class MapView(APIView):
             # we add coords to the results
             coords = get_district_coordinates(
                 item.get("city"), item.get("district"))
+            item["coordinates"] = coords
             item["latitude"] = coords["latitude"] if coords else None
             item["longitude"] = coords["longitude"] if coords else None
             item["listing_type"] = category

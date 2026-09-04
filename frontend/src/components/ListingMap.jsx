@@ -272,9 +272,11 @@ export default function ListingMap({
     listings.forEach((item) => {
       const cityName = (item.city || "Bilinmiyor").trim();
       const normalizedCity = cityName.toLocaleLowerCase("tr-TR");
+      const lat = item.coordinates?.latitude ?? item.latitude;
+      const lng = item.coordinates?.longitude ?? item.longitude;
       const coords =
-        item.latitude && item.longitude
-          ? [item.latitude, item.longitude]
+        lat && lng
+          ? [lat, lng]
           : cityCoordsMap.get(normalizedCity);
 
       if (coords) {

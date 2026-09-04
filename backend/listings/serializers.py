@@ -225,8 +225,7 @@ class SellerPublicProfileSerializer(serializers.ModelSerializer):
 
 class MapSerializer(serializers.ModelSerializer):
     listing_type = serializers.SerializerMethodField()
-    latitude = serializers.SerializerMethodField()
-    longitude = serializers.SerializerMethodField()
+    coordinates = serializers.SerializerMethodField()
     image = serializers.SerializerMethodField()
 
     class Meta:
@@ -237,8 +236,7 @@ class MapSerializer(serializers.ModelSerializer):
             "price",
             "city",
             "district",
-            "latitude",
-            "longitude",
+            "coordinates",
             "listing_type",
             "image",
         ]
@@ -250,13 +248,9 @@ class MapSerializer(serializers.ModelSerializer):
             return "house"
         return "unknown"
 
-    def get_latitude(self, obj):
+    def get_coordinates(self, obj):
         coords = get_district_coordinates(obj.city, obj.district)
-        return coords["latitude"] if coords else None
-
-    def get_longitude(self, obj):
-        coords = get_district_coordinates(obj.city, obj.district)
-        return coords["longitude"] if coords else None
+        return coords  # latitude and longitude
 
     def get_image(self, obj):  # get the cover image, if not get the first one
         images = list(obj.images.all())
