@@ -30,8 +30,6 @@ from .notification_services import (
     send_price_change_notifications,
     send_favorite_update_notifications,
     send_criteria_match_notifications,
-    process_price_change_notifications,
-    process_favorite_updated_notifications,
 )
 from .map_services import (
     get_district_coordinates,
