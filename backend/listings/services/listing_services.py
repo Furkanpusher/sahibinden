@@ -126,13 +126,25 @@ def get_all_reports():
 
 def add_images_to_listing(listing, image_files, is_cover=False):
     created_images = []
-    for image_file in image_files:
+    has_cover = listing.images.filter(is_cover=True).exists()
+    for idx, image_file in enumerate(image_files):
+        img_cover = is_cover or (not has_cover and idx == 0)
         img_obj = ListingImage.objects.create(
             listing=listing,
             image=image_file,
-            is_cover=is_cover
+            is_cover=img_cover
         )
+        if img_cover:
+            has_cover = True
         created_images.append(img_obj)
+
+    # Touch listing to trigger post_save signals & re-indexing
+    try:
+        sub_instance = getattr(listing, 'carlisting', getattr(listing, 'houselisting', listing))
+        sub_instance.save()
+    except Exception:
+        pass
+
     return created_images
 
 

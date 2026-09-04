@@ -1,6 +1,6 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from .models import CarListing, HouseListing
+from .models import CarListing, HouseListing, ListingImage
 
 
 @registry.register_document  # this will catche the post_save or post_delete signal
@@ -53,14 +53,33 @@ class CarListingDocument(Document):
         }
 
     class Django:
-        model = CarListing  # Connedted to my car model
+        model = CarListing  # Connected to my car model
         fields = [
             'id',
         ]
+        related_models = [ListingImage]
+
+    def get_instances_from_related(self, related_instance):
+        if isinstance(related_instance, ListingImage):
+            if hasattr(related_instance.listing, 'carlisting'):
+                return related_instance.listing.carlisting
+        return None
 
     def prepare_image(self, instance):
+        # 1. Önce kapak resmi (is_cover=True) var mı bak
+        cover = instance.images.filter(is_cover=True).first()
+        if cover and cover.image:
+            return cover.image.url
+
+        # 2. Kapak yoksa ilk yüklenmiş resmi al
+        first_img = instance.images.first()
+        if first_img and first_img.image:
+            return first_img.image.url
+
+        # 3. Modeldeki doğrudan image alanı (fallback)
         if instance.image:
             return instance.image.url
+
         return None
 
     def prepare_owner_id(self, instance):
@@ -111,11 +130,29 @@ class HouseListingDocument(Document):
         fields = [
             'id',
         ]
+        related_models = [ListingImage]
+
+    def get_instances_from_related(self, related_instance):
+        if isinstance(related_instance, ListingImage):
+            if hasattr(related_instance.listing, 'houselisting'):
+                return related_instance.listing.houselisting
+        return None
 
     def prepare_image(self, instance):
-        # name should be prepare_<field_name>
+        # 1. Önce kapak resmi (is_cover=True) var mı bak
+        cover = instance.images.filter(is_cover=True).first()
+        if cover and cover.image:
+            return cover.image.url
+
+        # 2. Kapak yoksa ilk yüklenmiş resmi al
+        first_img = instance.images.first()
+        if first_img and first_img.image:
+            return first_img.image.url
+
+        # 3. Modeldeki doğrudan image alanı (fallback)
         if instance.image:
             return instance.image.url
+
         return None
 
     def prepare_owner_id(self, instance):

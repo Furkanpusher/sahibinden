@@ -12,7 +12,6 @@ def format_hit(hit, index_name=None):
 
 
 def apply_term_filter(s, field_name, value):
-    # we only need term here because we don't support multiple terms in one key (yet)
     if value in (None, "", []):
         return s
     if isinstance(value, (list, tuple, set)):
@@ -44,78 +43,94 @@ def apply_range_filter(s, field_name, min_val=None, max_val=None):
 
 
 def normalize_transmission(value):
-    # gotta normalize the transmission_Type due to inconsistencies in the DB
     if not value:
         return value
 
     def _norm(v):
         if not isinstance(v, str):
-            return v
+            return [v]
         cleaned = v.strip().lower().replace("ı", "i").replace("İ", "i")
-        if cleaned == "otomatik":
-            return "Otomatik"
-        if cleaned in ("duz", "düz", "manuel"):
-            return "Düz"
+        if cleaned in ("otomatik", "automatic"):
+            return ["Otomatik", "otomatik"]
+        if cleaned in ("duz", "düz", "manuel", "manual"):
+            return ["Düz", "düz", "manuel"]
         if cleaned in ("yari otomatik", "yarı otomatik"):
-            return "Yarı Otomatik"
-        return v
+            return ["Yarı Otomatik", "yarı otomatik"]
+        return [v]
 
     if isinstance(value, (list, tuple, set)):
-        return [_norm(v) for v in value]
+        res = []
+        for v in value:
+            res.extend(_norm(v))
+        return list(set(res))
+
     return _norm(value)
 
 
-def search_car_listings(  # params we do the search with
+def normalize_brand(value):
+    if not value:
+        return value
+
+    def _norm(b):
+        if not isinstance(b, str):
+            return [b]
+        b_clean = b.strip()
+        if b_clean.lower() in ("mercedes-benz", "mercedes - benz", "mercedes"):
+            return ["Mercedes-Benz", "Mercedes - Benz"]
+        return [b_clean]
+
+    if isinstance(value, (list, tuple, set)):
+        res = []
+        for b in value:
+            res.extend(_norm(b))
+        return list(set(res))
+
+    return _norm(value)
+
+
+def search_car_listings(
     q=None,
     brand=None,
-    brands=None,
     model=None,
-    models=None,
     city=None,
     district=None,
     transmission_type=None,
-    transmission_types=None,
     min_price=None,
     max_price=None,
     max_km=None,
     sort='-listing_date',
-    page=1,  # just for output pagination in the frontend don't need it normally
+    page=1,
     page_size=20,
     **kwargs
 ):
     s = CarListingDocument.search()
 
-    # 1. Full text search across title, brand, model, series, city, district
+    # 1. Full text search
     if q:
         s = s.query(
             "multi_match",
             query=q,
-            fields=["title^3", "brand^2", "model^2",
-                    "series", "city", "district"],
+            fields=["title^3", "brand^2", "model^2", "series", "city", "district"],
             fuzziness="AUTO"
         )
 
-    # Exact & Multi-value filters (Dropdowns)
-    s = apply_term_filter(s, "brand.raw", brands or brand)  # HAS TO BE RAW
-    s = apply_term_filter(s, "model.raw", models or model)
+    # 2. Filters
+    s = apply_term_filter(s, "brand.raw", normalize_brand(brand or kwargs.get("brands")))
+    s = apply_term_filter(s, "model.raw", model or kwargs.get("models"))
     s = apply_term_filter(s, "city", city)
     s = apply_term_filter(s, "district", district)
-    norm_trans = normalize_transmission(
-        transmission_types or transmission_type)
-    s = apply_term_filter(s, "transmission_type", norm_trans)
+    s = apply_term_filter(s, "transmission_type", normalize_transmission(transmission_type or kwargs.get("transmission_types")))
 
-    # Numeric Range filters (Fiyat, Yıl, KM)
-    eff_min_price = min_price
-    eff_max_price = max_price
+    # 3. Numeric Range filters (Fiyat, KM)
+    s = apply_range_filter(s, "price", min_price or kwargs.get("price_min"), max_price or kwargs.get("price_max"))
+    s = apply_range_filter(s, "km", max_val=max_km or kwargs.get("km_max"))
 
-    s = apply_range_filter(s, "price", eff_min_price, eff_max_price)
-
-    s = s.sort('-listing_date')
+    s = s.sort(sort or '-listing_date')
 
     # Pagination
     start = (int(page) - 1) * int(page_size)
     end = start + int(page_size)
-    s = s[start:end]  # Elastic Search does this lazily.
+    s = s[start:end]
 
     response = s.execute()
     total = response.hits.total.value if hasattr(
@@ -139,14 +154,14 @@ def search_house_listings(
     min_price=None,
     max_price=None,
     min_meter_squared=None,
+    sort='-listing_date',
     page=1,
     page_size=20,
     **kwargs
 ):
-
     s = HouseListingDocument.search()
 
-    # Full text search across title, city, district, number of rooms, and floor number
+    # 1. Full text search
     if q:
         s = s.query(
             "multi_match",
@@ -156,18 +171,19 @@ def search_house_listings(
             fuzziness="AUTO"
         )
 
-    # Exact & Value filters
+    # 2. Filters
     s = apply_term_filter(s, "city", city)
     s = apply_term_filter(s, "district", district)
     s = apply_term_filter(s, "number_of_rooms", number_of_rooms)
     s = apply_term_filter(s, "floor", floor)
 
-    s = apply_range_filter(s, "price", min_price, max_price)
+    # 3. Range filters
+    s = apply_range_filter(s, "price", min_price or kwargs.get("price_min"), max_price or kwargs.get("price_max"))
     s = apply_range_filter(s, "meter_squared", min_val=min_meter_squared)
 
-    s = s.sort('-listing_date')
+    s = s.sort(sort or '-listing_date')
 
-    # Pagination & Execution
+    # Pagination
     start = (int(page) - 1) * int(page_size)
     end = start + int(page_size)
     s = s[start:end]

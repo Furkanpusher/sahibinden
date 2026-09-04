@@ -21,6 +21,7 @@ from listings.models import Listing, Notification
 from accounts.models import CustomUser
 from django.db.models import Count
 from .base import StandardListingPagination
+from ..cache_management import flush_listing_cache, CAR_CACHE_PREFIX, HOUSE_CACHE_PREFIX
 
 
 # FAVORİTE VİEWS
@@ -86,6 +87,8 @@ class ListingImageUploadView(APIView):
         if not files:
             return Response({"detail": "Hiçbir fotoğraf seçilmedi."}, status=status.HTTP_400_BAD_REQUEST)
         images = add_images_to_listing(listing, files)
+        flush_listing_cache(CAR_CACHE_PREFIX)
+        flush_listing_cache(HOUSE_CACHE_PREFIX)
         return Response(ListingImageSerializer(images, many=True).data, status=status.HTTP_201_CREATED)
 
 
