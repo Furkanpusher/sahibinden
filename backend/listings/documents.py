@@ -81,7 +81,6 @@ class HouseListingDocument(Document):
         attr='title',
         fields={
             'raw': fields.KeywordField(),
-            'suggest': fields.CompletionField(),
         }
     )
     city = fields.KeywordField(attr='city')
