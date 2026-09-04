@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft,
   Car,
@@ -16,12 +16,33 @@ import UserMenu from "../../components/UserMenu";
 import { fetchListings, getListingCoverImage } from "../../api";
 
 export default function MapPage() {
-  const [selectedCategory, setSelectedCategory] = useState("car"); // "car" | "house"
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryParam = searchParams.get("category");
+  const [selectedCategory, setSelectedCategory] = useState(
+    categoryParam === "house" ? "house" : "car"
+  );
   const [selectedCity, setSelectedCity] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Sync category if URL param changes
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat === "house" || cat === "car") {
+      setSelectedCategory(cat);
+    }
+  }, [searchParams]);
+
+  const handleCategoryChange = (newCat) => {
+    setSelectedCategory(newCat);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("category", newCat);
+      return next;
+    });
+  };
 
   // Fetch listings based on category & city via unified /map/ endpoint
   useEffect(() => {
@@ -58,11 +79,13 @@ export default function MapPage() {
       <header className="h-16 px-4 border-b border-slate-800 bg-[#131D2A] flex items-center justify-between z-20 shrink-0">
         <div className="flex items-center gap-4">
           <Link
-            to="/"
+            to={selectedCategory === "house" ? "/houses" : "/cars"}
             className="flex items-center gap-2 p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition"
           >
             <ArrowLeft className="w-5 h-5" />
-            <span className="hidden sm:inline text-sm font-medium">Ana Sayfa</span>
+            <span className="hidden sm:inline text-sm font-medium">
+              {selectedCategory === "house" ? "Ev İlanları" : "Araç İlanları"}
+            </span>
           </Link>
 
           <div className="h-6 w-px bg-slate-800 hidden sm:block" />
@@ -82,11 +105,12 @@ export default function MapPage() {
         <div className="flex items-center gap-1 bg-[#0F1720] p-1 rounded-xl border border-slate-800">
           <button
             type="button"
-            onClick={() => setSelectedCategory("car")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${selectedCategory === "car"
-              ? "bg-blue-600 text-white shadow-sm"
-              : "text-slate-400 hover:text-white"
-              }`}
+            onClick={() => handleCategoryChange("car")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              selectedCategory === "car"
+                ? "bg-blue-600 text-white shadow-sm"
+                : "text-slate-400 hover:text-white"
+            }`}
           >
             <Car className="w-3.5 h-3.5" />
             <span>Araçlar</span>
@@ -94,11 +118,12 @@ export default function MapPage() {
 
           <button
             type="button"
-            onClick={() => setSelectedCategory("house")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${selectedCategory === "house"
-              ? "bg-emerald-600 text-white shadow-sm"
-              : "text-slate-400 hover:text-white"
-              }`}
+            onClick={() => handleCategoryChange("house")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              selectedCategory === "house"
+                ? "bg-emerald-600 text-white shadow-sm"
+                : "text-slate-400 hover:text-white"
+            }`}
           >
             <HomeIcon className="w-3.5 h-3.5" />
             <span>Evler</span>

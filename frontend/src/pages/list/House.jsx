@@ -8,6 +8,7 @@ import {
   RotateCcw,
   Search,
   Scale,
+  Map,
 } from "lucide-react";
 import { fetchListings, getListingCoverImage } from "../../api";
 import { FilterInput, FilterSelect } from "../../components/ListingUI";
@@ -220,7 +221,15 @@ export default function HouseListPage() {
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                to="/harita?category=house"
+                className="inline-flex items-center gap-2 rounded-lg border border-[#232E3D] bg-[#161F2B] px-3.5 py-2 text-sm font-semibold text-[#EDEFF2] hover:border-[#E8A33D]/60 hover:bg-[#1A2533] hover:text-[#E8A33D] transition-all shadow-sm"
+              >
+                <Map size={16} className="text-[#E8A33D]" />
+                <span>Haritada Keşfet</span>
+              </Link>
+
               <CreateSearchAlarmButton
                 category="house"
                 appliedFilters={appliedFilters}
