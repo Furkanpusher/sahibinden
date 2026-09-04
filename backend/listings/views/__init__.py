@@ -10,5 +10,5 @@ from .common import (FavoriteToggleView, UserFavoritesListView,
 
 from .staff import StaffReportListView, StaffDeleteReportView, StaffDeleteListingView
 from .alarm import AlarmView
-from .search import CarSearchAPIView, HouseSearchAPIView
+from .search import SearchAPIView
 from .map import MapView

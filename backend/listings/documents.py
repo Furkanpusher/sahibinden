@@ -26,7 +26,7 @@ class CarListingDocument(Document):
     brand = fields.TextField(
         attr='brand',
         fields={
-            'raw': fields.KeywordField(),
+            'raw': fields.KeywordField(),  # for EXACT MATCH
         }
     )
     series = fields.TextField(attr='series')
