@@ -10,10 +10,9 @@ class CarListingDocument(Document):
         attr='title',
         fields={
             'raw': fields.KeywordField(),  # don't strip the text
-            'suggest': fields.CompletionField(),  # for auto complete
         }
     )
-    city = fields.KeywordField(attr='city')
+    city = fields.KeywordField(attr='city')  # no tokenization
     district = fields.KeywordField(attr='district')
     price = fields.DoubleField(attr='price')
     listing_date = fields.DateField(attr='listing_date')
@@ -24,9 +23,11 @@ class CarListingDocument(Document):
 
     # Car specific fields
     brand = fields.TextField(
+        # normally textfield has tokenization by default,
+        #  but when we put a .raw subfield, it doesn't tokenize
         attr='brand',
         fields={
-            'raw': fields.KeywordField(),  # for EXACT MATCH
+            'raw': fields.KeywordField(),
         }
     )
     series = fields.TextField(attr='series')

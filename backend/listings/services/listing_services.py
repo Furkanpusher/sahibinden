@@ -13,8 +13,7 @@ def get_all_listings(model_class, query_params=None):
     qs = model_class.objects.select_related(
         "listing_owner").prefetch_related("images").all().order_by("-listing_date")
     if query_params:
-        ids = query_params.get("ids")
-        # we only use ids for the compare page
+        ids = query_params.get("ids")  # we only use ids for the compare page
         if ids:
             id_list = [int(v.strip())
                        for v in str(ids).split(",") if v.strip().isdigit()]

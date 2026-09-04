@@ -3,8 +3,9 @@ from django.core.cache import cache
 
 # all cache management logic will be here
 
-CACHE_TIMEOUT = 60 * 60  # 1 hour
-CACHEABLE_PAGES = {"1", "2"}  # PAGES THAT WE CACHE İN REDİS
+# default is 15 mniutes but we override it in get_cache_context to 1 hour
+CACHE_TIMEOUT = 60 * 60
+CACHEABLE_PAGES = {"1", "2"}  # PAGES THAT WE CACHE IN REDIS
 
 CAR_CACHE_PREFIX = "car_listings_page"
 HOUSE_CACHE_PREFIX = "house_listings_page"
@@ -22,12 +23,12 @@ def get_cached_listing_page(prefix, request):
     is_cacheable = (not has_custom_filters) and (
         page_number in CACHEABLE_PAGES)
 
-    if not is_cacheable:
+    if not is_cacheable:  # cache miss
         return None, None
 
     cache_key = f"{prefix}_{page_number}"
     cached_data = cache.get(cache_key)
-    return cache_key, cached_data
+    return cache_key, cached_data  # cache hit
 
 
 def set_cached_listing_page(cache_key, data):

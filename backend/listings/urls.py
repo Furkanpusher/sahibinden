@@ -61,6 +61,7 @@ urlpatterns = [
     # Elasticsearch Search Endpoints
     path("search/<str:category>/", SearchAPIView.as_view(), name="search-category"),
     path("search/", SearchAPIView.as_view(), name="search-unified"),
+
     path("map/", MapView.as_view(), name="map-listings"),
 
 ]
