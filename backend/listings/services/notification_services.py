@@ -29,13 +29,14 @@ def send_price_change_notifications(old_price, new_price, listing_pk):
     )
 
     price_alarms = {
-        a.user_id: a
+        a.user_id: a  # {}a.user_id : alarm object
         for a in Alarm.objects.filter(
             listing_id=listing_pk,
             alarm_type="price_change",
             is_active=True
         )
     }
+    # keys are user_id's. we add them to target_user_ids.
     target_user_ids.update(price_alarms.keys())
 
     if not target_user_ids:
@@ -56,6 +57,7 @@ def send_price_change_notifications(old_price, new_price, listing_pk):
     notifications = [
         Notification(
             user_id=user_id,
+            # price_alarms[user_id] = alarm_id
             alarm=price_alarms.get(user_id),
             listing_id=listing_pk,
             message=message,
@@ -120,6 +122,7 @@ def send_criteria_match_notifications(alarm, matched_listings):
 
     notifications = [
         Notification(
+            # because it is a non listing alarm, no listing_id here.
             user=alarm.user,
             alarm=alarm,  # alarm.type
             listing_id=item.id,
@@ -130,33 +133,29 @@ def send_criteria_match_notifications(alarm, matched_listings):
     return bulk_create_notifications(notifications)
 
 
-# Aliases for backwards compatibility
-process_price_change_notifications = send_price_change_notifications
-process_favorite_updated_notifications = send_favorite_update_notifications
-
-
 def send_seller_followers_email(listing_pk):
     """
-    Sends an email to all followers of a seller when a new listing is published.
+    Sends an email to all followers of a seller when a new listing is published
+    via AbstractUser send_email() function.
     """
     listing = Listing.objects.select_related(
         "listing_owner").filter(pk=listing_pk).first()
     if not listing or not listing.listing_owner:
         return
-    seller = listing.listing_owner
 
+    seller = listing.listing_owner
     seller_followers = seller.followers.select_related("follower")
     if not seller_followers.exists():
         return
 
-    email_subject = f"Yeni İlan: {seller.username} bir ilan yayınladı!"
+    email_subject = f"Yeni İlan: {seller.username} bir ilan yayinladi"
     email_body = (
         f"Merhaba,\n\n"
-        f"Takip ettiğiniz satıcı '{seller.username}' yeni bir ilan yayınladı!\n\n"
-        f"📌 Başlık: {listing.title}\n"
-        f"💰 Fiyat: {listing.price:,} ₺\n"
-        f"📍 Şehir: {listing.city or 'Belirtilmemiş'}\n\n"
-        f"İlanı incelemek için platformumuzu ziyaret edebilirsiniz."
+        f"Takip ettiğiniz satici '{seller.username}' yeni bir ilan yayinladi!\n\n"
+        f"Başlık: {listing.title}\n"
+        f"Fiyat: {listing.price} ₺\n"
+        f"Şehir: {listing.city}\n\n"
+        f"İlani platformda görüntüleyebilirsiniz."
     )
 
     for follow in seller_followers:

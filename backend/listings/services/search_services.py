@@ -12,7 +12,7 @@ def format_hit(hit, index_name=None):
 
 
 def apply_term_filter(s, field_name, value):
-    # Applies 'terms' filter if value is list/tuple/set, or 'term' if single value
+    # we only need term here because we don't support multiple terms in one key (yet)
     if value in (None, "", []):
         return s
     if isinstance(value, (list, tuple, set)):
@@ -24,7 +24,7 @@ def apply_term_filter(s, field_name, value):
 
 
 def apply_range_filter(s, field_name, min_val=None, max_val=None):
-    # Applies numeric range filter (gte/lte) safely
+    # Applies numeric range filter (gte/lte) to min max fields
     if min_val in (None, "") and max_val in (None, ""):
         return s
     r = {}
@@ -65,7 +65,7 @@ def normalize_transmission(value):
     return _norm(value)
 
 
-def search_car_listings(
+def search_car_listings(  # params we do the search with
     q=None,
     brand=None,
     brands=None,
@@ -79,7 +79,7 @@ def search_car_listings(
     max_price=None,
     max_km=None,
     sort='-listing_date',
-    page=1,
+    page=1,  # just for output pagination in the frontend don't need it normally
     page_size=20,
     **kwargs
 ):
@@ -95,8 +95,8 @@ def search_car_listings(
             fuzziness="AUTO"
         )
 
-    # 2. Exact & Multi-value filters (Dropdowns)
-    s = apply_term_filter(s, "brand.raw", brands or brand)
+    # Exact & Multi-value filters (Dropdowns)
+    s = apply_term_filter(s, "brand.raw", brands or brand)  # HAS TO BE RAW
     s = apply_term_filter(s, "model.raw", models or model)
     s = apply_term_filter(s, "city", city)
     s = apply_term_filter(s, "district", district)
@@ -104,31 +104,18 @@ def search_car_listings(
         transmission_types or transmission_type)
     s = apply_term_filter(s, "transmission_type", norm_trans)
 
-    # 3. Numeric Range filters (Fiyat, Yıl, KM)
-    eff_min_price = min_price if min_price is not None else kwargs.get(
-        'price_min')
-    eff_max_price = max_price if max_price is not None else kwargs.get(
-        'price_max')
+    # Numeric Range filters (Fiyat, Yıl, KM)
+    eff_min_price = min_price
+    eff_max_price = max_price
+
     s = apply_range_filter(s, "price", eff_min_price, eff_max_price)
 
-    # 4. Sorting
-    sort_mapping = {
-        'price_asc': 'price',
-        'price_desc': '-price',
-        'year_asc': 'year',
-        'year_desc': '-year',
-        'km_asc': 'km',
-        'km_desc': '-km',
-        'date_asc': 'listing_date',
-        'date_desc': '-listing_date',
-        '-listing_date': '-listing_date',
-    }
-    s = s.sort(sort_mapping.get(sort, '-listing_date'))
+    s = s.sort('-listing_date')
 
-    # 5. Pagination & Execution
+    # Pagination
     start = (int(page) - 1) * int(page_size)
     end = start + int(page_size)
-    s = s[start:end]
+    s = s[start:end]  # Elastic Search does this lazily.
 
     response = s.execute()
     total = response.hits.total.value if hasattr(
@@ -148,23 +135,18 @@ def search_house_listings(
     city=None,
     district=None,
     number_of_rooms=None,
-    building_aged=None,
     floor=None,
-    floors=None,
     min_price=None,
     max_price=None,
     min_meter_squared=None,
-    max_meter_squared=None,
-    min_floors=None,
-    max_floors=None,
-    sort='-listing_date',
     page=1,
     page_size=20,
     **kwargs
 ):
+
     s = HouseListingDocument.search()
 
-    # 1. Full text search across title, city, district, number of rooms, and floor number
+    # Full text search across title, city, district, number of rooms, and floor number
     if q:
         s = s.query(
             "multi_match",
@@ -174,41 +156,18 @@ def search_house_listings(
             fuzziness="AUTO"
         )
 
-    # 2. Exact & Multi-value filters
+    # Exact & Value filters
     s = apply_term_filter(s, "city", city)
     s = apply_term_filter(s, "district", district)
     s = apply_term_filter(s, "number_of_rooms", number_of_rooms)
-    s = apply_term_filter(s, "building_aged", building_aged)
-    s = apply_term_filter(s, "floor", floors or floor)
+    s = apply_term_filter(s, "floor", floor)
 
-    # 3. Numeric Range filters (Price, m2, Floors)
-    eff_min_price = min_price if min_price is not None else kwargs.get(
-        'price_min')
-    eff_max_price = max_price if max_price is not None else kwargs.get(
-        'price_max')
-    s = apply_range_filter(s, "price", eff_min_price, eff_max_price)
+    s = apply_range_filter(s, "price", min_price, max_price)
+    s = apply_range_filter(s, "meter_squared", min_val=min_meter_squared)
 
-    eff_min_m2 = min_meter_squared if min_meter_squared is not None else kwargs.get(
-        'meter_squared_min')
-    eff_max_m2 = max_meter_squared if max_meter_squared is not None else kwargs.get(
-        'meter_squared_max')
-    s = apply_range_filter(s, "meter_squared", eff_min_m2, eff_max_m2)
+    s = s.sort('-listing_date')
 
-    s = apply_range_filter(s, "number_of_floors", min_floors, max_floors)
-
-    # 4. Sorting
-    sort_mapping = {
-        'price_asc': 'price',
-        'price_desc': '-price',
-        'meter_asc': 'meter_squared',
-        'meter_desc': '-meter_squared',
-        'date_asc': 'listing_date',
-        'date_desc': '-listing_date',
-        '-listing_date': '-listing_date',
-    }
-    s = s.sort(sort_mapping.get(sort, '-listing_date'))
-
-    # 5. Pagination & Execution
+    # Pagination & Execution
     start = (int(page) - 1) * int(page_size)
     end = start + int(page_size)
     s = s[start:end]

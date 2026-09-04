@@ -14,7 +14,7 @@ def _normalize_key(text: Optional[str]) -> str:
         return ""
     return (
         text.strip()
-        .replace("I", "ı")
+        .replace("I", "ı")  # have to them manually
         .replace("İ", "i")
         .lower()
     )
@@ -29,12 +29,12 @@ def _load_coordinates() -> Dict[Tuple[str, str], Dict[str, float]]:
     lookup: Dict[Tuple[str, str], Dict[str, float]] = {}
 
     if not COORDINATES_FILE.exists():
-        logger.warning(f"Koordinat dosyası bulunamadı: {COORDINATES_FILE}")
+        logger.warning(f"Koordinat dosyasi bulunamadi: {COORDINATES_FILE}")
         return lookup
 
     try:
         with open(COORDINATES_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
+            data = json.load(f)  # load the file once to the RAM
 
         for item in data:
             city = _normalize_key(item.get("city"))  # simple turkish check
@@ -55,7 +55,7 @@ def _load_coordinates() -> Dict[Tuple[str, str], Dict[str, float]]:
     return lookup
 
 
-# now it's in the ram
+# now it's in the RAM.
 DISTRICT_COORDINATES: Dict[Tuple[str, str],
                            Dict[str, float]] = _load_coordinates()
 

@@ -150,6 +150,8 @@ class ListingImage(models.Model):
 
 
 class Notification(models.Model):
+
+    # notification can and can not be connected to a listing
     listing = models.ForeignKey(
         Listing,
         on_delete=models.CASCADE,
@@ -157,15 +159,17 @@ class Notification(models.Model):
         null=True,
         blank=True)
 
+    # who receives it
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="notifications")
 
+    # what logic triggered it
     alarm = models.ForeignKey(
         "Alarm",
-        on_delete=models.SET_NULL,
-        null=True,
+        on_delete=models.SET_NULL,  # if alarm is deleted, notification stays
+        null=True,  # every alarm doesn't have to be connected to a listing in the first place
         blank=True,
         related_name="notifications"
     )
@@ -206,7 +210,7 @@ class Alarm(models.Model):
                              related_name="alarms")
 
     alarm_type = models.CharField(max_length=50, choices=ALARM_TYPES)
-    params = models.JSONField(default=dict)
+    params = models.JSONField(default=dict)  # {"city": "istanbul" ...}
 
     # for canceling or starting the alarm
     is_active = models.BooleanField(default=True)
@@ -215,10 +219,3 @@ class Alarm(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
-    # scan_alarms(alarm_type, user):
-    # look to db for matching alarms
-    # return matching_listings
-
-    # alarm_type={"PriceDropAlarm":"params"}
-
-    # PriceDropAlarm(params)

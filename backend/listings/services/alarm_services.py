@@ -8,8 +8,6 @@ from django.utils import timezone
 from listings.models import (
     Alarm,
     Listing,
-    CarListing,
-    HouseListing,
     Notification,
 )
 
